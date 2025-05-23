@@ -4,14 +4,15 @@ import React from "react";
 
 const PublicLayout = ({ children }: { children: React.ReactNode }) => {
   return (
-    <main>
+    <>
       <Navbar />
-      <section className="flex justify-center">
-        {/* add the sidebar part her */}
+      <main className="flex justify-center">
         <Sidebar />
-        <div className="md:max-w-7xl w-full bg-base-100 text-base-content">{children}</div>
-      </section>
-    </main>
+        <section className="md:max-w-7xl w-full bg-base-100 text-base-content">
+          {children}
+        </section>
+      </main>
+    </>
   );
 };
 

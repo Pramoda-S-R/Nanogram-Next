@@ -3,12 +3,16 @@ import React from "react";
 
 const PublicLayout = ({ children }: { children: React.ReactNode }) => {
   return (
-    <main>
+    <>
       <Navbar />
-      <section className="flex justify-center">
-        <div className="md:max-w-7xl w-full bg-base-100 text-base-content">{children}</div>
-      </section>
-    </main>
+      <main>
+        <section className="flex justify-center">
+          <div className="md:max-w-7xl w-full bg-base-100 text-base-content">
+            {children}
+          </div>
+        </section>
+      </main>
+    </>
   );
 };
 

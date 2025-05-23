@@ -88,7 +88,7 @@ const Sidebar = () => {
   return (
     <>
       {/* Desktop Sidebar */}
-      <div className="hidden md:flex h-svh bg-base-100">
+      <div className="hidden sticky top-0 md:flex h-dvh bg-base-100">
         <div className="p-1 pl-3">
           {mounted ? renderNav(colapsed) : renderNav(false)}
         </div>

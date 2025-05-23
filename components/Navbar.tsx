@@ -15,7 +15,7 @@ const navItems = [
 
 const Navbar = () => {
   return (
-    <header className="bg-primary flex justify-center text-white">
+    <header className="w-full bg-primary flex justify-center text-white sticky">
       <div className="w-full max-w-7xl flex justify-between items-center px-6 py-4">
         {/* Logo & Mobile Menu */}
         <div className="flex items-center gap-4">
