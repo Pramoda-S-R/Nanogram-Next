@@ -1,0 +1,128 @@
+.blog {
+  color: var(--color-base-content);
+  background-color: var(--color-base-100);
+  line-height: 1.7;
+  font-family: system-ui, sans-serif;
+  font-size: 1rem;
+}
+
+/* Headings */
+.blog h1 {
+  font-size: 2rem;
+  font-weight: bold;
+  margin: 1.2em 0 0.6em;
+  color: var(--color-primary);
+}
+.blog h2 {
+  font-size: 1.75rem;
+  font-weight: bold;
+  margin: 1em 0 0.5em;
+  color: var(--color-primary);
+}
+.blog h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0.9em 0 0.4em;
+  color: var(--color-primary);
+}
+.blog h4, .blog h5, .blog h6 {
+  font-weight: 600;
+  margin: 0.8em 0 0.4em;
+  color: var(--color-neutral);
+}
+
+/* Paragraph */
+.blog p {
+  margin: 0.6em 0;
+}
+
+/* Lists */
+.blog ul, .blog ol {
+  padding-left: 1.5em;
+  margin: 1em 0;
+}
+.blog ul {
+  list-style-type: disc;
+}
+.blog ol {
+  list-style-type: decimal;
+}
+.blog li {
+  margin: 0.25em 0;
+}
+
+/* Blockquote */
+.blog blockquote {
+  border-left: 4px solid var(--color-accent);
+  background-color: var(--color-base-200);
+  padding: 0.75em 1em;
+  margin: 1em 0;
+  color: var(--color-neutral-content);
+  font-style: italic;
+}
+
+/* Links */
+.blog a {
+  color: var(--color-secondary);
+  text-decoration: underline;
+}
+.blog a:hover {
+  color: var(--color-primary);
+}
+
+/* Inline code */
+.blog code {
+  background-color: var(--color-base-200);
+  color: var(--color-error);
+  font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 0.95em;
+  padding: 0.2em 0.4em;
+  border-radius: var(--radius-field);
+}
+
+/* Code block */
+.blog pre {
+  background-color: #1e1e1e;
+  color: #dcdcdc;
+  padding: 1em;
+  border-radius: var(--radius-box);
+  overflow-x: auto;
+  font-size: 0.9em;
+  line-height: 1.5;
+  margin: 1em 0;
+}
+.blog pre code {
+  background: none;
+  color: inherit;
+  font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+}
+
+/* Horizontal Rule */
+.blog hr {
+  border: none;
+  border-top: 1px solid var(--color-base-300);
+  margin: 2em 0;
+}
+
+/* Images */
+.blog img {
+  max-width: 100%;
+  border-radius: var(--radius-box);
+  margin: 1em 0;
+}
+
+/* Tables */
+.blog table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5em 0;
+}
+.blog th, .blog td {
+  border: 1px solid var(--color-base-300);
+  padding: 0.5em 1em;
+}
+.blog th {
+  background-color: var(--color-base-200);
+  color: var(--color-base-content);
+  font-weight: 600;
+}
