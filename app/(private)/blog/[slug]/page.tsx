@@ -1,7 +1,7 @@
 import { getMD } from "@/lib/blog";
 import React from "react";
 import { useRemarkSync } from "react-remark";
-import "../../../../styles/blog.css"
+import "../../../../styles/blog.css";
 
 export default async function BlogPage({
   params,
@@ -10,10 +10,27 @@ export default async function BlogPage({
 }) {
   const { slug } = await params;
   const url = new URL(
-    "https://raw.githubusercontent.com/Pramoda-S-R/AnimeSesh/main/README.md"
+    "https://gist.githubusercontent.com/Pramoda-S-R/8d952a1d05cc80b2984fd28a58772f76/raw/test.md"
   );
-  const markdown = await getMD(url);
+  const { metadata, markdown } = await getMD(url);
   const reactContent = useRemarkSync(markdown);
 
-  return <div className="w-3xl h-svh overflow-y-scroll blog">{reactContent}</div>;
+  return (
+    <div className="blog max-w-5xl h-svh overflow-y-scroll px-4 md:px-2 md:pr-6 pb-20">
+      <div className="aspect-[3/1] overflow-hidden">
+        <img
+          src={metadata.cover}
+          alt="cover image"
+          className="w-full h-full object-cover"
+        />
+      </div>
+
+      <h1>{metadata.title}</h1>
+      <p className="text-sm text-base-content/50">
+        {metadata.date} — by {metadata.authors?.join(", ")}
+      </p>
+      <hr />
+      {reactContent}
+    </div>
+  );
 }

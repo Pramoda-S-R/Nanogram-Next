@@ -65,7 +65,7 @@ const Sidebar = () => {
   );
 
   const renderBottomNav = () => (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 flex justify-around border-t-2 border-base-300 py-2 md:hidden">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 flex justify-around bg-base-100 border-t-2 border-base-300 py-2 md:hidden">
       {linkItems.slice(0, 5).map(({ href, label, icon }) => (
         <Link
           key={href}
