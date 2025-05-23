@@ -1,5 +1,5 @@
 import Navbar from "@/components/Navbar";
-import Sidebar from "@/components/Sidebar";
+import Sidebar from "@/components/client/Sidebar";
 import React from "react";
 
 const PublicLayout = ({ children }: { children: React.ReactNode }) => {
@@ -9,7 +9,7 @@ const PublicLayout = ({ children }: { children: React.ReactNode }) => {
       <section className="flex justify-center">
         {/* add the sidebar part her */}
         <Sidebar />
-        <div className="md:max-w-7xl w-full ">{children}</div>
+        <div className="md:max-w-7xl w-full bg-base-100 text-base-content">{children}</div>
       </section>
     </main>
   );

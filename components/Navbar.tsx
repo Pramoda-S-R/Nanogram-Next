@@ -4,62 +4,65 @@ import React from "react";
 import Navatar from "./client/Navatar";
 import { Menu } from "lucide-react";
 
+const navItems = [
+  { label: "Home", href: "/" },
+  { label: "About Us", href: "/about-us" },
+  { label: "Events", href: "/events" },
+  { label: "Community", href: "/community" },
+  { label: "Blog", href: "/blog" },
+  { label: "Newsletters", href: "/newsletter" },
+];
+
 const Navbar = () => {
   return (
-    <header className="bg-primary flex justify-center">
-      <div className="md:max-w-7xl w-full flex justify-between md:gap-15 gap-5 items-center text-white">
-        <div className=" flex gap-3 h-18 items-center ml-6">
-          <div className="dropdown md:hidden">
-            <div
-              tabIndex={0}
-              role="button"
-              className="btn btn-ghost btn-circle"
-            >
-              <Menu />
-            </div>
-            <ul
-              tabIndex={0}
-              className="menu menu-sm dropdown-content bg-base-100 text-base-content rounded-box z-1 mt-3 w-52 p-2 shadow"
-            >
-              <Link href="/">Home</Link>
-              <Link href="/about-us">About Us</Link>
-              <Link href="/events">Events</Link>
-              <Link href="/community">Community</Link>
-              <Link href="/blog">Blog</Link>
-              <Link href="/newsletter">Newsletters</Link>
-            </ul>
+    <header className="bg-primary flex justify-center text-white">
+      <div className="w-full max-w-7xl flex justify-between items-center px-6 py-4">
+        {/* Logo & Mobile Menu */}
+        <div className="flex items-center gap-4">
+          {/* Mobile Dropdown */}
+          <div className="relative md:hidden">
+            <details className="dropdown">
+              <summary className="btn btn-ghost btn-circle p-2 cursor-pointer">
+                <Menu />
+              </summary>
+              <ul className="menu menu-sm dropdown-content bg-base-100 text-base-content mt-3 w-52 p-2 shadow rounded-box z-10">
+                {navItems.map((item) => (
+                  <li key={item.href}>
+                    <Link href={item.href}>{item.label}</Link>
+                  </li>
+                ))}
+              </ul>
+            </details>
           </div>
-          <Image
-            src={"/assets/images/nanogram_logo-no-bg.svg"}
-            alt="Logo"
-            width={32}
-            height={32}
-          />
-          <h1 className="font-blanka text-2xl mb-2">NANOGRAM</h1>
+
+          {/* Logo */}
+          <Link href="/" className="flex items-center gap-2">
+            <Image
+              src="/assets/images/nanogram_logo-no-bg.svg"
+              alt="Nanogram Logo"
+              width={32}
+              height={32}
+              priority
+            />
+            <h1 className="font-blanka text-2xl">NANOGRAM</h1>
+          </Link>
         </div>
-        <nav>
-          <ul className="md:flex flex-wrap hidden gap-8 font-semibold">
-            <Link className="hover:underline" href="/">
-              Home
+
+        {/* Desktop Navigation */}
+        <nav className="hidden md:flex gap-8 font-semibold">
+          {navItems.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="hover:underline"
+            >
+              {item.label}
             </Link>
-            <Link className="hover:underline" href="/about-us">
-              About Us
-            </Link>
-            <Link className="hover:underline" href="/events">
-              Events
-            </Link>
-            <Link className="hover:underline" href="/community">
-              Community
-            </Link>
-            <Link className="hover:underline" href="/blog">
-              Blog
-            </Link>
-            <Link className="hover:underline" href="/newsletter">
-              Newsletters
-            </Link>
-          </ul>
+          ))}
         </nav>
-        <div className="mr-6 flex items-center">
+
+        {/* User Avatar */}
+        <div>
           <Navatar />
         </div>
       </div>
