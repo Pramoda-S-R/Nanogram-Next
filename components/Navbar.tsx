@@ -1,8 +1,13 @@
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
-import Navatar from "./client/Navatar";
 import { Menu } from "lucide-react";
+import {
+  SignedIn,
+  SignedOut,
+  UserButton,
+} from "@clerk/nextjs";
+import SignInButton from "./client/SignInButton";
 
 const navItems = [
   { label: "Home", href: "/" },
@@ -51,11 +56,7 @@ const Navbar = () => {
         {/* Desktop Navigation */}
         <nav className="hidden md:flex gap-8 font-semibold">
           {navItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="hover:underline"
-            >
+            <Link key={item.href} href={item.href} className="hover:underline">
               {item.label}
             </Link>
           ))}
@@ -63,7 +64,12 @@ const Navbar = () => {
 
         {/* User Avatar */}
         <div>
-          <Navatar />
+          <SignedOut>
+            <SignInButton />
+          </SignedOut>
+          <SignedIn>
+            <UserButton />
+          </SignedIn>
         </div>
       </div>
     </header>

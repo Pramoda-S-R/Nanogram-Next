@@ -24,7 +24,7 @@
 ## Challenges
 
 - lack of good websocket infrastructure for free (messaging)
-- 
+- that i don't follow html tag conventions (recheck every components exquisite young lad)
 
 ## How to use
 

@@ -47,19 +47,3 @@
   --color-primary: #0D2DA2;
   --font-blanka: 'Blanka';
 }
-
-
-:root {
-    --bg-color: white;
-    --text-color: black;
-  }
-  
-  [data-theme='dark'] {
-    --bg-color: #121212;
-    --text-color: #e0e0e0;
-  }
-  
-  body {
-    background-color: var(--bg-color);
-    color: var(--text-color);
-  }
