@@ -20,6 +20,7 @@
 - routes have been established
 - navbar ui ready
 - sidebar and bottombar ready
+- Auth is ready but callback route needs attention and overall UI needs improvement. next hook up DB to auth
 
 ## Challenges
 

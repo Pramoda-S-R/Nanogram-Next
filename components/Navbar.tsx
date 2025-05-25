@@ -21,7 +21,7 @@ const navItems = [
 const Navbar = () => {
   return (
     <header className="w-full bg-primary flex justify-center text-white sticky">
-      <div className="w-full max-w-7xl flex justify-between items-center px-6 py-4">
+      <div className="w-full max-w-7xl flex justify-between items-center px-6 py-1">
         {/* Logo & Mobile Menu */}
         <div className="flex items-center gap-4">
           {/* Mobile Dropdown */}
@@ -49,7 +49,7 @@ const Navbar = () => {
               height={32}
               priority
             />
-            <h1 className="font-blanka text-2xl">NANOGRAM</h1>
+            <h1 className="font-blanka text-2xl mb-2">NANOGRAM</h1>
           </Link>
         </div>
 
@@ -63,7 +63,7 @@ const Navbar = () => {
         </nav>
 
         {/* User Avatar */}
-        <div>
+        <div className="flex items-center justify-center">
           <SignedOut>
             <SignInButton />
           </SignedOut>

@@ -5,11 +5,9 @@ const PublicLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <>
       <Navbar />
-      <main>
-        <section className="flex justify-center">
-          <div className="w-full bg-base-100 text-base-content">
-            {children}
-          </div>
+      <main className="flex justify-center">
+        <section className="w-full bg-base-100 text-base-content">
+          {children}
         </section>
       </main>
     </>
