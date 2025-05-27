@@ -22,7 +22,9 @@
 - routes have been established
 - navbar ui ready
 - sidebar and bottombar ready
-- Auth is ready but callback route needs attention and overall UI needs improvement. next hook up DB to auth
+- Auth is ready but /callback needs attention & overall UI needs improvement. next hook up DB to auth
+- Connected MongoDB to app and checked with schema creation
+- Working towards adding a api route to generate open-graph images
 
 ## Challenges
 
