@@ -1,13 +1,12 @@
 "use client";
 
 import React, { useState } from "react";
-import type { OAuthStrategy } from "@clerk/types";
 import { useSignIn } from "@clerk/clerk-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Eye, EyeClosed, Lock, User } from "lucide-react";
+import { Eye, EyeOff, Lock, User } from "lucide-react";
 
 const schema = z.object({
   identifier: z
@@ -209,9 +208,9 @@ export default function CustomSignIn() {
               aria-label={showPassword ? "Hide password" : "Show password"}
             >
               {showPassword ? (
-                <Eye className="bg-none" size={20} />
+                <EyeOff className="bg-none" size={20} />
               ) : (
-                <EyeClosed className="bg-none" size={20} />
+                <Eye className="bg-none" size={20} />
               )}
             </button>
           </label>

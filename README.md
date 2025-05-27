@@ -4,7 +4,9 @@
 
 - Next.js
 - Mongodb Atlas (database)
-- Cloudflare R2 (storage)
+- Cloudflare R2 (storage) (debit card 😔)
+- Cloudinary (storage) (no cc 🤩) (only image and video 😔)
+- UploadThing (storage) (2 GB 🤩)
 - Appwrite or Clerk.dev (auth)
 - Cleaner UI/UX with daisy UI
 - Form builder and Blog builder
