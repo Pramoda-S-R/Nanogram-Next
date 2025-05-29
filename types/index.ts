@@ -30,3 +30,16 @@ export interface Testimonial {
   content: string,
   avatarUrl: string,
 }
+
+export interface Event {
+  _id: ObjectId;
+  imageUrl?: string;
+  title: string;
+  subtitle?: string;
+  description?: string;
+  content?: string;
+  date?: Date;
+  location?: string;
+  registration?: string;
+  completed?: boolean;
+}
