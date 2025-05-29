@@ -11,10 +11,12 @@
   "dependencies": {
     "@clerk/nextjs": "^6.20.0",
     "@hookform/resolvers": "^5.0.1",
+    "@radix-ui/react-accordion": "^1.2.11",
     "@react-three/drei": "^10.0.8",
     "@react-three/fiber": "^9.1.2",
     "@vercel/og": "^0.6.8",
     "clsx": "^2.1.1",
+    "embla-carousel-react": "^8.6.0",
     "framer-motion": "^12.15.0",
     "gray-matter": "^4.0.3",
     "lucide-react": "^0.510.0",

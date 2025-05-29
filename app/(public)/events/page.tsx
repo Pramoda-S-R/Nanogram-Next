@@ -1,10 +1,15 @@
+import { EventGallery, Faq, NextEvent, RecentEvent, Upcoming } from '@/components/routes/events'
 import React from 'react'
 
 const Events = () => {
   return (
-    <div>
-      Events
-    </div>
+    <>
+    <NextEvent />
+    <RecentEvent />
+    <Upcoming />
+    <EventGallery />
+    <Faq />
+    </>
   )
 }
 

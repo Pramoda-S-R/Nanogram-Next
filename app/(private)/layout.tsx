@@ -1,4 +1,4 @@
-import Navbar from "@/components/Navbar";
+import Navbar from "@/components/server/shared/Navbar";
 import Sidebar from "@/components/client/Sidebar";
 import React from "react";
 

@@ -2,12 +2,8 @@ import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 import { Menu } from "lucide-react";
-import {
-  SignedIn,
-  SignedOut,
-  UserButton,
-} from "@clerk/nextjs";
-import SignInButton from "./client/SignInButton";
+import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
+import SignInButton from "../../client/SignInButton";
 
 const navItems = [
   { label: "Home", href: "/" },

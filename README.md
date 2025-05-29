@@ -30,6 +30,7 @@
 - Completed Home page
 - Added auth to api routes
 - Completed About Us page
+- Completed Events page (bug: home and events route has inconsistancy in layout)
 
 ## Challenges
 
