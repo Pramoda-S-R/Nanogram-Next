@@ -11,6 +11,8 @@
   "dependencies": {
     "@clerk/nextjs": "^6.20.0",
     "@hookform/resolvers": "^5.0.1",
+    "@react-three/drei": "^10.0.8",
+    "@react-three/fiber": "^9.1.2",
     "@vercel/og": "^0.6.8",
     "clsx": "^2.1.1",
     "gray-matter": "^4.0.3",
@@ -21,6 +23,7 @@
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.56.4",
     "react-remark": "^2.1.0",
+    "three": "^0.176.0",
     "zod": "^3.25.28"
   },
   "devDependencies": {

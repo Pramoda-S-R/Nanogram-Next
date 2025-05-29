@@ -7,7 +7,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff, Lock, Mail, User } from "lucide-react";
-import OtpInput from "@/components/client/OtpInput";
+import OtpInput from "@/components/client/shared/OtpInput";
 
 const schema = z.object({
   username: z.string().min(4, "Username must be at least 4 characters"),
