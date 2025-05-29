@@ -20,7 +20,7 @@ const Hero = async () => {
           </p>
           <div className="w-full flex md:flex-row flex-col gap-5 pointer-events-auto">
             <Button
-              className={"btn btn-secondary text-base-content w-full md:w-fit"}
+              className={"btn btn-secondary text-base-content w-fit"}
               navigateTo="/community"
             >
               Join the Community for Free!

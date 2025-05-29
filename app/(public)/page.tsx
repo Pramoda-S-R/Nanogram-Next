@@ -1,4 +1,4 @@
-import Hero from "@/components/routes/home/Hero";
+import { Achievements, Gallery, Hero, Highlights, Initiatives, Testimonials } from "@/components/routes/home";
 
 export async function generateMetadata() {
   return {
@@ -24,6 +24,11 @@ export default function Home() {
   return (
     <>
       <Hero />
+      <Initiatives />
+      <Highlights />
+      <Gallery />
+      <Achievements />
+      <Testimonials />
     </>
   );
 }

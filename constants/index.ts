@@ -1,0 +1,18 @@
+export const images = [
+  "/assets/images/home_3.jpg",
+  "/assets/images/home_1.jpg",
+  "/assets/images/gallery_3.jpg",
+  "/assets/images/gallery_4.jpg",
+  "/assets/images/gallery_5.jpg",
+  "/assets/images/gallery_6.jpg",
+  "/assets/images/gallery_7.jpg",
+  "/assets/images/gallery_8.jpg",
+  "/assets/images/gallery_9.jpg",
+  "/assets/images/gallery_10.jpg",
+  "/assets/images/gallery_11.jpg",
+  "/assets/images/gallery_12.jpg",
+  "/assets/images/gallery_13.jpg",
+  "/assets/images/home_2.jpg",
+  "/assets/images/gallery_15.jpg",
+  "/assets/images/gallery_16.jpg",
+];

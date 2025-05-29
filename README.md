@@ -25,6 +25,8 @@
 - Auth is ready but /callback needs attention & overall UI needs improvement. next hook up DB to auth
 - Connected MongoDB to app and checked with schema creation
 - Working towards adding a api route to generate open-graph images
+- Added api routes to fetch from nanogram collection
+- Added the hero section
 
 ## Challenges
 

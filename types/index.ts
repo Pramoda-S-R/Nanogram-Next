@@ -9,16 +9,24 @@ export interface Point {
 }
 
 export interface Nanogram {
-    _id: ObjectId;
-    name: string;
-    role: string;
-    content?: string;
-    avatarId?: string;
-    avatarUrl?: string;
-    linkedin?: string;
-    github?: string;
-    instagram?: string;
-    alumini?: boolean;
-    core?: boolean;
-    priority?: number;
+  _id: ObjectId;
+  name: string;
+  role: string;
+  content?: string;
+  avatarId?: string;
+  avatarUrl?: string;
+  linkedin?: string;
+  github?: string;
+  instagram?: string;
+  alumini?: boolean;
+  core?: boolean;
+  priority?: number;
+}
+
+export interface Testimonial {
+  _id: ObjectId,
+  name: string,
+  role: string,
+  content: string,
+  avatarUrl: string,
 }
