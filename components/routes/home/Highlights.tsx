@@ -3,7 +3,7 @@ import React from "react";
 
 const Highlights = () => {
   return (
-    <section className="w-full flex md:flex-row flex-col gap-10 md:px-14 px-10 pb-20">
+    <section className="max-w-7xl mx-auto w-full flex md:flex-row flex-col gap-10 md:px-14 px-10 pb-20">
       <div className="w-full flex -space-x-[12%] justify-center">
         <div className="size-1/3 bg-base-300 rounded-xl shadow-lg -rotate-[30deg]">
           <img

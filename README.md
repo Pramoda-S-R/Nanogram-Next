@@ -17,6 +17,14 @@
 - fun game, yes
 - blogs can be md files, just an idea tho, not just an idea anymore turns out it's best fit for blogs
 
+## What to do next
+- api routes for events collection
+- api logic for the entirity of events route
+<!-- - fix the inconsistency in home and events route -->
+- start work on the community group
+- connect uploadthing and establish blogs and newsletters
+- connect cloudinary and test out it's usage
+
 ## Current Progress
 
 - routes have been established
@@ -31,6 +39,7 @@
 - Added auth to api routes
 - Completed About Us page
 - Completed Events page (bug: home and events route has inconsistancy in layout)
+- fixed the inconsistency
 
 ## Challenges
 

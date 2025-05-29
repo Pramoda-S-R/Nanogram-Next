@@ -17,7 +17,7 @@ const ShiftingCountdown = ({
   countdownFrom: Date;
 }) => {
   return (
-    <section className="bg-gradient-to-br from-primary to-secondary p-4">
+    <section className="max-w-7xl mx-auto bg-gradient-to-br from-primary to-secondary p-4">
       <div className="w-full flex justify-center items-center">
         <h1 className="text-primary-content text-5xl mb-5 font-bold">{title}</h1>
       </div>

@@ -7,7 +7,7 @@ const RecentEvent = () => {
     imageUrl: "/assets/images/placeholder.png",
   };
   return (
-    <section className="w-full flex flex-col gap-10">
+    <section className="max-w-7xl mx-auto w-full flex flex-col gap-10">
       <div className="w-full flex lg:flex-row flex-col justify-center gap-5 md:px-10 px-0 mt-5">
         <div className="w-full flex justify-between flex-col p-10 gap-10">
           <div className="flex flex-col w-full gap-5">

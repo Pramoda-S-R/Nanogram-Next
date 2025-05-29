@@ -42,8 +42,8 @@ const KeyInitiativeItem = ({
 
 const Initiatives = () => {
   return (
-    <section className="flex-grow p-8 border-none outline-none pb-20">
-      <div className="w-full mx-auto text-center">
+    <section className="max-w-7xl mx-auto flex-grow p-8 border-none outline-none pb-20">
+      <div className="w-full text-center">
         <h1 className="text-5xl font-medium mb-4">Our Key Initiatives</h1>
         <p className="text-lg font-normal text-neutral-black/70">
           Explore the main activities and projects our club is engaged in.

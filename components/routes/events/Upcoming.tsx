@@ -22,7 +22,7 @@ const Upcoming = () => {
     <>
       {events?.documents.length !== 0 ? (
         <section
-          className="w-full text-neutral-black py-16 sm:py-10"
+          className="max-w-7xl mx-auto w-full text-neutral-black py-16 sm:py-10"
           id="new-events"
         >
           <div className="mx-auto max-w-7xl px-6 lg:px-10">

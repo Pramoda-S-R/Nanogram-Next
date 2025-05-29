@@ -44,7 +44,7 @@ const EventGallery = () => {
   };
 
   return (
-    <section className=" px-6 py-10 md:px-8 md:py-10">
+    <section className="max-w-7xl mx-auto px-6 py-10 md:px-8 md:py-10">
       <div className="mx-auto w-full max-w-7xl flex flex-col gap-12">
         <div className="w-full flex flex-col gap-6 text-center md:text-left">
           <h1 className="text-4xl font-semibold">Event Gallery</h1>

@@ -5,7 +5,7 @@ import Button from "@/components/client/shared/Button";
 
 const Gallery = () => {
   return (
-    <section className="w-full flex md:flex-row flex-col gap-5 md:px-20 px-4">
+    <section className="max-w-7xl mx-auto w-full flex md:flex-row flex-col gap-5 md:px-20 px-4">
       <div className="w-full h-full">
         <ShuffleGallery images={images} />
       </div>

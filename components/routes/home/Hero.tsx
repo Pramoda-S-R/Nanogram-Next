@@ -6,7 +6,7 @@ import { getHeroNanograms } from "@/api";
 const Hero = async () => {
   const teamMembers = await getHeroNanograms();
   return (
-    <section className="w-full h-screen flex flex-col">
+    <section className="max-w-7xl mx-auto w-full h-screen flex flex-col">
       <div className="w-full h-5/6 relative">
         <ParticleRing />
         <div className="absolute top-0 left-0 max-w-full w-full h-full flex flex-col justify-end pointer-events-none md:p-20 p-4">

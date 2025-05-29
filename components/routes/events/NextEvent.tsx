@@ -32,7 +32,7 @@ const NextEvent = () => {
           countdownFrom={event.date}
         />
       )}
-      <section className="w-full flex lg:flex-row flex-col justify-center gap-5 md:px-10 px-0 ">
+      <section className="max-w-7xl mx-auto w-full flex lg:flex-row flex-col justify-center gap-5 md:px-10 px-0 ">
         <div className="flex justify-center items-center w-full md:p-0 p-8">
           <img
             src={event.imageUrl || "/assets/images/placeholder.png"}
