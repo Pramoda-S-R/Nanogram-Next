@@ -29,6 +29,7 @@
 - Added the hero section
 - Completed Home page
 - Added auth to api routes
+- Completed About Us page
 
 ## Challenges
 
