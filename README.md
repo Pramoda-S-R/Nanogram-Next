@@ -27,11 +27,16 @@
 - Working towards adding a api route to generate open-graph images
 - Added api routes to fetch from nanogram collection
 - Added the hero section
+- Completed Home page
+- Added auth to api routes
 
 ## Challenges
 
 - lack of good websocket infrastructure for free (messaging)
 - that i don't follow html tag conventions (recheck every components exquisite young lad)
+
+## .env codes
+- [.env.local](https://gist.githubusercontent.com/Pramoda-S-R/25e2a6074970f20cfc2b34f48f3871af)
 
 ## How to use
 

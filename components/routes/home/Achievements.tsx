@@ -34,9 +34,9 @@ const Achievements = () => {
   ];
 
   return (
-    <div className="w-full pt-14">
+    <section className="w-full pt-14">
       <div className="w-full flex flex-col gap-5 text-center">
-        <h2 className="text-5xl font-medium mb-4">Achievements</h2>
+        <h1 className="text-5xl font-medium mb-4">Achievements</h1>
         <p className="text-lg font-normal text-base-content/70 px-4 mb-10">
           Nanogram - The Tech Hub has been at the forefront of technological
           innovation and education.
@@ -68,7 +68,7 @@ const Achievements = () => {
           </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 };
 

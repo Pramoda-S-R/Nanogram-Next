@@ -1,6 +1,7 @@
 import { Nanogram, Testimonial } from "@/types";
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+const apiKey: string | undefined = process.env.API_KEY;
 
 // ==================
 // Nanogram Functions
@@ -12,6 +13,7 @@ export async function getHeroNanograms(): Promise<Nanogram[]> {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
+                'x-api-key': apiKey || '',
             },
             next: {
                 revalidate: 86400 // 24 hours
@@ -32,13 +34,14 @@ export async function getHeroNanograms(): Promise<Nanogram[]> {
 }
 export async function getTestimonials(): Promise<Testimonial[]> {
     try {
-        const response = await fetch(`${BASE_URL}/api/nanogram?alumini=true&content=true`, {
+        const response = await fetch(`${BASE_URL}/api/nanogram?alumini=true&content=true&sort=priority&order=1`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
+                'x-api-key': apiKey || '',
             },
             next: {
-                revalidate: 86400 // 24 hours
+                revalidate: 60 // 1 minute
             }
         });
 

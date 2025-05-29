@@ -7,9 +7,9 @@ const PublicLayout = ({ children }: { children: React.ReactNode }) => {
     <>
       <Navbar />
       <main className="flex justify-center">
-        <section className="w-full bg-base-100 text-base-content">
+        <div className="w-full bg-base-100 text-base-content">
           {children}
-        </section>
+        </div>
       </main>
       <Footer />
     </>

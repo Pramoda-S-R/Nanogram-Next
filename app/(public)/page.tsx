@@ -1,22 +1,17 @@
-import { Achievements, Gallery, Hero, Highlights, Initiatives, Testimonials } from "@/components/routes/home";
+import {
+  Achievements,
+  Gallery,
+  Hero,
+  Highlights,
+  Initiatives,
+  Testimonials,
+} from "@/components/routes/home";
 
 export async function generateMetadata() {
   return {
-    title: "Nanogram",
-    keywords: ["Nanogram"],
+    title: "Home",
     description:
-      "Nanogram is a modern, open-source social media platform built with Next.js and MongoDB.",
-    openGraph: {
-      images: [
-        {
-          url: `https://your-app.vercel.app/api/og?title=${encodeURIComponent(
-            "Nanogram"
-          )}`,
-          width: 1200,
-          height: 630,
-        },
-      ],
-    },
+      "Join Nanogram – a student-driven electronics community offering hands-on projects, workshops, and real-world industry exposure. Learn, build, and innovate.",
   };
 }
 

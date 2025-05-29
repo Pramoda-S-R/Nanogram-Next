@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence, useAnimation } from "framer-motion";
 import { Testimonial } from "@/types";
 
@@ -10,43 +10,71 @@ export default function AnimatedTestimonial({
   testimonials: Testimonial[];
 }) {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [direction, setDirection] = useState<"left" | "right">("left");
   const controls = useAnimation();
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-  const nextTestimonial = () => {
-    setCurrentIndex((prevIndex) => (prevIndex + 1) % testimonials.length);
+  // Function to start or reset the autoplay timer
+  const startTimer = () => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    timerRef.current = setInterval(() => {
+      setDirection("left");
+      setCurrentIndex((prevIndex) => (prevIndex + 1) % testimonials.length);
+    }, 5000);
   };
 
   useEffect(() => {
-    const timer = setInterval(nextTestimonial, 5000); // Auto-play every 5 seconds
-    return () => clearInterval(timer);
+    startTimer();
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
   }, [testimonials]);
 
   const handleDragEnd = (_: any, info: any) => {
     if (info.offset.x > 100) {
+      setDirection("right");
       setCurrentIndex(
         (prevIndex) =>
           (prevIndex - 1 + testimonials.length) % testimonials.length
       );
+      startTimer(); // reset timer on user interaction
     } else if (info.offset.x < -100) {
-      nextTestimonial();
+      setDirection("left");
+      setCurrentIndex((prevIndex) => (prevIndex + 1) % testimonials.length);
+      startTimer(); // reset timer on user interaction
+    } else {
+      controls.start({ x: 0 }); // not enough drag, no change
     }
-    controls.start({ x: 0 });
+  };
+
+  const variants = {
+    enter: (direction: "left" | "right") => ({
+      x: direction === "left" ? 300 : -300,
+      opacity: 0,
+    }),
+    center: { x: 0, opacity: 1 },
+    exit: (direction: "left" | "right") => ({
+      x: direction === "left" ? -300 : 300,
+      opacity: 0,
+    }),
   };
 
   return (
     <>
-      <AnimatePresence initial={false} mode="wait">
+      <AnimatePresence custom={direction} initial={false} mode="wait">
         <motion.div
           key={currentIndex}
+          custom={direction}
+          variants={variants}
+          initial="enter"
+          animate="center"
+          exit="exit"
+          transition={{ type: "spring", stiffness: 300, damping: 30 }}
           drag="x"
           dragConstraints={{ left: 0, right: 0 }}
           dragElastic={0.2}
           onDragEnd={handleDragEnd}
-          animate={{ opacity: 1, x: 0 }}
-          initial={{ opacity: 0, x: 300 }}
-          exit={{ opacity: 0, x: -300 }}
-          transition={{ type: "spring", stiffness: 300, damping: 30 }}
-          className="bg-neutral-white shadow-xl rounded-lg p-8 cursor-grab active:cursor-grabbing"
+          className="bg-base-100 shadow-xl rounded-lg p-8 cursor-grab active:cursor-grabbing"
         >
           <TestimonialDiv testimonial={testimonials[currentIndex]} />
         </motion.div>
@@ -56,7 +84,7 @@ export default function AnimatedTestimonial({
           <div
             key={index}
             className={`w-2 h-2 rounded-full ${
-              index === currentIndex ? "bg-primary" : "bg-accent-gray"
+              index === currentIndex ? "bg-primary" : "bg-base-300"
             }`}
           />
         ))}
@@ -71,7 +99,7 @@ function TestimonialDiv({ testimonial }: { testimonial: Testimonial }) {
       <motion.img
         src={testimonial?.avatarUrl || "/assets/images/placeholder.png"}
         alt={testimonial?.name || "Avatar"}
-        className="w-24 h-24 rounded-full border border-neutral-black/10 object-cover mx-auto"
+        className="w-24 h-24 rounded-full border border-base-content/10 object-cover mx-auto"
         whileHover={{ scale: 1.1 }}
         transition={{ type: "spring", stiffness: 300 }}
       />
@@ -84,7 +112,7 @@ function TestimonialDiv({ testimonial }: { testimonial: Testimonial }) {
         {testimonial?.name}
       </motion.h3>
       <motion.p
-        className="text-neutral-black/70 mb-4"
+        className="text-base-content/70 mb-4"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.3 }}
@@ -92,7 +120,7 @@ function TestimonialDiv({ testimonial }: { testimonial: Testimonial }) {
         {testimonial?.role}
       </motion.p>
       <motion.blockquote
-        className="text-lg italic text-neutral-black"
+        className="text-lg italic text-base-content"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4, type: "spring", stiffness: 100 }}

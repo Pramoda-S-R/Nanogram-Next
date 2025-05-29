@@ -3,8 +3,18 @@ import { ObjectId } from "mongodb";
 import { NextRequest, NextResponse } from "next/server";
 
 const database: string | undefined = process.env.DATABASE;
+const apiKey: string | undefined = process.env.API_KEY;
 
 export async function GET(req: NextRequest) {
+  // Check for API key
+  const apiKeyHeader = req.headers.get("x-api-key");
+  if (apiKey && apiKeyHeader !== apiKey) {
+    return NextResponse.json(
+      { error: "Unauthorized" },
+      { status: 401 }
+    );
+  }
+  
   const { searchParams } = new URL(req.url);
   const alumini = searchParams.get("alumini");
   const core = searchParams.get("core");
@@ -53,6 +63,15 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  // Check for API key
+  const apiKeyHeader = req.headers.get("x-api-key");
+  if (apiKey && apiKeyHeader !== apiKey) {
+    return NextResponse.json(
+      { error: "Unauthorized" },
+      { status: 401 }
+    );
+  }
+
   try {
     const client = await clientPromise;
     const collection = client.db(database).collection("nanogram");
@@ -74,6 +93,15 @@ export async function POST(req: NextRequest) {
 }
 
 export async function PUT(req: NextRequest) {
+  // Check for API key
+  const apiKeyHeader = req.headers.get("x-api-key");
+  if (apiKey && apiKeyHeader !== apiKey) {
+    return NextResponse.json(
+      { error: "Unauthorized" },
+      { status: 401 }
+    );
+  }
+
   const { searchParams } = new URL(req.url);
   const id = searchParams.get("id");
   if (!id) {
@@ -105,6 +133,15 @@ export async function PUT(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
+  // Check for API key
+  const apiKeyHeader = req.headers.get("x-api-key");
+  if (apiKey && apiKeyHeader !== apiKey) {
+    return NextResponse.json(
+      { error: "Unauthorized" },
+      { status: 401 }
+    );
+  }
+
   const { searchParams } = new URL(req.url);
   const id = searchParams.get("id");
 

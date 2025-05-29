@@ -3,7 +3,7 @@ import React from "react";
 
 const Highlights = () => {
   return (
-    <div className="w-full flex md:flex-row flex-col gap-10 md:px-14 px-10 pb-20">
+    <section className="w-full flex md:flex-row flex-col gap-10 md:px-14 px-10 pb-20">
       <div className="w-full flex -space-x-[12%] justify-center">
         <div className="size-1/3 bg-base-300 rounded-xl shadow-lg -rotate-[30deg]">
           <img
@@ -35,7 +35,7 @@ const Highlights = () => {
         </div>
       </div>
       <div className="w-full flex flex-col gap-5">
-        <h2 className="text-5xl font-medium mb-4">Highlights</h2>
+        <h1 className="text-5xl font-medium mb-4">Highlights</h1>
         <p className="text-lg font-normal text-base-content/70 px-4">
           At Nanogram we actively engage in various activities to keep our
           members updated with the latest trends in technology.
@@ -44,7 +44,7 @@ const Highlights = () => {
           Events at Nanogram
         </Button>
       </div>
-    </div>
+    </section>
   );
 };
 
