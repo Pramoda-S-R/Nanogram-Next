@@ -1,4 +1,5 @@
 @import "tailwindcss";
+
 @plugin "daisyui" {
   themes: false;
 }
@@ -46,4 +47,32 @@
 @theme {
   --color-primary: #0D2DA2;
   --font-blanka: 'Blanka';
+}
+
+::-webkit-scrollbar {
+  width: 8px;  
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+
+.nano-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.nano-scrollbar::-webkit-scrollbar-track {
+  background: oklch(100% 0 0);
+}
+
+.nano-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #0D2DA2;
+  border-radius: 6px;
+  border: 2px solid transparent;
+}
+
+/* Firefox */
+.nano-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #0D2DA2 oklch(100% 0 0);
 }

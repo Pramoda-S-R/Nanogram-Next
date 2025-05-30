@@ -56,7 +56,7 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en">
-        <body>{children}</body>
+        <body className="nano-scrollbar">{children}</body>
       </html>
     </ClerkProvider>
   );

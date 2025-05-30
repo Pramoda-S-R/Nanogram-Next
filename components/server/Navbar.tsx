@@ -21,6 +21,13 @@ const navItems = [
   { label: "Community", href: "/community" },
   { label: "Blog", href: "/blog" },
   { label: "Newsletters", href: "/newsletter" },
+  { label: "Developers", href: "/developers" },
+  { label: "FAQ", href: "/about-us#faq" },
+  { label: "Contact Us", href: "/about-us#contact" },
+  { label: "Feedback", href: "/feedback" },
+  { label: "Privacy Policy", href: "/privacy-policy" },
+  { label: "Terms of Service", href: "/terms-of-service" },
+  { label: "Sitemap", href: "/sitemap" },
 ];
 
 const Navbar = () => {
@@ -50,7 +57,7 @@ const Navbar = () => {
                   Explore Nanogram and discover our community, events, and more.
                 </SheetDescription>
               </SheetHeader>
-              <nav className="flex flex-col gap-2 mt-10">
+              <nav className="flex flex-col gap-2 mt-10 overflow-y-scroll nano-scrollbar h-[calc(100vh-200px)]">
                 {navItems.map((item) => (
                   <Link
                     key={item.label}
@@ -61,7 +68,11 @@ const Navbar = () => {
                   </Link>
                 ))}
               </nav>
-              <SheetFooter></SheetFooter>
+              <SheetFooter>
+                <p className="text-sm text-base-content mt-4">
+                  © {new Date().getFullYear()} Nanogram. All rights reserved.
+                </p>
+              </SheetFooter>
             </SheetContent>
           </Sheet>
           {/* Logo */}

@@ -25,6 +25,10 @@
 - connect uploadthing and establish blogs and newsletters
 - connect cloudinary and test out it's usage
 <!-- - Revamped Navbar and community sidebar -->
+- better api authentication allowing api key creation (mailjet perhaps)
+- admin dashboard
+- censor board
+- activity logs
 - Dev/API page for developers
 - Docs for the devs
 - Terms of Service and Privacy policy
