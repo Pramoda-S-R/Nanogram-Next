@@ -13,6 +13,7 @@ import {
   PlusSquare,
   Users,
 } from "lucide-react";
+import Image from "next/image";
 
 const Sidebar = () => {
   const pathname = usePathname();
@@ -24,16 +25,51 @@ const Sidebar = () => {
   }, []);
 
   const linkItems = [
+    {
+      href: "/",
+      label: "Home",
+      icon: (
+        <Image
+          src={"/assets/images/nanogram_logo-bg-primary.svg"}
+          alt="logo"
+          width={24}
+          height={24}
+        />
+      ),
+    },
     { href: "/community", label: "FYP", icon: <Home height={24} /> },
     { href: "/explore", label: "Explore", icon: <Compass height={24} /> },
-    { href: "/create-post", label: "Create", icon: <PlusSquare height={24} /> },
+    { href: "/all-users", label: "People", icon: <Users height={24} /> },
     { href: "/saved", label: "Saved", icon: <Album height={24} /> },
     {
       href: "/messages",
       label: "Messages",
       icon: <MessageCircle height={24} />,
     },
-    { href: "/all-users", label: "People", icon: <Users height={24} /> },
+    { href: "/create-post", label: "Create", icon: <PlusSquare height={24} /> },
+  ];
+  
+  const islandItems = [
+    { href: "/community", label: "FYP", icon: <Home height={24} /> },
+    { href: "/explore", label: "Explore", icon: <Compass height={24} /> },
+    { href: "/create-post", label: "Create", icon: <PlusSquare height={24} /> },
+    {
+      href: "/messages",
+      label: "Messages",
+      icon: <MessageCircle height={24} />,
+    },
+    {
+      href: "/",
+      label: "Profile",
+      icon: (
+        <Image
+          src={"/assets/images/nanogram_logo-bg-primary.svg"}
+          alt="logo"
+          width={24}
+          height={24}
+        />
+      ),
+    }
   ];
 
   const isActive = (href: string) =>
@@ -66,7 +102,7 @@ const Sidebar = () => {
 
   const renderBottomNav = () => (
     <nav className="fixed bottom-0 left-0 right-0 z-50 flex justify-around bg-base-100 border-t-2 border-base-300 py-2 md:hidden">
-      {linkItems.slice(0, 5).map(({ href, label, icon }) => (
+      {islandItems.slice(0, 5).map(({ href, label, icon }) => (
         <Link
           key={href}
           href={href}

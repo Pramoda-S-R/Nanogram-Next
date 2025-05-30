@@ -24,6 +24,12 @@
 - start work on the community group
 - connect uploadthing and establish blogs and newsletters
 - connect cloudinary and test out it's usage
+<!-- - Revamped Navbar and community sidebar -->
+- Dev/API page for developers
+- Docs for the devs
+- Terms of Service and Privacy policy
+- dedicated backend
+- mobile app and desktop app
 
 ## Current Progress
 
@@ -40,6 +46,7 @@
 - Completed About Us page
 - Completed Events page (bug: home and events route has inconsistancy in layout)
 - fixed the inconsistency
+- Revamped Navbar and community sidebar
 
 ## Challenges
 
