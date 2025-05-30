@@ -1,4 +1,4 @@
-import Button from "@/components/client/shared/Button";
+import Button from "@/components/client/shared/ui/Button";
 import React from "react";
 
 const Highlights = () => {
@@ -40,7 +40,10 @@ const Highlights = () => {
           At Nanogram we actively engage in various activities to keep our
           members updated with the latest trends in technology.
         </p>
-        <Button className="btn btn-link w-fit no-underline" navigateTo="/events">
+        <Button
+          className="btn btn-link w-fit no-underline"
+          navigateTo="/events"
+        >
           Events at Nanogram
         </Button>
       </div>

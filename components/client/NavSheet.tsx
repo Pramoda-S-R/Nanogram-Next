@@ -9,7 +9,7 @@ import {
   SheetTitle,
   SheetDescription,
   SheetFooter,
-} from "../client/shared/Sheet";
+} from "./shared/ui/Sheet";
 import { Hamburger } from "./shared/Hamburger";
 import { Logo } from "../server/Navbar";
 import Link from "next/link";

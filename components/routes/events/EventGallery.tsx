@@ -5,7 +5,7 @@ import {
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
-} from "@/components/client/shared/Carousel";
+} from "@/components/client/shared/ui/Carousel";
 import { getEvents } from "@/api";
 
 const EventGallery = async () => {

@@ -1,5 +1,5 @@
 import { getNextEvent } from "@/api";
-import Button from "@/components/client/shared/Button";
+import Button from "@/components/client/shared/ui/Button";
 import ShiftingCountdown from "@/components/client/ShiftingCountdown";
 import Banner from "@/components/server/Banner";
 import { CalendarDays, Pin } from "lucide-react";

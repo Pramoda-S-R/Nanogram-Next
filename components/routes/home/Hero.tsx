@@ -1,5 +1,5 @@
 import ParticleRing from "@/components/client/ParticleRing";
-import Button from "@/components/client/shared/Button";
+import Button from "@/components/client/shared/ui/Button";
 import { ArrowRight, Plus } from "lucide-react";
 import { getHeroNanograms } from "@/api";
 

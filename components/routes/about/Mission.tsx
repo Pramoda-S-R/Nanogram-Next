@@ -1,6 +1,6 @@
 import React from "react";
 import { ArrowRight } from "lucide-react";
-import Button from "@/components/client/shared/Button";
+import Button from "@/components/client/shared/ui/Button";
 
 const Mission = () => {
   return (

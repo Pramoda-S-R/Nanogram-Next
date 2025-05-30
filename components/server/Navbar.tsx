@@ -4,6 +4,7 @@ import React from "react";
 import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import SignInButton from "../client/SignInButton";
 import NavSheet from "../client/NavSheet";
+import ProfileDrawer from "../client/shared/ProfileDrawer";
 
 const navItems = [
   { label: "Home", href: "/" },
@@ -46,6 +47,7 @@ const Navbar = () => {
             <SignInButton />
           </SignedOut>
           <SignedIn>
+            <ProfileDrawer />
             <UserButton />
           </SignedIn>
         </div>

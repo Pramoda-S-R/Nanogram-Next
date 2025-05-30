@@ -18,8 +18,8 @@
 - blogs can be md files, just an idea tho, not just an idea anymore turns out it's best fit for blogs
 
 ## What to do next
-- api routes for events collection
-- api logic for the entirity of events route
+<!-- - api routes for events collection -->
+<!-- - api logic for the entirity of events route -->
 <!-- - fix the inconsistency in home and events route -->
 - start work on the community group
 - connect uploadthing and establish blogs and newsletters
@@ -34,6 +34,7 @@
 - Terms of Service and Privacy policy
 - dedicated backend
 - mobile app and desktop app
+- IP bans
 
 ## Current Progress
 
@@ -51,6 +52,7 @@
 - Completed Events page (bug: home and events route has inconsistancy in layout)
 - fixed the inconsistency
 - Revamped Navbar and community sidebar
+- Events page database fetching done
 
 ## Challenges
 

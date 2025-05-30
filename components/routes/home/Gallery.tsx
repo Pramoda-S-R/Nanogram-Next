@@ -1,7 +1,7 @@
 import React from "react";
 import ShuffleGallery from "@/components/client/ShuffleGallery";
 import { images } from "@/constants";
-import Button from "@/components/client/shared/Button";
+import Button from "@/components/client/shared/ui/Button";
 
 const Gallery = () => {
   return (

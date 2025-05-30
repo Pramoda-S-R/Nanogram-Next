@@ -3,7 +3,7 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/components/client/shared/Accordion";
+} from "@/components/client/shared/ui/Accordion";
 
 // FAQ Data (You can easily add new items here)
 const faqData = [

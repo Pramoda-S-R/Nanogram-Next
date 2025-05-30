@@ -75,3 +75,52 @@ export const pointsOuter: Point[] = Array.from(
     color,
   };
 });
+
+export function formatRelativeTime(isoDate: string): string {
+  const date = new Date(isoDate);
+  const now = new Date();
+
+  const dateStr = date.toDateString();
+  const nowStr = now.toDateString();
+
+  // Time part
+  const timeString = date.toLocaleTimeString(undefined, {
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  });
+
+  // Check Today
+  if (dateStr === nowStr) {
+    return `Today at ${timeString}`;
+  }
+
+  // Check Yesterday
+  const yesterday = new Date(now);
+  yesterday.setDate(now.getDate() - 1);
+  if (dateStr === yesterday.toDateString()) {
+    return `Yesterday at ${timeString}`;
+  }
+
+  // Check if same week
+  const getStartOfWeek = (d: Date) => {
+    const day = d.getDay(); // Sunday = 0, Monday = 1, ...
+    const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Adjust to Monday
+    return new Date(d.setDate(diff));
+  };
+
+  const startOfWeek = getStartOfWeek(new Date(now));
+  if (date > startOfWeek) {
+    const weekday = date.toLocaleDateString(undefined, { weekday: 'short' }); // "Mon"
+    return `${weekday} at ${timeString}`;
+  }
+
+  // Else: use Month Day format
+  const dateString = date.toLocaleDateString(undefined, {
+    month: 'short',
+    day: 'numeric',
+  });
+
+  return `${dateString} at ${timeString}`;
+}
+
