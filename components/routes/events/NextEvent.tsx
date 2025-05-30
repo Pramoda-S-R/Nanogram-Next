@@ -1,24 +1,12 @@
+import { getNextEvent } from "@/api";
 import Button from "@/components/client/shared/Button";
 import ShiftingCountdown from "@/components/client/ShiftingCountdown";
 import Banner from "@/components/server/Banner";
-import { Event } from "@/types";
 import { CalendarDays, Pin } from "lucide-react";
-import { ObjectId } from "mongodb";
 import React from "react";
 
-const NextEvent = () => {
-  const event: Event | undefined = {
-    _id: new ObjectId("64f8b2c1e4b0f3a1c8d5e6f7"),
-    imageUrl: "/assets/images/event-teaser.jpg",
-    title: "Tech Conference 2023",
-    subtitle: "Innovating the Future",
-    description: "Join us for a day of tech talks and networking.",
-    content: "This event will feature industry leaders discussing the latest trends in technology. Don't miss out on the opportunity to learn and network with like-minded individuals.",
-    date: new Date("2023-10-15T10:00:00Z"),
-    location: "Tech Hub, Silicon Valley",
-    registration: "https://example.com/register",
-    completed: false,
-  }
+const NextEvent = async () => {
+  const event = await getNextEvent();
 
   if (!event) {
     return <Banner />;

@@ -36,9 +36,9 @@ export interface Event {
   imageUrl?: string;
   title: string;
   subtitle?: string;
-  description?: string;
+  description: string;
   content?: string;
-  date?: Date;
+  date: Date;
   location?: string;
   registration?: string;
   completed?: boolean;

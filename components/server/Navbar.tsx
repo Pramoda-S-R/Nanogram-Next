@@ -3,16 +3,7 @@ import Link from "next/link";
 import React from "react";
 import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import SignInButton from "../client/SignInButton";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/client/shared/Sheet";
-import { Hamburger } from "@/components/client/shared/Hamburger";
+import NavSheet from "../client/NavSheet";
 
 const navItems = [
   { label: "Home", href: "/" },
@@ -22,7 +13,7 @@ const navItems = [
   { label: "Blog", href: "/blog" },
   { label: "Newsletters", href: "/newsletter" },
   { label: "Developers", href: "/developers" },
-  { label: "FAQ", href: "/about-us#faq" },
+  { label: "FAQ", href: "/events#faq" },
   { label: "Contact Us", href: "/about-us#contact" },
   { label: "Feedback", href: "/feedback" },
   { label: "Privacy Policy", href: "/privacy-policy" },
@@ -44,37 +35,7 @@ const Navbar = () => {
         {/* Logo & Menu */}
         <div className="flex items-center gap-4">
           {/* Dropdown */}
-          <Sheet>
-            <SheetTrigger asChild>
-              <Hamburger />
-            </SheetTrigger>
-            <SheetContent side={"left"}>
-              <SheetHeader>
-                <SheetTitle className="text-primary">
-                  <Logo imgBg="primary" />
-                </SheetTitle>
-                <SheetDescription className="text-justify">
-                  Explore Nanogram and discover our community, events, and more.
-                </SheetDescription>
-              </SheetHeader>
-              <nav className="flex flex-col gap-2 mt-10 overflow-y-scroll nano-scrollbar h-[calc(100vh-200px)]">
-                {navItems.map((item) => (
-                  <Link
-                    key={item.label}
-                    href={item.href}
-                    className="text-base-content hover:text-primary transition-colors"
-                  >
-                    {item.label}
-                  </Link>
-                ))}
-              </nav>
-              <SheetFooter>
-                <p className="text-sm text-base-content mt-4">
-                  © {new Date().getFullYear()} Nanogram. All rights reserved.
-                </p>
-              </SheetFooter>
-            </SheetContent>
-          </Sheet>
+          <NavSheet navItems={navItems} />
           {/* Logo */}
           <Logo />
         </div>

@@ -6,42 +6,10 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/client/shared/Carousel";
+import { getEvents } from "@/api";
 
-const EventGallery = () => {
-  const events = {
-    documents: [
-      {
-        title: "Tech Fest 2023",
-        subtitle: "A celebration of technology and innovation",
-        imageUrl: "/assets/images/placeholder.png",
-      },
-      {
-        title: "Hackathon 2023",
-        subtitle: "24-hour coding marathon",
-        imageUrl: "/assets/images/placeholder.png",
-      },
-      {
-        title: "AI Workshop",
-        subtitle: "Learn about the latest in AI technology",
-        imageUrl: "/assets/images/placeholder.png",
-      },
-      {
-        title: "Web Development Bootcamp",
-        subtitle: "Build your first website in a day",
-        imageUrl: "/assets/images/placeholder.png",
-      },
-        {
-            title: "Cybersecurity Seminar",
-            subtitle: "Protecting your digital assets",
-            imageUrl: "/assets/images/placeholder.png",
-        },
-        {
-            title: "Cloud Computing Conference",
-            subtitle: "Exploring the future of cloud technology",
-            imageUrl: "/assets/images/placeholder.png",
-        },
-    ],
-  };
+const EventGallery = async () => {
+  const events = await getEvents();
 
   return (
     <section className="max-w-7xl mx-auto px-6 py-10 md:px-8 md:py-10">
@@ -58,7 +26,7 @@ const EventGallery = () => {
             <CarouselPrevious />
             <CarouselNext />
             <CarouselContent>
-              {events?.documents.map((highlight, index) => (
+              {events?.map((highlight, index) => (
                 <CarouselItem
                   className="md:basis-1/2 lg:basis-1/3 xl:basis-1/5 "
                   key={index}
@@ -69,7 +37,10 @@ const EventGallery = () => {
                         <img
                           alt={highlight.title}
                           className="object-cover w-full h-full transition-all duration-300 origin-bottom group-hover:scale-110 aspect-[3/4]"
-                          src={highlight.imageUrl}
+                          src={
+                            highlight.imageUrl ||
+                            "/assets/images/placeholder.png"
+                          }
                           loading="lazy"
                         />
                       </div>
