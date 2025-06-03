@@ -3,7 +3,7 @@ import { ObjectId } from "mongodb";
 import { NextRequest, NextResponse } from "next/server";
 
 const database: string | undefined = process.env.DATABASE;
-const apiKey: string | undefined = process.env.API_KEY;
+const apiKey: string | undefined = process.env.NEXT_PUBLIC_API_KEY;
 
 export async function GET(req: NextRequest) {
   // Check for API key

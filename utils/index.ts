@@ -112,7 +112,7 @@ export function formatRelativeTime(isoDate: string): string {
   const startOfWeek = getStartOfWeek(new Date(now));
   if (date > startOfWeek) {
     const weekday = date.toLocaleDateString(undefined, { weekday: 'short' }); // "Mon"
-    return `${weekday} at ${timeString}`;
+    return `Last ${weekday} at ${timeString}`;
   }
 
   // Else: use Month Day format
@@ -124,3 +124,11 @@ export function formatRelativeTime(isoDate: string): string {
   return `${dateString} at ${timeString}`;
 }
 
+export function getCurrentSessionIdFromCookie() {
+  const match = document.cookie.match(/clerk_active_context=([^;]+)/);
+  if (match) {
+    const value = decodeURIComponent(match[1]);
+    return value.split(':')[0]; // Remove trailing colon if present
+  }
+  return null;
+}

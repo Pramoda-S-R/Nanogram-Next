@@ -1,7 +1,77 @@
 import { Event, Nanogram, Testimonial } from "@/types";
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
-const apiKey: string | undefined = process.env.API_KEY;
+const apiKey: string | undefined = process.env.NEXT_PUBLIC_API_KEY;
+
+// ==================
+// User Functions
+// ==================
+// Delete user by ID
+export async function deleteUserById(userId: string): Promise<boolean> {
+  try {
+    const response = await fetch(`${BASE_URL}/api/account?user_id=${userId}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": apiKey || "",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to delete user");
+    }
+    console.log("User deleted successfully");
+    return true;
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    return false;
+  }
+}
+// Update user profile
+export async function updateUserProfile({
+  userId,
+  firstName,
+  lastName,
+  file,
+}: {
+  userId: string;
+  firstName: string;
+  lastName: string;
+  file?: File;
+}): Promise<any> {
+  try {
+    const formData = new FormData();
+    formData.append("firstName", firstName);
+    formData.append("lastName", lastName);
+    if (file) {
+      formData.append("file", file);
+    }
+
+    console.log("file: ", file);
+
+    const response = await fetch(
+      `${BASE_URL}/api/account?update=profile&user_id=${userId}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": apiKey || "",
+        },
+        body: formData,
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to update user profile");
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error updating user profile:", error);
+    return null;
+  }
+}
 
 // ==================
 // Nanogram Functions

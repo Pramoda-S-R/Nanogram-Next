@@ -1,6 +1,6 @@
 "use client";
 
-import { useSignUp } from "@clerk/clerk-react";
+import { useSignIn, useSignUp } from "@clerk/clerk-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -19,6 +19,7 @@ type FormData = z.infer<typeof schema>;
 
 export default function SignUp() {
   const { signUp, setActive, isLoaded } = useSignUp();
+  const { signIn, setActive: setSignInActive, isLoaded: isSignInLoaded } = useSignIn();
   const [pendingVerification, setPendingVerification] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -67,9 +68,9 @@ export default function SignUp() {
   const handleOAuthSignUp = async (
     strategy: "oauth_google" | "oauth_github"
   ) => {
-    if (!signUp) return;
+    if (!signIn) return;
     try {
-      await signUp.authenticateWithRedirect({
+      await signIn.authenticateWithRedirect({
         strategy,
         redirectUrl: `/callback?redirect_url=${encodeURIComponent(
           redirectUrl

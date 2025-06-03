@@ -9,7 +9,7 @@ export default function Page() {
     <div>
       <p>Redirecting...</p>
       <div id="clerk-captcha" />
-      <AuthenticateWithRedirectCallback />;
+      <AuthenticateWithRedirectCallback />
     </div>
   );
 }
