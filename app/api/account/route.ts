@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { clerkClient } from "@clerk/nextjs/server";
+import { useUser } from "@clerk/nextjs";
 
 const apiKey: string | undefined = process.env.NEXT_PUBLIC_API_KEY;
 
@@ -12,7 +13,22 @@ export async function PUT(req: NextRequest) {
   const update = searchParams.get("update");
   if (update === "password") {
     try {
-      const client = await clerkClient();
+      const formData = await req.formData();
+      const currentPassword = formData.get("currentPassword") as string;
+      const newPassword = formData.get("newPassword") as string;
+      const signOutOfOtherSessions =
+        formData.get("signOutOfOtherSessions") === "true";
+
+      const { user } = useUser();
+      await user?.updatePassword({
+        currentPassword,
+        newPassword,
+        signOutOfOtherSessions,
+      });
+      return NextResponse.json(
+        { message: "Password updated successfully" },
+        { status: 200 }
+      );
     } catch (error) {
       return NextResponse.json(
         { error: "Failed to update password" },
@@ -20,9 +36,8 @@ export async function PUT(req: NextRequest) {
       );
     }
   }
-  if (update === "profile") {
+  if (update === "username") {
     try {
-      const client = await clerkClient();
       const userId = searchParams.get("user_id");
       if (!userId) {
         return NextResponse.json(
@@ -30,23 +45,34 @@ export async function PUT(req: NextRequest) {
           { status: 400 }
         );
       }
-      const body = await req.json();
-      console.log("Updating profile for user:", body);
-      const { firstName, lastName, file } = body;
+      const username = searchParams.get("username");
+      if (!username) {
+        return NextResponse.json(
+          { error: "Username is required" },
+          { status: 400 }
+        );
+      }
 
-      // Update user profile
-      await client.users.updateUser(userId, {
-        firstName,
-        lastName,
-      });
-      await client.users.updateUserProfileImage(userId, {
-        file,
+      const client = await clerkClient();
+      const { isSignedIn } = await client.authenticateRequest(req, {
+        authorizedParties: ["http://localhost:3000"],
       });
 
-      return NextResponse.json({ message: "Profile updated successfully" }, { status: 200 });
+      if (!isSignedIn) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      }
+      // Update user username
+      const res = await client.users.updateUser(userId, {
+        username,
+      });
+
+      return NextResponse.json(
+        { message: "Username updated successfully" },
+        { status: 200 }
+      );
     } catch (error) {
       return NextResponse.json(
-        { error: "Failed to update profile" },
+        { error: "Failed to update username" },
         { status: 500 }
       );
     }
@@ -67,6 +93,7 @@ export async function DELETE(req: NextRequest) {
   }
   try {
     const client = await clerkClient();
+
     client.users.deleteUser(userId);
     return Response.json({ message: "User deleted" }, { status: 200 });
   } catch (error) {

@@ -10,7 +10,14 @@ import { Eye, EyeOff, Lock, Mail, User } from "lucide-react";
 import OtpInput from "@/components/client/shared/OtpInput";
 
 const schema = z.object({
-  username: z.string().min(4, "Username must be at least 4 characters"),
+  username: z
+    .string()
+    .min(4, "Username must be at least 4 characters")
+    .max(30, "Username must be less than 30 characters")
+    .regex(
+      /^[a-zA-Z0-9_]+$/,
+      "Username can only contain letters, numbers, and underscores"
+    ),
   email: z.string().email("Invalid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
@@ -19,7 +26,11 @@ type FormData = z.infer<typeof schema>;
 
 export default function SignUp() {
   const { signUp, setActive, isLoaded } = useSignUp();
-  const { signIn, setActive: setSignInActive, isLoaded: isSignInLoaded } = useSignIn();
+  const {
+    signIn,
+    setActive: setSignInActive,
+    isLoaded: isSignInLoaded,
+  } = useSignIn();
   const [pendingVerification, setPendingVerification] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);

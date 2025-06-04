@@ -18,9 +18,11 @@
 - blogs can be md files, just an idea tho, not just an idea anymore turns out it's best fit for blogs
 
 ## What to do next
+
 <!-- - api routes for events collection -->
 <!-- - api logic for the entirity of events route -->
 <!-- - fix the inconsistency in home and events route -->
+
 - start work on the community group
 - connect uploadthing and establish blogs and newsletters
 - connect cloudinary and test out it's usage
@@ -53,13 +55,17 @@
 - fixed the inconsistency
 - Revamped Navbar and community sidebar
 - Events page database fetching done
+- made the manage account component but multiple features are still missing
+- possible features from manage account: (revoke sessions, add_emails, add_connections?)
 
 ## Challenges
 
 - lack of good websocket infrastructure for free (messaging)
 - that i don't follow html tag conventions (recheck every components exquisite young lad)
+- clerk is a bitch and locks many features from the sdk (or so i thought I just suck at designing client side components for managinf accounts)
 
 ## .env codes
+
 - [.env.local](https://gist.githubusercontent.com/Pramoda-S-R/25e2a6074970f20cfc2b34f48f3871af)
 
 ## How to use

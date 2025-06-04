@@ -47,7 +47,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { SignOutButton, useClerk, useUser } from "@clerk/nextjs";
 import { SessionWithActivitiesResource, UserResource } from "@clerk/types";
 import { formatRelativeTime, getCurrentSessionIdFromCookie } from "@/utils";
-import { deleteUserById, updateUserProfile } from "@/api";
+import {
+  changeUserPassword,
+  deleteUserById,
+  removeUserProfileImage,
+  updateUsernameById,
+  updateUserProfile,
+} from "@/api";
+import FileUploader from "./ui/FileUploader";
 
 const ProfileDrawer = () => {
   // const router = useRouter();
@@ -173,7 +180,7 @@ const ProfileDrawer = () => {
                     <p className="text-sm font-semibold text-base-content/80">
                       {user.username}
                     </p>
-                    <button className="btn btn-ghost">Update Username</button>
+                    <UpdateUsernameDialog user={user} />
                   </div>
                 </div>
                 <div className="divider"></div>
@@ -206,10 +213,69 @@ const ProfileDrawer = () => {
                   </div>
                 </div>
                 <div className="divider"></div>
-                <div>
-                  {user.primaryEmailAddress?.linkedTo.map((auths, idx) => (
-                    <p key={idx}>{auths.type}</p>
-                  ))}
+                <div className="flex flex-col md:flex-row w-full">
+                  <p className="tet-md font-semibold mt-2 md:basis-50">
+                    Connections
+                  </p>
+                  <div className="flex w-full">
+                    <div className="flex w-full">
+                      {user.primaryEmailAddress?.linkedTo.map((auths, idx) => (
+                        <div key={idx} className="flex items-center px-2">
+                          {auths.type === "oauth_google" ? (
+                            <div className="btn bg-white text-black border-[#e5e5e5]">
+                              <svg
+                                aria-label="Google logo"
+                                width="16"
+                                height="16"
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 512 512"
+                              >
+                                <g>
+                                  <path d="m0 0H512V512H0" fill="#fff"></path>
+                                  <path
+                                    fill="#34a853"
+                                    d="M153 292c30 82 118 95 171 60h62v48A192 192 0 0190 341"
+                                  ></path>
+                                  <path
+                                    fill="#4285f4"
+                                    d="m386 400a140 175 0 0053-179H260v74h102q-7 37-38 57"
+                                  ></path>
+                                  <path
+                                    fill="#fbbc02"
+                                    d="m90 341a208 200 0 010-171l63 49q-12 37 0 73"
+                                  ></path>
+                                  <path
+                                    fill="#ea4335"
+                                    d="m153 219c22-69 116-109 179-50l55-54c-78-75-230-72-297 55"
+                                  ></path>
+                                </g>
+                              </svg>
+                              Google
+                            </div>
+                          ) : (
+                            <div className="btn bg-black text-white border-black">
+                              <svg
+                                aria-label="GitHub logo"
+                                width="16"
+                                height="16"
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  fill="white"
+                                  d="M12,2A10,10 0 0,0 2,12C2,16.42 4.87,20.17 8.84,21.5C9.34,21.58 9.5,21.27 9.5,21C9.5,20.77 9.5,20.14 9.5,19.31C6.73,19.91 6.14,17.97 6.14,17.97C5.68,16.81 5.03,16.5 5.03,16.5C4.12,15.88 5.1,15.9 5.1,15.9C6.1,15.97 6.63,16.93 6.63,16.93C7.5,18.45 8.97,18 9.54,17.76C9.63,17.11 9.89,16.67 10.17,16.42C7.95,16.17 5.62,15.31 5.62,11.5C5.62,10.39 6,9.5 6.65,8.79C6.55,8.54 6.2,7.5 6.75,6.15C6.75,6.15 7.59,5.88 9.5,7.17C10.29,6.95 11.15,6.84 12,6.84C12.85,6.84 13.71,6.95 14.5,7.17C16.41,5.88 17.25,6.15 17.25,6.15C17.8,7.5 17.45,8.54 17.35,8.79C18,9.5 18.38,10.39 18.38,11.5C18.38,15.32 16.04,16.16 13.81,16.41C14.17,16.72 14.5,17.33 14.5,18.26C14.5,19.6 14.5,20.68 14.5,21C14.5,21.27 14.66,21.59 15.17,21.5C19.14,20.16 22,16.42 22,12A10,10 0 0,0 12,2Z"
+                                ></path>
+                              </svg>
+                              Login with GitHub
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                      <button className="btn btn-ghost w-fit">
+                        + connection
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
             ) : (
@@ -320,13 +386,117 @@ const ProfileDrawer = () => {
   );
 };
 
+function UpdateUsernameDialog({ user }: { user: UserResource }) {
+  const [loading, setLoading] = useState(false);
+  const [open, setOpen] = useState(false);
+
+  const UsernameSchema = z.object({
+    // Validate username with Zod no spaces, special characters, and length
+    username: z
+      .string()
+      .min(4, "Username is required")
+      .max(30, "Username must be less than 30 characters")
+      .regex(
+        /^[a-zA-Z0-9_]+$/,
+        "Username can only contain letters, numbers, and underscores"
+      ),
+  });
+
+  type UsernameFormData = z.infer<typeof UsernameSchema>;
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<UsernameFormData>({
+    resolver: zodResolver(UsernameSchema),
+    defaultValues: {
+      username: user.username || "",
+    },
+  });
+
+  async function updateUsername(data: UsernameFormData) {
+    if (!user) {
+      return;
+    }
+    console.log("Updating username with data:", data);
+    setLoading(true);
+    try {
+      const res = await updateUsernameById({
+        userId: user.id,
+        username: data.username,
+      });
+      if (!res) {
+        console.error("Failed to update username:", res);
+        return;
+      }
+    } catch (error) {
+      console.error("Error updating username:", error);
+    } finally {
+      user.reload();
+      setLoading(false);
+      setOpen(false);
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger className="btn btn-ghost">Update Username</DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Update Username</DialogTitle>
+          <DialogDescription>
+            Enter a new username for your account.
+          </DialogDescription>
+        </DialogHeader>
+        <form onSubmit={handleSubmit(updateUsername)}>
+          <div className="mb-2.5">
+            <label className="input validator w-full">
+              <input
+                type="text"
+                required
+                placeholder="New Username"
+                {...register("username")}
+              />
+            </label>
+            {errors.username && (
+              <p className="text-sm mt-1 text-warning">
+                {errors.username.message}
+              </p>
+            )}
+          </div>
+          <DialogFooter>
+            <DialogClose disabled={loading} className="btn btn-error brn-block">
+              Close
+            </DialogClose>
+            <button
+              type="submit"
+              className="btn btn-primary"
+              disabled={loading}
+            >
+              {loading ? (
+                <span className="loading loading-spinner loading-sm"></span>
+              ) : (
+                "Update Username"
+              )}
+            </button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 function UpdateUserDialog({ user }: { user: UserResource }) {
   const [loading, setLoading] = useState(false);
+  const [open, setOpen] = useState(false);
 
   const ProfileSchema = z.object({
     firstName: z.string().min(1, "First name is required"),
     lastName: z.string().min(1, "Last name is required"),
-    file: z.any(),
+    file: z.any().refine((file) => file instanceof File || file === null, {
+      message: "A valid image file is required",
+    }),
   });
 
   type ProfileFormData = z.infer<typeof ProfileSchema>;
@@ -338,6 +508,11 @@ function UpdateUserDialog({ user }: { user: UserResource }) {
     formState: { errors },
   } = useForm<ProfileFormData>({
     resolver: zodResolver(ProfileSchema),
+    defaultValues: {
+      firstName: user.firstName || "",
+      lastName: user.lastName || "",
+      file: null, // Initialize file as null
+    },
   });
 
   async function updateProfile(data: ProfileFormData) {
@@ -359,11 +534,36 @@ function UpdateUserDialog({ user }: { user: UserResource }) {
     } catch (error) {
       console.error("Error updating password:", error);
     } finally {
+      user.reload();
       setLoading(false);
+      setOpen(false);
     }
   }
+
+  async function removeProfileImage() {
+    if (!user) {
+      return;
+    }
+    setLoading(true);
+    try {
+      const res = await removeUserProfileImage(user.id);
+      if (!res) {
+        console.error("Failed to remove profile image:", res);
+        return;
+      }
+      console.log("Profile image removed successfully");
+      setValue("file", null); // Reset file input
+    } catch (error) {
+      console.error("Error removing profile image:", error);
+    } finally {
+      user.reload();
+      setLoading(false);
+      setOpen(false);
+    }
+  }
+
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger className="btn btn-ghost">Update Profile</DialogTrigger>
       <DialogContent>
         <DialogHeader>
@@ -374,56 +574,69 @@ function UpdateUserDialog({ user }: { user: UserResource }) {
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit(updateProfile)}>
-          <div className="mb-2.5">
-            <label className="input validator w-full">
-              <input
-                type="text"
-                required
-                placeholder="First Name"
-                {...register("firstName")}
-              />
-            </label>
-            {errors.firstName && (
-              <p className="text-sm mt-1 text-warning">
-                {errors.firstName.message}
-              </p>
-            )}
+          <div className="md:h-100 h-140 overflow-y-scroll">
+            <div className="mb-2.5">
+              <label className="input validator w-full">
+                <input
+                  type="text"
+                  required
+                  placeholder="First Name"
+                  {...register("firstName")}
+                />
+              </label>
+              {errors.firstName && (
+                <p className="text-sm mt-1 text-warning">
+                  {errors.firstName.message}
+                </p>
+              )}
+            </div>
+            <div className="mb-2.5">
+              <label className="input validator w-full">
+                <input
+                  type="text"
+                  required
+                  placeholder="last Name"
+                  {...register("lastName")}
+                />
+              </label>
+              {errors.lastName && (
+                <p className="text-sm mt-1 text-warning">
+                  {errors.lastName.message}
+                </p>
+              )}
+            </div>
+            <div className="divider"></div>
+            <div className="mb-2.5">
+              <label className="w-full flex items-center justify-center">
+                <FileUploader
+                  onFileChange={(file) => setValue("file", file)}
+                  initialFileUrl={user.imageUrl}
+                  acceptedFileTypes={{ "image/*": [".jpg", ".jpeg", ".png"] }}
+                  enableImageCropping={true}
+                  cropAspectRatio={1}
+                  cropperStyle={{ width: "100%", height: "25%" }}
+                />
+              </label>
+              {typeof errors.file?.message === "string" && (
+                <p className="text-sm mt-1 text-warning">
+                  {errors.file.message}
+                </p>
+              )}
+            </div>
+            <div className="divider"></div>
           </div>
-          <div className="mb-2.5">
-            <label className="input validator w-full">
-              <input
-                type="text"
-                required
-                placeholder="last Name"
-                {...register("lastName")}
-              />
-            </label>
-            {errors.lastName && (
-              <p className="text-sm mt-1 text-warning">
-                {errors.lastName.message}
-              </p>
-            )}
-          </div>
-          <div className="mb-2.5">
-            <label className="validator w-full flex">
-              <input
-                type="file"
-                required
-                className="file-input file-input-primary mt-2"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  setValue("file", file);
-                }}
-              />
-            </label>
-            {/* {errors.file && (
-              <p className="text-sm mt-1 text-warning">{errors.file.message}</p>
-            )} */}
-          </div>
-          <DialogFooter>
-            <DialogClose>
-              <p className="btn btn-error">Cancel</p>
+          <DialogFooter className="mt-2">
+            <DialogClose disabled={loading} className="btn btn-error brn-block">
+              Close
             </DialogClose>
+            <button
+              type="button"
+              className="btn btn-error btn-outline"
+              onClick={removeProfileImage}
+              disabled={loading}
+            >
+              Remove Profile Image
+            </button>
             <button
               type="submit"
               className="btn btn-primary"
@@ -432,7 +645,7 @@ function UpdateUserDialog({ user }: { user: UserResource }) {
               {loading ? (
                 <span className="loading loading-spinner loading-sm"></span>
               ) : (
-                "Update Password"
+                "Update Profile"
               )}
             </button>
           </DialogFooter>
@@ -470,10 +683,10 @@ function UpdatePasswordDialog({ user }: { user: UserResource }) {
     console.log("Updating password with data:", data);
     setLoading(true);
     try {
-      const res = await user.updatePassword({
+      const res = await changeUserPassword({
         currentPassword: data.currentPassword,
         newPassword: data.newPassword,
-        signOutOfOtherSessions: data.signOutOfOtherSessions,
+        signOutOfOtherSessions: data.signOutOfOtherSessions || false,
       });
       if (!res) {
         console.error("Failed to update password:", res);

@@ -8,6 +8,15 @@ export interface Point {
   color: string;
 }
 
+export interface UploadedFile {
+  onFileChange: (file: File | null) => void;
+  initialFileUrl?: string;
+  acceptedFileTypes?: Record<string, string[]>;
+  enableImageCropping?: boolean;
+  cropAspectRatio?: number;
+  cropperStyle?: React.CSSProperties;
+}
+
 export interface Nanogram {
   _id: ObjectId;
   name: string;

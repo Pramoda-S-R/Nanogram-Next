@@ -1,5 +1,6 @@
 import { Event, Nanogram, Testimonial } from "@/types";
 
+const CLERK_API = process.env.NEXT_PUBLIC_CLERK_API || "";
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 const apiKey: string | undefined = process.env.NEXT_PUBLIC_API_KEY;
 
@@ -12,7 +13,6 @@ export async function deleteUserById(userId: string): Promise<boolean> {
     const response = await fetch(`${BASE_URL}/api/account?user_id=${userId}`, {
       method: "DELETE",
       headers: {
-        "Content-Type": "application/json",
         "x-api-key": apiKey || "",
       },
     });
@@ -50,11 +50,10 @@ export async function updateUserProfile({
     console.log("file: ", file);
 
     const response = await fetch(
-      `${BASE_URL}/api/account?update=profile&user_id=${userId}`,
+      `${BASE_URL}/api/account/profile?user_id=${userId}`,
       {
         method: "PUT",
         headers: {
-          "Content-Type": "application/json",
           "x-api-key": apiKey || "",
         },
         body: formData,
@@ -70,6 +69,95 @@ export async function updateUserProfile({
   } catch (error) {
     console.error("Error updating user profile:", error);
     return null;
+  }
+}
+// Update username
+export async function updateUsernameById({
+  userId,
+  username,
+}: {
+  userId: string;
+  username: string;
+}): Promise<boolean> {
+  try {
+    const response = await fetch(`${BASE_URL}/api/account/username`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": apiKey || "",
+      },
+      body: JSON.stringify({ userId, username }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error("Server error:", errorData);
+      throw new Error(errorData.error || "Failed to update username");
+    }
+
+    console.log("Username updated successfully");
+    return true;
+  } catch (error) {
+    console.error("Error updating username:", error);
+    return false;
+  }
+}
+// Remove user profile image
+export async function removeUserProfileImage(userId: string): Promise<boolean> {
+  try {
+    const response = await fetch(
+      `${BASE_URL}/api/account/profile?user_id=${userId}`,
+      {
+        method: "DELETE",
+        headers: {
+          "x-api-key": apiKey || "",
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to remove user profile image");
+    }
+
+    console.log("User profile image removed successfully");
+    return true;
+  } catch (error) {
+    console.error("Error removing user profile image:", error);
+    return false;
+  }
+}
+// Change user password TODO: Not Working
+export async function changeUserPassword({
+  currentPassword,
+  newPassword,
+  signOutOfOtherSessions,
+}: {
+  currentPassword: string;
+  newPassword: string;
+  signOutOfOtherSessions: boolean;
+}): Promise<boolean> {
+  const formData = new FormData();
+  formData.append("currentPassword", currentPassword);
+  formData.append("newPassword", newPassword);
+  formData.append("signOutOfOtherSessions", signOutOfOtherSessions.toString());
+  try {
+    const response = await fetch(`${BASE_URL}/api/account/password`, {
+      method: "PUT",
+      headers: {
+        "x-api-key": apiKey || "",
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to change password");
+    }
+
+    console.log("Password changed successfully");
+    return true;
+  } catch (error) {
+    console.error("Error changing password:", error);
+    return false;
   }
 }
 
