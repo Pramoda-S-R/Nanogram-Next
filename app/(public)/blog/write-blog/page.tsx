@@ -1,0 +1,159 @@
+"use client";
+import React, { useEffect, useState } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import "../styles/blog.css";
+import matter from "gray-matter";
+
+const example = `---
+title: "How to Blog"
+date: "2025-05-20"
+authors: ["Web Dev", "Viceroy"]
+tags: ["Tutorial", "Blog Writing", "How to"]
+---
+
+# This is h1
+## This is h2
+### This is h3
+
+This is a normal sentence
+*italic*, _also italic_, **bold**, ~strikethrough~, ~~strikethrough again~~
+
+> BlockQuote  — Someone
+
+1. ordered list
+2. is llike this
+
+* unordered list
+* is like this
+- also this
+  - use spaces in multiples of 2 to indent
+    - like this
+
+\`here's a code\`
+
+\`\`\`code
+print("and this is a code block")
+\`\`\`
+
+horizontal rule
+
+---
+
+like this (notice the spacing)
+
+[this is a link](https://nanogram-techhub.vercel.app)
+
+![this is a image](https://nanogram-techhub.vercel.app/assets/images/nanogram_logo-twitter-card.png)
+
+| You can| Make a Table|
+| - | - |
+| Something | like|
+| this | ! |
+
+Here's a sentence with a footnote. [^1]
+
+Checkboxes ?
+- [x] Write the press release
+- [ ] Update the website
+- [ ] Contact the media
+
+---
+
+*Written with ❤️ by Pramoda S R*
+
+[^1]: This is the footnote.
+
+`;
+
+export default function BlogPage() {
+  const [md, setMd] = useState(example);
+  const [metadata, setMetadata] = useState<{ [key: string]: any }>({});
+  const [reactContent, setReactContent] = useState("");
+  const [parseError, setParseError] = useState<string | null>(null); // State to store parsing errors
+
+  useEffect(() => {
+    setParseError(null); // Clear previous errors on new input
+    let parsedMetadata = {};
+    let parsedMarkdown = "";
+
+    try {
+      // Attempt to parse the markdown with gray-matter
+      const { data, content } = matter(md);
+      parsedMetadata = data;
+      parsedMarkdown = content;
+    } catch (e: any) {
+      // Catch any error during parsing
+      // Check if it's specifically a YAMLException or similar parsing error
+      if (e.name === "YAMLException" || e.message.includes("YAML")) {
+        setParseError(
+          `YAML Front Matter Error: ${
+            e.reason || e.message
+          }. Please check your syntax, especially quotes.`
+        );
+      } else {
+        setParseError(`An unexpected error occurred: ${e.message}`);
+      }
+      // Set content to empty or previous valid content to avoid rendering bad data
+      setMetadata({}); // Clear metadata on error
+      setReactContent(""); // Clear rendered content on error
+      return; // Stop execution if parsing failed
+    }
+
+    // If parsing was successful, proceed to render markdown
+    setMetadata(parsedMetadata);
+    setReactContent(parsedMarkdown);
+  }, [md]);
+
+  return (
+    <div className="flex w-full h-[91vh]">
+      <div className="w-full h-full flex flex-col">
+        {" "}
+        {/* Added flex-col for better layout with error */}
+        <textarea
+          placeholder={`---
+            title: "The \"Escaped\" Example Title"
+            date: "2025-05-20"
+            authors: ["Alex Chen", "Priya Kumar"]
+            tags: ["JavaScript", "Web Development", "Frontend"]
+            ---
+
+            In the past decade, the web development landscape has changed dramatically.
+
+            **React**, **Angular**, and **Vue.js** have emerged as dominant players, each offering unique approaches to building dynamic user interfaces.
+            `}
+          className="textarea textarea-primary textarea-xs w-full h-full"
+          onChange={(e) => setMd(e.target.value)}
+          value={md}
+        ></textarea>
+        {/* Display parsing error message */}
+        {parseError && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded text-sm mt-2">
+            {parseError}
+          </div>
+        )}
+      </div>
+      <div className="blog w-full px-4 md:px-2 md:pr-6 pb-20 overflow-y-scroll">
+        {metadata.cover && (
+          <div className="aspect-[3/1] overflow-hidden">
+            <img
+              src={metadata.cover}
+              alt="cover image"
+              className="w-full h-full object-cover"
+            />
+          </div>
+        )}
+        {/* Display metadata only if title exists to avoid empty tags on initial render */}
+        {metadata.title && <h1>{metadata.title}</h1>}
+        {metadata.date && (
+          <p className="text-sm text-base-content/50">
+            {metadata.date} — by {metadata.authors?.join(", ")}
+          </p>
+        )}
+        {(metadata.title || metadata.date) && <hr />}{" "}
+        {/* Show HR only if content above it */}
+        <ReactMarkdown remarkPlugins={[remarkGfm]}>{reactContent}</ReactMarkdown>
+      </div>
+    </div>
+  );
+}

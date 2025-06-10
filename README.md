@@ -23,6 +23,7 @@
 <!-- - api logic for the entirity of events route -->
 <!-- - fix the inconsistency in home and events route -->
 - customize reverify dialog window
+- redo previous manage account features
 - start work on the community group
 - connect uploadthing and establish blogs and newsletters
 - connect cloudinary and test out it's usage
