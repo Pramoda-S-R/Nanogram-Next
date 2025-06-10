@@ -22,7 +22,7 @@
 <!-- - api routes for events collection -->
 <!-- - api logic for the entirity of events route -->
 <!-- - fix the inconsistency in home and events route -->
-
+- customize reverify dialog window
 - start work on the community group
 - connect uploadthing and establish blogs and newsletters
 - connect cloudinary and test out it's usage
@@ -57,6 +57,8 @@
 - Events page database fetching done
 - made the manage account component but multiple features are still missing
 - possible features from manage account: (revoke sessions, add_emails, add_connections?)
+- add emails, add connections, revoke sessions, update password built 
+- manage account ui complete
 
 ## Challenges
 

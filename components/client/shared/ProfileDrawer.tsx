@@ -13,9 +13,11 @@ import {
 } from "./ui/Drawer";
 import { usePathname, useRouter } from "next/navigation";
 import {
+  BadgeCheck,
   Ellipsis,
   Monitor,
   Shield,
+  ShieldAlert,
   Smartphone,
   User,
   Wrench,
@@ -44,17 +46,33 @@ import {
 import { z } from "zod";
 import { set, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { SignOutButton, useClerk, useUser } from "@clerk/nextjs";
-import { SessionWithActivitiesResource, UserResource } from "@clerk/types";
+import {
+  SignOutButton,
+  useClerk,
+  useReverification,
+  useUser,
+} from "@clerk/nextjs";
+import {
+  CreateExternalAccountParams,
+  EmailAddressResource,
+  ExternalAccountResource,
+  SessionWithActivitiesResource,
+  UpdateUserPasswordParams,
+  UserResource,
+} from "@clerk/types";
 import { formatRelativeTime, getCurrentSessionIdFromCookie } from "@/utils";
 import {
-  changeUserPassword,
+  deleteEmailById,
   deleteUserById,
   removeUserProfileImage,
+  revokeUserSession,
+  updateUserEmail,
   updateUsernameById,
   updateUserProfile,
 } from "@/api";
 import FileUploader from "./ui/FileUploader";
+import OtpInput from "./OtpInput";
+import { Popover, PopoverContent, PopoverTrigger } from "./ui/Popover";
 
 const ProfileDrawer = () => {
   // const router = useRouter();
@@ -62,6 +80,7 @@ const ProfileDrawer = () => {
   const [sessions, setSessions] = useState<SessionWithActivitiesResource[]>([]);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
 
+  const [loading, setLoading] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [currentTab, setCurrentTab] = useState(1);
   const pathname = usePathname();
@@ -74,26 +93,50 @@ const ProfileDrawer = () => {
     return null; // or handle the case where the user is not authenticated
   }
 
-  // console.log("User:", user);
+  // console.log("User:", user.externalAccounts[0].provider);
 
   async function getSession() {
     if (!user) {
       return;
     }
     const sessions = await user.getSessions();
+    console.log("sessions: ", sessions);
     setSessions(sessions);
+  }
+
+  async function handleSessionDelete(sessionId: string) {
+    setLoading(true);
+    try {
+      const response = await revokeUserSession(sessionId);
+      if (!response) {
+        console.error("Failed to revoke session");
+        return;
+      }
+      setSessions((prevSessions) =>
+        prevSessions.filter((session) => session.id !== sessionId)
+      );
+    } catch (error) {
+      console.error("Error revoking session:", error);
+    }
   }
 
   return (
     <Drawer>
       <DrawerTrigger>
-        <div className="relative group w-7 h-7 overflow-hidden rounded-full">
-          <img
-            src={user?.imageUrl}
-            alt={user?.username || "pfp"}
-            className="w-full h-full object-cover rounded-full cursor-pointer"
-          />
-          <div className="pointer-events-none absolute inset-0 before:absolute before:w-[150%] before:h-[150%] before:rotate-45 before:top-[-100%] before:left-[-100%] before:bg-gradient-to-r before:from-transparent before:via-base-100/50 before:to-transparent before:content-[''] before:transition-transform before:duration-500 group-hover:before:translate-x-[200%] group-hover:before:translate-y-[200%]" />
+        <div
+          className="flex h-full items-center tooltip tooltip-bottom"
+          data-tip={`${user?.firstName || "User"} ${
+            user?.lastName || "Profile"
+          }`}
+        >
+          <div className="relative group w-7 h-7 overflow-hidden rounded-full">
+            <img
+              src={user?.imageUrl}
+              alt={user?.username || "pfp"}
+              className="w-full h-full object-cover rounded-full cursor-pointer"
+            />
+            <div className="pointer-events-none absolute inset-0 before:absolute before:w-[150%] before:h-[150%] before:rotate-45 before:top-[-100%] before:left-[-100%] before:bg-gradient-to-r before:from-transparent before:via-base-100/50 before:to-transparent before:content-[''] before:transition-transform before:duration-500 group-hover:before:translate-x-[200%] group-hover:before:translate-y-[200%]" />
+          </div>
         </div>
       </DrawerTrigger>
       <DrawerContent>
@@ -199,16 +242,19 @@ const ProfileDrawer = () => {
                             <p className="text-sm font-semibold text-base-content/80 ml-2">
                               {email.emailAddress}
                             </p>
+                            {email.verification.status === "verified" ? (
+                              <BadgeCheck size={15} className="text-success" />
+                            ) : (
+                              <ShieldAlert size={15} className="text-error" />
+                            )}
                             {email.id === user.primaryEmailAddressId && (
                               <div className="badge">primary</div>
                             )}
                           </div>
-                          <button className="btn btn-ghost">•••</button>
+                          <EmailActionsPopover user={user} email={email} />
                         </div>
                       ))}
-                      <button className="btn btn-ghost w-fit">
-                        + email address
-                      </button>
+                      <UpdateEmailDialog user={user} />
                     </div>
                   </div>
                 </div>
@@ -219,61 +265,14 @@ const ProfileDrawer = () => {
                   </p>
                   <div className="flex w-full">
                     <div className="flex w-full">
-                      {user.primaryEmailAddress?.linkedTo.map((auths, idx) => (
-                        <div key={idx} className="flex items-center px-2">
-                          {auths.type === "oauth_google" ? (
-                            <div className="btn bg-white text-black border-[#e5e5e5]">
-                              <svg
-                                aria-label="Google logo"
-                                width="16"
-                                height="16"
-                                xmlns="http://www.w3.org/2000/svg"
-                                viewBox="0 0 512 512"
-                              >
-                                <g>
-                                  <path d="m0 0H512V512H0" fill="#fff"></path>
-                                  <path
-                                    fill="#34a853"
-                                    d="M153 292c30 82 118 95 171 60h62v48A192 192 0 0190 341"
-                                  ></path>
-                                  <path
-                                    fill="#4285f4"
-                                    d="m386 400a140 175 0 0053-179H260v74h102q-7 37-38 57"
-                                  ></path>
-                                  <path
-                                    fill="#fbbc02"
-                                    d="m90 341a208 200 0 010-171l63 49q-12 37 0 73"
-                                  ></path>
-                                  <path
-                                    fill="#ea4335"
-                                    d="m153 219c22-69 116-109 179-50l55-54c-78-75-230-72-297 55"
-                                  ></path>
-                                </g>
-                              </svg>
-                              Google
-                            </div>
-                          ) : (
-                            <div className="btn bg-black text-white border-black">
-                              <svg
-                                aria-label="GitHub logo"
-                                width="16"
-                                height="16"
-                                xmlns="http://www.w3.org/2000/svg"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  fill="white"
-                                  d="M12,2A10,10 0 0,0 2,12C2,16.42 4.87,20.17 8.84,21.5C9.34,21.58 9.5,21.27 9.5,21C9.5,20.77 9.5,20.14 9.5,19.31C6.73,19.91 6.14,17.97 6.14,17.97C5.68,16.81 5.03,16.5 5.03,16.5C4.12,15.88 5.1,15.9 5.1,15.9C6.1,15.97 6.63,16.93 6.63,16.93C7.5,18.45 8.97,18 9.54,17.76C9.63,17.11 9.89,16.67 10.17,16.42C7.95,16.17 5.62,15.31 5.62,11.5C5.62,10.39 6,9.5 6.65,8.79C6.55,8.54 6.2,7.5 6.75,6.15C6.75,6.15 7.59,5.88 9.5,7.17C10.29,6.95 11.15,6.84 12,6.84C12.85,6.84 13.71,6.95 14.5,7.17C16.41,5.88 17.25,6.15 17.25,6.15C17.8,7.5 17.45,8.54 17.35,8.79C18,9.5 18.38,10.39 18.38,11.5C18.38,15.32 16.04,16.16 13.81,16.41C14.17,16.72 14.5,17.33 14.5,18.26C14.5,19.6 14.5,20.68 14.5,21C14.5,21.27 14.66,21.59 15.17,21.5C19.14,20.16 22,16.42 22,12A10,10 0 0,0 12,2Z"
-                                ></path>
-                              </svg>
-                              Login with GitHub
-                            </div>
-                          )}
-                        </div>
+                      {user.externalAccounts.map((account, idx) => (
+                        <ConnectionsActions
+                          key={idx}
+                          user={user}
+                          externalAccount={account}
+                        />
                       ))}
-                      <button className="btn btn-ghost w-fit">
-                        + connection
-                      </button>
+                      <ConnectionsPopover user={user} />
                     </div>
                   </div>
                 </div>
@@ -332,14 +331,13 @@ const ProfileDrawer = () => {
                             )}
                           </p>
                         </div>
-                        <div className="flex">
-                          <button
-                            className="btn btn-ghost px-0 "
-                            disabled={currentSessionId === session.id}
-                          >
-                            <Ellipsis />
-                          </button>
-                        </div>
+                        <button
+                          className="btn btn-ghost"
+                          disabled={currentSessionId === session.id}
+                          onClick={() => handleSessionDelete(session.id)}
+                        >
+                          Sign out
+                        </button>
                       </div>
                     ))}
                   </div>
@@ -385,6 +383,524 @@ const ProfileDrawer = () => {
     </Drawer>
   );
 };
+
+function ConnectionsActions({
+  user,
+  externalAccount,
+}: {
+  user: UserResource;
+  externalAccount: ExternalAccountResource;
+}) {
+  const removeConnection = useReverification(() => externalAccount.destroy());
+  async function handleRemoveConnection() {
+    try {
+      await removeConnection();
+      console.log("Connection removed successfully");
+    } catch (error) {
+      console.error("Error removing connection:", error);
+    }
+  }
+  return (
+    <Popover>
+      <PopoverTrigger>
+        {externalAccount.provider === "google" && (
+          <div className="btn bg-white text-black border-[#e5e5e5]">
+            <svg
+              aria-label="Google logo"
+              width="16"
+              height="16"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 512 512"
+            >
+              <g>
+                <path d="m0 0H512V512H0" fill="#fff"></path>
+                <path
+                  fill="#34a853"
+                  d="M153 292c30 82 118 95 171 60h62v48A192 192 0 0190 341"
+                ></path>
+                <path
+                  fill="#4285f4"
+                  d="m386 400a140 175 0 0053-179H260v74h102q-7 37-38 57"
+                ></path>
+                <path
+                  fill="#fbbc02"
+                  d="m90 341a208 200 0 010-171l63 49q-12 37 0 73"
+                ></path>
+                <path
+                  fill="#ea4335"
+                  d="m153 219c22-69 116-109 179-50l55-54c-78-75-230-72-297 55"
+                ></path>
+              </g>
+            </svg>
+            Google
+          </div>
+        )}
+        {externalAccount.provider === "github" && (
+          <div className="btn bg-black text-white border-black">
+            <svg
+              aria-label="GitHub logo"
+              width="16"
+              height="16"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+            >
+              <path
+                fill="white"
+                d="M12,2A10,10 0 0,0 2,12C2,16.42 4.87,20.17 8.84,21.5C9.34,21.58 9.5,21.27 9.5,21C9.5,20.77 9.5,20.14 9.5,19.31C6.73,19.91 6.14,17.97 6.14,17.97C5.68,16.81 5.03,16.5 5.03,16.5C4.12,15.88 5.1,15.9 5.1,15.9C6.1,15.97 6.63,16.93 6.63,16.93C7.5,18.45 8.97,18 9.54,17.76C9.63,17.11 9.89,16.67 10.17,16.42C7.95,16.17 5.62,15.31 5.62,11.5C5.62,10.39 6,9.5 6.65,8.79C6.55,8.54 6.2,7.5 6.75,6.15C6.75,6.15 7.59,5.88 9.5,7.17C10.29,6.95 11.15,6.84 12,6.84C12.85,6.84 13.71,6.95 14.5,7.17C16.41,5.88 17.25,6.15 17.25,6.15C17.8,7.5 17.45,8.54 17.35,8.79C18,9.5 18.38,10.39 18.38,11.5C18.38,15.32 16.04,16.16 13.81,16.41C14.17,16.72 14.5,17.33 14.5,18.26C14.5,19.6 14.5,20.68 14.5,21C14.5,21.27 14.66,21.59 15.17,21.5C19.14,20.16 22,16.42 22,12A10,10 0 0,0 12,2Z"
+              ></path>
+            </svg>
+            GitHub
+          </div>
+        )}
+      </PopoverTrigger>
+      <PopoverContent>
+        <button
+          className="btn btn-error"
+          onClick={() => handleRemoveConnection()}
+        >
+          Remove
+        </button>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+function ConnectionsPopover({ user }: { user: UserResource }) {
+  const router = useRouter();
+
+  const [isOpen, setIsOpen] = useState(false);
+  const [connections, setConnections] = useState(
+    user.primaryEmailAddress?.linkedTo || []
+  );
+  const createExternalConnection = useReverification(
+    (params: CreateExternalAccountParams) => user?.createExternalAccount(params)
+  );
+
+  const handleConnect = async (type: "oauth_google" | "oauth_github") => {
+    console.log("Connecting account:", type);
+    try {
+      const externalAccount = await createExternalConnection({
+        strategy: type,
+        redirectUrl: `/callback?redirect_url=${encodeURIComponent(
+          window.location.href
+        )}`,
+      });
+      const redirectUrl =
+        externalAccount.verification?.externalVerificationRedirectURL;
+      if (redirectUrl) {
+        router.push(redirectUrl.toString());
+      }
+    } catch (error) {
+      console.error("Error connecting account:", error);
+    }
+  };
+
+  if (connections.length === 0) {
+    return (
+      <Popover open={isOpen} onOpenChange={setIsOpen}>
+        <PopoverTrigger className="btn btn-ghost">
+          + Connect Account
+        </PopoverTrigger>
+        <PopoverContent className="flex flex-col gap-2">
+          <button
+            className="btn  bg-white text-black border-[#e5e5e5]"
+            onClick={() => handleConnect("oauth_google")}
+          >
+            <svg
+              aria-label="Google logo"
+              width="16"
+              height="16"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 512 512"
+            >
+              <g>
+                <path d="m0 0H512V512H0" fill="#fff"></path>
+                <path
+                  fill="#34a853"
+                  d="M153 292c30 82 118 95 171 60h62v48A192 192 0 0190 341"
+                ></path>
+                <path
+                  fill="#4285f4"
+                  d="m386 400a140 175 0 0053-179H260v74h102q-7 37-38 57"
+                ></path>
+                <path
+                  fill="#fbbc02"
+                  d="m90 341a208 200 0 010-171l63 49q-12 37 0 73"
+                ></path>
+                <path
+                  fill="#ea4335"
+                  d="m153 219c22-69 116-109 179-50l55-54c-78-75-230-72-297 55"
+                ></path>
+              </g>
+            </svg>
+            Google
+          </button>
+          <button
+            className="btn bg-black text-white border-black"
+            onClick={() => handleConnect("oauth_github")}
+          >
+            <svg
+              aria-label="GitHub logo"
+              width="16"
+              height="16"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+            >
+              <path
+                fill="white"
+                d="M12,2A10,10 0 0,0 2,12C2,16.42 4.87,20.17 8.84,21.5C9.34,21.58 9.5,21.27 9.5,21C9.5,20.77 9.5,20.14 9.5,19.31C6.73,19.91 6.14,17.97 6.14,17.97C5.68,16.81 5.03,16.5 5.03,16.5C4.12,15.88 5.1,15.9 5.1,15.9C6.1,15.97 6.63,16.93 6.63,16.93C7.5,18.45 8.97,18 9.54,17.76C9.63,17.11 9.89,16.67 10.17,16.42C7.95,16.17 5.62,15.31 5.62,11.5C5.62,10.39 6,9.5 6.65,8.79C6.55,8.54 6.2,7.5 6.75,6.15C6.75,6.15 7.59,5.88 9.5,7.17C10.29,6.95 11.15,6.84 12,6.84C12.85,6.84 13.71,6.95 14.5,7.17C16.41,5.88 17.25,6.15 17.25,6.15C17.8,7.5 17.45,8.54 17.35,8.79C18,9.5 18.38,10.39 18.38,11.5C18.38,15.32 16.04,16.16 13.81,16.41C14.17,16.72 14.5,17.33 14.5,18.26C14.5,19.6 14.5,20.68 14.5,21C14.5,21.27 14.66,21.59 15.17,21.5C19.14,20.16 22,16.42 22,12A10,10 0 0,0 12,2Z"
+              ></path>
+            </svg>
+            GitHub
+          </button>
+        </PopoverContent>
+      </Popover>
+    );
+  }
+
+  return (
+    <Popover open={isOpen} onOpenChange={setIsOpen}>
+      <PopoverTrigger className="btn btn-ghost">
+        + Connect Account
+      </PopoverTrigger>
+      <PopoverContent>
+        {connections.map((connection, idx) => (
+          <div key={idx} className="flex felx-col items-center gap-2">
+            {connection.type !== "oauth_google" && (
+              <button
+                className="btn  bg-white text-black border-[#e5e5e5]"
+                onClick={() => handleConnect("oauth_google")}
+              >
+                <svg
+                  aria-label="Google logo"
+                  width="16"
+                  height="16"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 512 512"
+                >
+                  <g>
+                    <path d="m0 0H512V512H0" fill="#fff"></path>
+                    <path
+                      fill="#34a853"
+                      d="M153 292c30 82 118 95 171 60h62v48A192 192 0 0190 341"
+                    ></path>
+                    <path
+                      fill="#4285f4"
+                      d="m386 400a140 175 0 0053-179H260v74h102q-7 37-38 57"
+                    ></path>
+                    <path
+                      fill="#fbbc02"
+                      d="m90 341a208 200 0 010-171l63 49q-12 37 0 73"
+                    ></path>
+                    <path
+                      fill="#ea4335"
+                      d="m153 219c22-69 116-109 179-50l55-54c-78-75-230-72-297 55"
+                    ></path>
+                  </g>
+                </svg>
+                Google
+              </button>
+            )}
+            {connection.type !== "oauth_github" && (
+              <button
+                className="btn bg-black text-white border-black"
+                onClick={() => handleConnect("oauth_github")}
+              >
+                <svg
+                  aria-label="GitHub logo"
+                  width="16"
+                  height="16"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    fill="white"
+                    d="M12,2A10,10 0 0,0 2,12C2,16.42 4.87,20.17 8.84,21.5C9.34,21.58 9.5,21.27 9.5,21C9.5,20.77 9.5,20.14 9.5,19.31C6.73,19.91 6.14,17.97 6.14,17.97C5.68,16.81 5.03,16.5 5.03,16.5C4.12,15.88 5.1,15.9 5.1,15.9C6.1,15.97 6.63,16.93 6.63,16.93C7.5,18.45 8.97,18 9.54,17.76C9.63,17.11 9.89,16.67 10.17,16.42C7.95,16.17 5.62,15.31 5.62,11.5C5.62,10.39 6,9.5 6.65,8.79C6.55,8.54 6.2,7.5 6.75,6.15C6.75,6.15 7.59,5.88 9.5,7.17C10.29,6.95 11.15,6.84 12,6.84C12.85,6.84 13.71,6.95 14.5,7.17C16.41,5.88 17.25,6.15 17.25,6.15C17.8,7.5 17.45,8.54 17.35,8.79C18,9.5 18.38,10.39 18.38,11.5C18.38,15.32 16.04,16.16 13.81,16.41C14.17,16.72 14.5,17.33 14.5,18.26C14.5,19.6 14.5,20.68 14.5,21C14.5,21.27 14.66,21.59 15.17,21.5C19.14,20.16 22,16.42 22,12A10,10 0 0,0 12,2Z"
+                  ></path>
+                </svg>
+                GitHub
+              </button>
+            )}
+          </div>
+        ))}
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+function EmailActionsPopover({
+  user,
+  email,
+}: {
+  user: UserResource;
+  email: EmailAddressResource;
+}) {
+  const [option, setOption] = useState<"verify" | "button">("button");
+  const [code, setCode] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [successful, setSuccessful] = useState(false);
+
+  async function setPrimaryEmail() {
+    setLoading(true);
+    try {
+      const res = await updateUserEmail({
+        userId: user.id,
+        primaryEmailAddressID: email.id,
+      });
+      await user.reload();
+      if (!res) {
+        console.error("Failed to set primary email:", res);
+        return;
+      }
+    } catch (error) {
+      console.error("Error setting primary email:", error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function deleteEmail() {
+    setLoading(true);
+    try {
+      const res = await deleteEmailById({ emailAddressID: email.id });
+      await user.reload();
+      if (!res) {
+        console.error("Failed to delete email:", res);
+        return;
+      }
+    } catch (err) {
+      console.error("Error deleting email:", err);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function verifyEmail() {
+    setOption("verify");
+    try {
+      email.prepareVerification({ strategy: "email_code" });
+      const emailVerifyAttempt = await email?.attemptVerification({
+        code,
+      });
+      if (emailVerifyAttempt?.verification.status === "verified") {
+        setSuccessful(true);
+      } else {
+        // If the status is not complete, check why. User may need to
+        // complete further steps.
+        console.error(JSON.stringify(emailVerifyAttempt, null, 2));
+      }
+    } catch (err) {
+      console.error("Error verifying email:", err);
+    }
+  }
+  return (
+    <Popover>
+      <PopoverTrigger className="btn btn-ghost">
+        <Ellipsis />
+      </PopoverTrigger>
+      <PopoverContent>
+        {option === "verify" ? (
+          <form className="flex flex-col gap-2 w-70" onSubmit={verifyEmail}>
+            <p className="text-sm">
+              A verification code has been sent to{" "}
+              <span className="font-semibold">{email.emailAddress}</span>.
+              Please enter the code below to verify your email address.
+            </p>
+            <OtpInput onChange={(e) => setCode(e)} />
+            <button
+              type="submit"
+              className={`btn ${successful ? "btn-success" : "btn-primary"}`}
+            >
+              {successful ? "Verified ✔️" : "Verify"}
+            </button>
+          </form>
+        ) : (
+          <div className="flex flex-col w-40 gap-2">
+            {email.verification.status !== "verified" && (
+              <button
+                className="btn btn-soft btn-success"
+                onClick={() => setOption("verify")}
+              >
+                {loading ? (
+                  <span className="loading loading-sm"></span>
+                ) : (
+                  "Verify"
+                )}
+              </button>
+            )}
+            {email.id !== user.primaryEmailAddressId && (
+              <button
+                className="btn btn-soft btn-primary"
+                onClick={() => setPrimaryEmail()}
+                disabled={loading}
+              >
+                {loading ? (
+                  <span className="loading loading-sm"></span>
+                ) : (
+                  "Set as primary"
+                )}
+              </button>
+            )}
+            <button
+              className="btn btn-error btn-soft"
+              onClick={() => deleteEmail()}
+              disabled={loading}
+            >
+              {loading ? (
+                <span className="loading loading-sm"></span>
+              ) : (
+                "Delete"
+              )}
+            </button>
+          </div>
+        )}
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+function UpdateEmailDialog({ user }: { user: UserResource }) {
+  const [code, setCode] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [isVerifying, setIsVerifying] = React.useState(false);
+  const [successful, setSuccessful] = React.useState(false);
+  const [emailObj, setEmailObj] = React.useState<
+    EmailAddressResource | undefined
+  >();
+  const createEmailAddress = useReverification((email: string) =>
+    user?.createEmailAddress({ email })
+  );
+
+  const AddEmailSchema = z.object({
+    email: z
+      .string()
+      .email("Please enter a valid email address")
+      .min(1, "Email is required"),
+  });
+
+  type AddEmailFormData = z.infer<typeof AddEmailSchema>;
+
+  const {
+    register: registerAddEmail,
+    handleSubmit: handleAddEmailSubmit,
+    formState: { errors: addEmailErrors },
+  } = useForm<AddEmailFormData>({
+    resolver: zodResolver(AddEmailSchema),
+  });
+
+  const handleSubmit = async (data: AddEmailFormData) => {
+    setLoading(true);
+    try {
+      // Add an unverified email address to user
+      const res = await createEmailAddress(data.email);
+      // Reload user to get updated User object
+      await user.reload();
+
+      // Find the email address that was just added
+      const emailAddress = user.emailAddresses.find((a) => a.id === res?.id);
+      // Create a reference to the email address that was just added
+      setEmailObj(emailAddress);
+
+      // Send the user an email with the verification code
+      emailAddress?.prepareVerification({ strategy: "email_code" });
+
+      // Set to true to display second form
+      // and capture the OTP code
+      setIsVerifying(true);
+    } catch (err) {
+      // See https://clerk.com/docs/custom-flows/error-handling
+      // for more info on error handling
+      console.error(JSON.stringify(err, null, 2));
+    } finally {
+      setLoading(false);
+    }
+  };
+  // Handle the submission of the verification form
+  const verifyCode = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      // Verify that the code entered matches the code sent to the user
+      const emailVerifyAttempt = await emailObj?.attemptVerification({
+        code,
+      });
+
+      if (emailVerifyAttempt?.verification.status === "verified") {
+        setSuccessful(true);
+      } else {
+        // If the status is not complete, check why. User may need to
+        // complete further steps.
+        console.error(JSON.stringify(emailVerifyAttempt, null, 2));
+      }
+    } catch (err) {
+      console.error(JSON.stringify(err, null, 2));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Dialog>
+      <DialogTrigger className="btn btn-ghost w-fit">
+        + Add email address
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Add Email Address</DialogTitle>
+          <DialogDescription>
+            You'll need to verify this email address before it can be added to
+            your account.
+          </DialogDescription>
+        </DialogHeader>
+        {isVerifying ? (
+          <form onSubmit={(e) => verifyCode(e)}>
+            <OtpInput onChange={(e) => setCode(e)} />
+
+            <DialogFooter>
+              <DialogClose className="btn btn-error" type="button">
+                Cancel
+              </DialogClose>
+            </DialogFooter>
+          </form>
+        ) : (
+          <form onSubmit={handleAddEmailSubmit(handleSubmit)}>
+            <div className="mb-2.5">
+              <label className="input validator w-full">
+                <input
+                  type="email"
+                  required
+                  placeholder="New Email Address"
+                  {...registerAddEmail("email")}
+                />
+              </label>
+              {addEmailErrors.email && (
+                <p className="text-sm mt-1 text-warning">
+                  {addEmailErrors.email.message}
+                </p>
+              )}
+            </div>
+            <DialogFooter>
+              <DialogClose className="btn btn-error" type="button">
+                Cancel
+              </DialogClose>
+              <button
+                type="submit"
+                className="btn btn-primary"
+                disabled={isVerifying}
+              >
+                {loading ? (
+                  <span className="loading loading-spinner loading-sm"></span>
+                ) : (
+                  "Add Email"
+                )}
+              </button>
+            </DialogFooter>
+          </form>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
 
 function UpdateUsernameDialog({ user }: { user: UserResource }) {
   const [loading, setLoading] = useState(false);
@@ -655,8 +1171,13 @@ function UpdateUserDialog({ user }: { user: UserResource }) {
   );
 }
 
+// TODO
 function UpdatePasswordDialog({ user }: { user: UserResource }) {
   const [loading, setLoading] = useState(false);
+  const [open, setOpen] = useState(false);
+  const changeUserPassword = useReverification(
+    (params: UpdateUserPasswordParams) => user.updatePassword(params)
+  );
 
   const UpdatePasswordSchema = z.object({
     currentPassword: z
@@ -677,28 +1198,23 @@ function UpdatePasswordDialog({ user }: { user: UserResource }) {
   });
 
   async function updatePassword(data: UpdatePasswordFormData) {
-    if (!user) {
-      return;
-    }
     console.log("Updating password with data:", data);
     setLoading(true);
     try {
       const res = await changeUserPassword({
-        currentPassword: data.currentPassword,
         newPassword: data.newPassword,
-        signOutOfOtherSessions: data.signOutOfOtherSessions || false,
+        currentPassword: data.currentPassword,
+        signOutOfOtherSessions: data.signOutOfOtherSessions,
       });
-      if (!res) {
-        console.error("Failed to update password:", res);
-      }
     } catch (error) {
       console.error("Error updating password:", error);
     } finally {
       setLoading(false);
+      setOpen(false);
     }
   }
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger className="btn btn-ghost">Update Password</DialogTrigger>
       <DialogContent>
         <DialogHeader>

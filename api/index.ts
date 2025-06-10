@@ -1,6 +1,5 @@
 import { Event, Nanogram, Testimonial } from "@/types";
 
-const CLERK_API = process.env.NEXT_PUBLIC_CLERK_API || "";
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 const apiKey: string | undefined = process.env.NEXT_PUBLIC_API_KEY;
 
@@ -123,6 +122,90 @@ export async function removeUserProfileImage(userId: string): Promise<boolean> {
     return true;
   } catch (error) {
     console.error("Error removing user profile image:", error);
+    return false;
+  }
+}
+// Update user email
+export async function updateUserEmail({
+  userId,
+  primaryEmailAddressID,
+}: {
+  userId: string;
+  primaryEmailAddressID: string;
+}): Promise<boolean> {
+  try {
+    const formData = new FormData();
+    formData.append("primaryEmailAddressID", primaryEmailAddressID);
+
+    const response = await fetch(
+      `${BASE_URL}/api/account/email?user_id=${userId}`,
+      {
+        method: "PUT",
+        headers: {
+          "x-api-key": apiKey || "",
+        },
+        body: formData,
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to update user email");
+    }
+
+    console.log("User email updated successfully");
+    return true;
+  } catch (error) {
+    console.error("Error updating user email:", error);
+    return false;
+  }
+}
+// Delete user email
+export async function deleteEmailById({
+  emailAddressID,
+}: {
+  emailAddressID: string;
+}): Promise<boolean> {
+  try {
+    const response = await fetch(
+      `${BASE_URL}/api/account/email?email_address_id=${emailAddressID}`,
+      {
+        method: "DELETE",
+        headers: {
+          "x-api-key": apiKey || "",
+        },
+      }
+    );
+    if (!response.ok) {
+      throw new Error("Failed to delete user email");
+    }
+    console.log("User email deleted successfully");
+    return true;
+  } catch (error) {
+    console.error("Error deleting user email:", error);
+    return false;
+  }
+}
+// Revoke user session
+export async function revokeUserSession(sessionId: string): Promise<boolean> {
+  try {
+    const response = await fetch(
+      `${BASE_URL}/api/account/sessions?session_id=${sessionId}`,
+      {
+        method: "DELETE",
+        headers: {
+          "x-api-key": apiKey || "",
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to revoke user session");
+    }
+
+    console.log("User session revoked successfully");
+    return true;
+  } catch (error) {
+    console.error("Error revoking user session:", error);
     return false;
   }
 }
