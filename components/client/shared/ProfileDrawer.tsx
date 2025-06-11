@@ -1171,7 +1171,6 @@ function UpdateUserDialog({ user }: { user: UserResource }) {
   );
 }
 
-// TODO
 function UpdatePasswordDialog({ user }: { user: UserResource }) {
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);

@@ -4,6 +4,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import "../styles/blog.css";
 import matter from "gray-matter";
+import { createBlogPost } from "@/api";
 
 const example = `---
 title: "How to Blog"
@@ -105,6 +106,29 @@ export default function BlogPage() {
     setReactContent(parsedMarkdown);
   }, [md]);
 
+  async function uploadBlog() {
+    try {
+      const response = await createBlogPost({
+        title: metadata.title || "Untitled",
+        publishedAt: new Date(metadata.date) || new Date(),
+        authors: metadata.authors || ["Unknown"],
+        tags: metadata.tags || [],
+        cover: metadata.cover || "",
+        file: new File([md], `${metadata.title || "untitled"}.md`, {
+          type: "text/markdown",
+        }), // Convert markdown to File
+      });
+      if (response.id) {
+        alert("Blog uploaded successfully!");
+      } else {
+        throw new Error("Failed to upload blog");
+      }
+    } catch (error: any) {
+      console.error("Error uploading blog:", error);
+      alert(`Failed to upload blog: ${error.message}`);
+    }
+  }
+
   return (
     <div className="flex w-full h-[91vh]">
       <div className="w-full h-full flex flex-col">
@@ -132,6 +156,13 @@ export default function BlogPage() {
             {parseError}
           </div>
         )}
+        <button
+          className="btn btn-primary mt-2"
+          onClick={uploadBlog}
+          disabled={!metadata.title || !reactContent}
+        >
+          Upload Blog
+        </button>
       </div>
       <div className="blog w-full px-4 md:px-2 md:pr-6 pb-20 overflow-y-scroll">
         {metadata.cover && (
@@ -152,7 +183,9 @@ export default function BlogPage() {
         )}
         {(metadata.title || metadata.date) && <hr />}{" "}
         {/* Show HR only if content above it */}
-        <ReactMarkdown remarkPlugins={[remarkGfm]}>{reactContent}</ReactMarkdown>
+        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+          {reactContent}
+        </ReactMarkdown>
       </div>
     </div>
   );

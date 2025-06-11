@@ -1,5 +1,4 @@
 import clientPromise from "@/lib/mongodb";
-import { slugify } from "@/utils";
 import { ObjectId } from "mongodb";
 import { NextRequest, NextResponse } from "next/server";
 import { UTApi } from "uploadthing/server";
@@ -13,21 +12,17 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   const { searchParams } = new URL(req.url);
-  const blogId = searchParams.get("id");
-  const route = searchParams.get("route");
-  const sort = searchParams.get("sort") || "publishedAt";
+  const id = searchParams.get("id");
+  const sort = searchParams.get("sort") || "createdAt";
   const order = parseInt(searchParams.get("order") || "1"); // 1 for ascending, -1 for descending
   const limit = parseInt(searchParams.get("limit") || "0");
   const query: any = {};
-  if (blogId) {
-    query._id = new ObjectId(blogId);
-  }
-  if (route) {
-    query.route = route;
+  if (id) {
+    query._id = new ObjectId(id);
   }
   try {
     const client = await clientPromise;
-    const collection = client.db(database).collection("blogs");
+    const collection = client.db(database).collection("newsletter");
 
     let cursor = collection.find(query);
     if (sort) {
@@ -36,7 +31,6 @@ export async function GET(req: NextRequest) {
     if (limit > 0) {
       cursor = cursor.limit(limit);
     }
-
     const documents = await cursor.toArray();
     return NextResponse.json({ documents }, { status: 200 });
   } catch (error: any) {
@@ -54,39 +48,38 @@ export async function POST(req: NextRequest) {
   }
   try {
     const client = await clientPromise;
-    const collection = client.db(database).collection("blogs");
+    const collection = client.db(database).collection("newsletter");
 
     const formData = await req.formData();
     const title = formData.get("title") as string;
     const publishedAt = formData.get("publishedAt") as string;
-    const tags = formData.get("tags") as string;
-    const authors = formData.get("authors") as string;
-    const file = formData.get("file") as File;
+    const files = formData.getAll("files") as File[];
 
-    const utapi = new UTApi();
+    // Upload files using Uploadthing
+    let fileUrl = "";
+    let fileId = "";
+    if (files.length > 0) {
+      const utapi = new UTApi();
+      const uploadResponse = await utapi.uploadFiles(files);
+      fileUrl = uploadResponse[0].data?.ufsUrl || "";
+      fileId = uploadResponse[0].data?.key || "";
+    }
 
-    const response = await utapi.uploadFiles([file]);
-
-    const body = {
+    const newDocument = {
       title,
       publishedAt: new Date(publishedAt),
-      tags: JSON.parse(tags),
-      authors: JSON.parse(authors),
-      route: slugify(title),
-      fileUrl: response[0].data?.ufsUrl,
-      fileId: response[0].data?.key,
+      fileUrl,
+      fileId,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
 
-    const result = await collection.insertOne(body);
-
+    const result = await collection.insertOne(newDocument);
     return NextResponse.json(
-      { message: "Blog created successfully", id: result.insertedId },
+      { success: true, id: result.insertedId },
       { status: 201 }
     );
   } catch (error: any) {
-    console.error("Error creating blog:", error);
     return NextResponse.json(
       { error: error.message || "An error occurred." },
       { status: 500 }
@@ -106,51 +99,50 @@ export async function PUT(req: NextRequest) {
   }
   try {
     const client = await clientPromise;
-    const collection = client.db(database).collection("blogs");
+    const collection = client.db(database).collection("newsletter");
 
     const formData = await req.formData();
     const title = formData.get("title") as string;
     const publishedAt = formData.get("publishedAt") as string;
-    const tags = formData.get("tags") as string;
-    const authors = formData.get("authors") as string;
-    const file = formData.get("file") as File;
+    const files = formData.getAll("files") as File[];
     const key = formData.get("key") as string;
 
-    const update: any = {
+    // Prepare update object
+    const updateObject: any = {
       title,
       publishedAt: new Date(publishedAt),
-      tags: JSON.parse(tags),
-      authors: JSON.parse(authors),
-      route: title ? slugify(title) : undefined,
       updatedAt: new Date(),
     };
 
-    if (file) {
+    // Handle file uploads
+    if (files.length > 0) {
       const utapi = new UTApi();
-      await utapi.deleteFiles(key);
-      const response = await utapi.uploadFiles([file]);
-      update.fileUrl = response[0].data?.ufsUrl;
-      update.fileId = response[0].data?.key;
+      const { success, deletedCount } = await utapi.deleteFiles(key);
+      if (!success || deletedCount === 0) {
+        return NextResponse.json(
+          { error: "Failed to delete old file" },
+          { status: 500 }
+        );
+      }
+      const uploadResponse = await utapi.uploadFiles(files);
+      updateObject.fileUrl = uploadResponse[0].data?.ufsUrl || "";
+      updateObject.fileId = uploadResponse[0].data?.key || "";
     }
 
     const result = await collection.updateOne(
       { _id: new ObjectId(id) },
-      { $set: update }
+      { $set: updateObject }
     );
 
     if (result.modifiedCount === 0) {
       return NextResponse.json(
-        { error: "No document found to update" },
+        { error: "No document found with the provided ID" },
         { status: 404 }
       );
     }
 
-    return NextResponse.json(
-      { message: "Blog updated successfully" },
-      { status: 200 }
-    );
+    return NextResponse.json({ success: true }, { status: 200 });
   } catch (error: any) {
-    console.error("Error updating blog:", error);
     return NextResponse.json(
       { error: error.message || "An error occurred." },
       { status: 500 }
@@ -170,16 +162,30 @@ export async function DELETE(req: NextRequest) {
   }
   try {
     const client = await clientPromise;
-    const collection = client.db(database).collection("blogs");
+    const collection = client.db(database).collection("newsletter");
 
-    const blog = await collection.findOne({ _id: new ObjectId(id) });
-    if (!blog) {
-      return NextResponse.json({ error: "Blog not found" }, { status: 404 });
+    // Find the document to delete
+    const document = await collection.findOne({ _id: new ObjectId(id) });
+    if (!document) {
+      return NextResponse.json(
+        { error: "Document not found" },
+        { status: 404 }
+      );
     }
-
+    // Delete the file from Uploadthing if it exists
     const utapi = new UTApi();
-    await utapi.deleteFiles(blog.fileId);
-
+    if (document.fileId) {
+      const { success, deletedCount } = await utapi.deleteFiles(
+        document.fileId
+      );
+      if (!success || deletedCount === 0) {
+        return NextResponse.json(
+          { error: "Failed to delete file from Uploadthing" },
+          { status: 500 }
+        );
+      }
+    }
+    // Delete the document from MongoDB
     const result = await collection.deleteOne({ _id: new ObjectId(id) });
     if (result.deletedCount === 0) {
       return NextResponse.json(
@@ -187,13 +193,8 @@ export async function DELETE(req: NextRequest) {
         { status: 404 }
       );
     }
-
-    return NextResponse.json(
-      { message: "Blog deleted successfully" },
-      { status: 200 }
-    );
+    return NextResponse.json({ success: true }, { status: 200 });
   } catch (error: any) {
-    console.error("Error deleting blog:", error);
     return NextResponse.json(
       { error: error.message || "An error occurred." },
       { status: 500 }

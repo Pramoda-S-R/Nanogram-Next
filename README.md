@@ -25,7 +25,7 @@
 - customize reverify dialog window
 - redo previous manage account features
 - start work on the community group
-- connect uploadthing and establish blogs and newsletters
+<!-- - connect uploadthing and establish blogs and newsletters -->
 - connect cloudinary and test out it's usage
 <!-- - Revamped Navbar and community sidebar -->
 - better api authentication allowing api key creation (mailjet perhaps)
@@ -60,6 +60,8 @@
 - possible features from manage account: (revoke sessions, add_emails, add_connections?)
 - add emails, add connections, revoke sessions, update password built 
 - manage account ui complete
+- uploadthing connected
+- blog and newsletter api routes done
 
 ## Challenges
 

@@ -33,7 +33,6 @@
     "react-dropzone": "^14.3.8",
     "react-hook-form": "^7.56.4",
     "react-markdown": "^10.1.0",
-    "react-remark": "^2.1.0",
     "remark-gfm": "^4.0.1",
     "three": "^0.176.0",
     "uploadthing": "^7.7.2",

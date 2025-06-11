@@ -1,4 +1,4 @@
-import { Event, Nanogram, Testimonial } from "@/types";
+import { BlogPost, BlogSchema, Event, Nanogram, Testimonial } from "@/types";
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 const apiKey: string | undefined = process.env.NEXT_PUBLIC_API_KEY;
@@ -473,6 +473,99 @@ export async function getNextEvent(): Promise<Event | null> {
     return data.documents.length > 0 ? (data.documents[0] as Event) : null;
   } catch (error) {
     console.error("Error fetching next event:", error);
+    return null;
+  }
+}
+// ===================
+// Blog Functions
+// ===================
+// Create a new blog post
+export async function createBlogPost({
+  title,
+  publishedAt,
+  authors,
+  tags,
+  cover,
+  file,
+}: BlogSchema): Promise<any> {
+  try {
+    const formData = new FormData();
+    formData.append("title", title);
+    formData.append("publishedAt", publishedAt.toISOString());
+    formData.append("authors", JSON.stringify(authors));
+    formData.append("tags", JSON.stringify(tags));
+    if (cover) {
+      formData.append("cover", cover);
+    }
+    if (file) {
+      formData.append("file", file);
+    }
+    const response = await fetch(`${BASE_URL}/api/blog`, {
+      method: "POST",
+      headers: {
+        "x-api-key": apiKey || "",
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to create blog post");
+    }
+
+    const data = await response.json();
+    // console.log("Blog post created successfully:", data);
+    return data;
+  } catch (error) {
+    console.error("Error creating blog post:", error);
+    return null;
+  }
+}
+// Get all blog posts
+export async function getAllBlogPosts(): Promise<BlogPost[]> {
+  try {
+    const response = await fetch(`${BASE_URL}/api/blog`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": apiKey || "",
+      },
+      next: {
+        revalidate: 60, // 1 minute
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.documents as BlogPost[];
+  } catch (error) {
+    console.error("Error fetching blog posts:", error);
+    return [];
+  }
+}
+// Get a single blog post by ID
+export async function getBlogPostById(id: string): Promise<BlogPost | null> {
+  try {
+    const response = await fetch(`${BASE_URL}/api/blog?route=${id}`, {
+      method: "GET",
+      headers: {
+        "x-api-key": apiKey || "",
+      },
+      next: {
+        revalidate: 60, // 1 minute
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.documents.length > 0 ? (data.documents[0] as BlogPost) : null;
+  } catch (error) {
+    console.error("Error fetching blog post by ID:", error);
     return null;
   }
 }
