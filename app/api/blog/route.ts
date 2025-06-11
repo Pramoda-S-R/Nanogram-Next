@@ -58,6 +58,7 @@ export async function POST(req: NextRequest) {
 
     const formData = await req.formData();
     const title = formData.get("title") as string;
+    const desc = formData.get("desc") as string;
     const publishedAt = formData.get("publishedAt") as string;
     const tags = formData.get("tags") as string;
     const authors = formData.get("authors") as string;
@@ -69,6 +70,7 @@ export async function POST(req: NextRequest) {
 
     const body = {
       title,
+      desc,
       publishedAt: new Date(publishedAt),
       tags: JSON.parse(tags),
       authors: JSON.parse(authors),
@@ -110,6 +112,7 @@ export async function PUT(req: NextRequest) {
 
     const formData = await req.formData();
     const title = formData.get("title") as string;
+    const desc = formData.get("desc") as string;
     const publishedAt = formData.get("publishedAt") as string;
     const tags = formData.get("tags") as string;
     const authors = formData.get("authors") as string;
@@ -118,6 +121,7 @@ export async function PUT(req: NextRequest) {
 
     const update: any = {
       title,
+      desc,
       publishedAt: new Date(publishedAt),
       tags: JSON.parse(tags),
       authors: JSON.parse(authors),

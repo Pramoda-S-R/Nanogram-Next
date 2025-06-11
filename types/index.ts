@@ -55,6 +55,7 @@ export interface Event {
 
 export interface BlogSchema {
   title: string;
+  desc: string;
   publishedAt: Date;
   authors: string[];
   tags: string[];
@@ -66,6 +67,7 @@ export interface BlogSchema {
 export interface BlogPost {
   _id: ObjectId;
   title: string;
+  desc: string;
   publishedAt: Date;
   authors: string[];
   tags: string[];

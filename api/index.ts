@@ -1,4 +1,11 @@
-import { BlogPost, BlogSchema, Event, Nanogram, Testimonial } from "@/types";
+import {
+  BlogPost,
+  BlogSchema,
+  Event,
+  Nanogram,
+  Newsletters,
+  Testimonial,
+} from "@/types";
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 const apiKey: string | undefined = process.env.NEXT_PUBLIC_API_KEY;
@@ -361,6 +368,7 @@ export async function getAluminiMembers(): Promise<Nanogram[]> {
     return [];
   }
 }
+
 // ==================
 // Event Functions
 // ==================
@@ -476,12 +484,14 @@ export async function getNextEvent(): Promise<Event | null> {
     return null;
   }
 }
+
 // ===================
 // Blog Functions
 // ===================
 // Create a new blog post
 export async function createBlogPost({
   title,
+  desc,
   publishedAt,
   authors,
   tags,
@@ -491,6 +501,7 @@ export async function createBlogPost({
   try {
     const formData = new FormData();
     formData.append("title", title);
+    formData.append("desc", desc);
     formData.append("publishedAt", publishedAt.toISOString());
     formData.append("authors", JSON.stringify(authors));
     formData.append("tags", JSON.stringify(tags));
@@ -567,5 +578,33 @@ export async function getBlogPostById(id: string): Promise<BlogPost | null> {
   } catch (error) {
     console.error("Error fetching blog post by ID:", error);
     return null;
+  }
+}
+
+// ====================
+// Newsletter Functions
+// ====================
+// Get all newsletters
+export async function getAllNewsletters(): Promise<Newsletters[]> {
+  try {
+    const response = await fetch(`${BASE_URL}/api/newsletter`, {
+      method: "GET",
+      headers: {
+        "x-api-key": apiKey || "",
+      },
+      next: {
+        revalidate: 60, // 1 minute
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.documents as Newsletters[];
+  } catch (error) {
+    console.error("Error fetching newsletters:", error);
+    return [];
   }
 }

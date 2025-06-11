@@ -8,6 +8,7 @@ import { createBlogPost } from "@/api";
 
 const example = `---
 title: "How to Blog"
+desc: "A comprehensive guide on how to write and publish a blog post effectively."
 date: "2025-05-20"
 authors: ["Web Dev", "Viceroy"]
 tags: ["Tutorial", "Blog Writing", "How to"]
@@ -110,6 +111,7 @@ export default function BlogPage() {
     try {
       const response = await createBlogPost({
         title: metadata.title || "Untitled",
+        desc: metadata.desc || "No description provided",
         publishedAt: new Date(metadata.date) || new Date(),
         authors: metadata.authors || ["Unknown"],
         tags: metadata.tags || [],
