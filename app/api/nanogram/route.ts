@@ -1,20 +1,11 @@
+import { withAdminAuth, withDevAuth } from "@/lib/apiauth";
 import clientPromise from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
 import { NextRequest, NextResponse } from "next/server";
 
 const database: string | undefined = process.env.DATABASE;
-const apiKey: string | undefined = process.env.NEXT_PUBLIC_API_KEY;
 
-export async function GET(req: NextRequest) {
-  // Check for API key
-  const apiKeyHeader = req.headers.get("x-api-key");
-  if (apiKey && apiKeyHeader !== apiKey) {
-    return NextResponse.json(
-      { error: "Unauthorized" },
-      { status: 401 }
-    );
-  }
-  
+export const GET = withDevAuth(async (req: NextRequest) => {
   const { searchParams } = new URL(req.url);
   const alumini = searchParams.get("alumini");
   const core = searchParams.get("core");
@@ -60,18 +51,9 @@ export async function GET(req: NextRequest) {
       { status: 500 }
     );
   }
-}
+});
 
-export async function POST(req: NextRequest) {
-  // Check for API key
-  const apiKeyHeader = req.headers.get("x-api-key");
-  if (apiKey && apiKeyHeader !== apiKey) {
-    return NextResponse.json(
-      { error: "Unauthorized" },
-      { status: 401 }
-    );
-  }
-
+export const POST = withAdminAuth(async (req: NextRequest) => {
   try {
     const client = await clientPromise;
     const collection = client.db(database).collection("nanogram");
@@ -90,18 +72,9 @@ export async function POST(req: NextRequest) {
       { status: 500 }
     );
   }
-}
+});
 
-export async function PUT(req: NextRequest) {
-  // Check for API key
-  const apiKeyHeader = req.headers.get("x-api-key");
-  if (apiKey && apiKeyHeader !== apiKey) {
-    return NextResponse.json(
-      { error: "Unauthorized" },
-      { status: 401 }
-    );
-  }
-
+export const PUT = withAdminAuth(async (req: NextRequest) => {
   const { searchParams } = new URL(req.url);
   const id = searchParams.get("id");
   if (!id) {
@@ -130,18 +103,9 @@ export async function PUT(req: NextRequest) {
       { status: 500 }
     );
   }
-}
+});
 
-export async function DELETE(req: NextRequest) {
-  // Check for API key
-  const apiKeyHeader = req.headers.get("x-api-key");
-  if (apiKey && apiKeyHeader !== apiKey) {
-    return NextResponse.json(
-      { error: "Unauthorized" },
-      { status: 401 }
-    );
-  }
-
+export const DELETE = withAdminAuth(async (req: NextRequest) => {
   const { searchParams } = new URL(req.url);
   const id = searchParams.get("id");
 
@@ -170,4 +134,4 @@ export async function DELETE(req: NextRequest) {
       { status: 500 }
     );
   }
-}
+});

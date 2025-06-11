@@ -26,6 +26,7 @@
 - bring all the clerk manage functions to frontend using reverification
 - redo previous manage account features
 - start work on the community group
+- community ui
 <!-- - connect uploadthing and establish blogs and newsletters -->
 - subscribe to newsletter
 <!-- - connect cloudinary and test out it's usage -->
@@ -66,6 +67,7 @@
 - blog and newsletter api routes done
 - cloudinary integrated and storage increased to 25GB 🤩
 - post apis in place
+- better api auth but unimplemented on many routes
 
 ## Challenges
 
