@@ -15,7 +15,7 @@ const Mission = () => {
                 className="absolute inset-0 h-full w-full object-cover"
               />
             </div>
-            <div className="absolute inset-0 bg-neutral/70 mix-blend-multiply"></div>
+            <div className="absolute inset-0 bg-neutral/35 mix-blend-multiply"></div>
             <figure className="relative isolate">
               <blockquote className="mt-6 text-xl font-semibold leading-8 text-primary-content">
                 <span>
@@ -35,7 +35,7 @@ const Mission = () => {
         </div>
         <div>
           <div className="text-base leading-7 lg:mx-w-lg">
-            <div className="text-base font-semibold leading-7 text-primary/70">
+            <div className="text-base font-semibold leading-7 text-info">
               Empowering Tech Enthusiasts
             </div>
             <h1 className="mt-2 text-3xl font-bold tracking-tight">
@@ -55,43 +55,43 @@ const Mission = () => {
               </p>
             </div>
           </div>
-          <dl className="mt-10 grid grid-cols-2 gap-8 border-t border-neutral pt-10 sm:grid-cols-4">
+          <dl className="mt-10 grid grid-cols-2 gap-8 border-t border-base-content pt-10 sm:grid-cols-4">
             <div>
-              <dt className="text-sm font-semibold leading-6 text-neutral/80 text-nowrap">
+              <dt className="text-sm font-semibold leading-6 text-base-content/80 text-nowrap">
                 <div>Founded</div>
               </dt>
-              <dd className="mt-2 text-3xl font-bold leading-10 tracking-tight text-neutral">
+              <dd className="mt-2 text-3xl font-bold leading-10 tracking-tight text-base-content">
                 <div>2024</div>
               </dd>
             </div>
             <div>
-              <dt className="text-sm font-semibold leading-6 text-neutral/80 text-nowrap">
+              <dt className="text-sm font-semibold leading-6 text-base-content/80 text-nowrap">
                 <div>Workshops & Events</div>
               </dt>
-              <dd className="mt-2 text-3xl font-bold leading-10 tracking-tight text-neutral">
+              <dd className="mt-2 text-3xl font-bold leading-10 tracking-tight text-base-content">
                 <div>10+</div>
               </dd>
             </div>
             <div>
-              <dt className="text-sm font-semibold leading-6 text-neutral/80 text-nowrap">
+              <dt className="text-sm font-semibold leading-6 text-base-content/80 text-nowrap">
                 <div>Active Members</div>
               </dt>
-              <dd className="mt-2 text-3xl font-bold leading-10 tracking-tight text-neutral">
+              <dd className="mt-2 text-3xl font-bold leading-10 tracking-tight text-base-content">
                 <div>50+</div>
               </dd>
             </div>
             <div>
-              <dt className="text-sm font-semibold leading-6 text-neutral/80 text-nowrap">
+              <dt className="text-sm font-semibold leading-6 text-base-content/80 text-nowrap">
                 <div>Students Reached</div>
               </dt>
-              <dd className="mt-2 text-3xl font-bold leading-10 tracking-tight text-neutral">
+              <dd className="mt-2 text-3xl font-bold leading-10 tracking-tight text-base-content">
                 <div>350+</div>
               </dd>
             </div>
           </dl>
           <div className="mt-10 flex">
             <Button
-              className="btn btn-link text-lg group flex items-center gap-1 font-semibold leading-6"
+              className="btn btn-info text-lg group flex items-center gap-1 font-semibold leading-6"
               navigateTo="/blog/advent-of-javascript"
             >
               Learn more about us

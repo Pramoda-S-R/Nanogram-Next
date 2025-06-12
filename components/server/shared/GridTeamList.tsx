@@ -16,10 +16,10 @@ const GridTeamList = ({ teamMembers }: { teamMembers: Nanogram[] }) => {
             />
           </div>
           <div className="flex-auto">
-            <h3 className="text-lg font-semibold leading-8 tracking-tight text-neutral">
+            <h3 className="text-lg font-semibold leading-8 tracking-tight text-base-content">
               {member.name}
             </h3>
-            <p className="text-base leading-7 text-neutral/70">
+            <p className="text-base leading-7 text-base-content/70">
               {member.role}
             </p>
 
@@ -30,7 +30,7 @@ const GridTeamList = ({ teamMembers }: { teamMembers: Nanogram[] }) => {
                   href={member.linkedin}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-neutral hover:text-primary"
+                  className="text-base-content hover:text-primary"
                 >
                   <Linkedin />
                 </a>
@@ -40,7 +40,7 @@ const GridTeamList = ({ teamMembers }: { teamMembers: Nanogram[] }) => {
                   href={member.instagram}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-neutral hover:text-primary"
+                  className="text-base-content hover:text-primary"
                 >
                   <Instagram />
                 </a>
@@ -50,7 +50,7 @@ const GridTeamList = ({ teamMembers }: { teamMembers: Nanogram[] }) => {
                   href={member.github}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-neutral hover:text-primary"
+                  className="text-base-content hover:text-primary"
                 >
                   <Github />
                 </a>

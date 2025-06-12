@@ -37,6 +37,8 @@
   <!-- - admin auth proxy api -->
   <!-- - make proxy secure/ ditch proxy for server actions "use server" -->
 - community database rework
+- relationships using aggregate
+- add ai mascot
 - admin dashboard
 - censor board
 - activity logs

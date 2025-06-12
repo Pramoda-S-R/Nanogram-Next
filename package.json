@@ -37,6 +37,7 @@
     "react-hook-form": "^7.56.4",
     "react-markdown": "^10.1.0",
     "remark-gfm": "^4.0.1",
+    "theme-change": "^2.5.0",
     "three": "^0.176.0",
     "uploadthing": "^7.7.2",
     "vaul": "^1.1.2",

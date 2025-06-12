@@ -9,10 +9,10 @@ const Team = async () => {
     <section className="w-full pt-20" id="team">
       <div className="max-w-7xl mx-auto px-4 pb-16">
         <div className="mx-auto max-w-2xl sm:text-center">
-          <h1 className="text-4xl font-extrabold text-neutral">
+          <h1 className="text-4xl font-extrabold text-base-content">
             Meet Our Team
           </h1>
-          <p className="mt-6 text-base font-normal text-neutral/70">
+          <p className="mt-6 text-base font-normal text-base-content/70">
             Our team consists of passionate professionals dedicated to advancing
             technology.
           </p>

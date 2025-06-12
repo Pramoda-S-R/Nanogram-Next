@@ -19,7 +19,9 @@ const ShiftingCountdown = ({
   return (
     <section className="max-w-7xl mx-auto bg-gradient-to-br from-primary to-secondary p-4">
       <div className="w-full flex justify-center items-center">
-        <h1 className="text-primary-content text-5xl mb-5 font-bold">{title}</h1>
+        <h1 className="text-primary-content text-5xl mb-5 font-bold">
+          {title}
+        </h1>
       </div>
       <div className="mx-auto flex w-full items-center bg-white">
         <CountdownItem unit="Day" text="days" countdownFrom={countdownFrom} />
@@ -55,12 +57,12 @@ const CountdownItem = ({
       <div className="relative w-full overflow-hidden text-center">
         <span
           ref={ref}
-          className="block text-2xl font-medium text-neutral md:text-4xl lg:text-6xl xl:text-7xl"
+          className="block text-2xl font-medium text-base-content md:text-4xl lg:text-6xl xl:text-7xl"
         >
           {time}
         </span>
       </div>
-      <span className="text-xs font-light text-neutral/70 md:text-sm lg:text-base">
+      <span className="text-xs font-light text-base-content/70 md:text-sm lg:text-base">
         {text}
       </span>
     </div>

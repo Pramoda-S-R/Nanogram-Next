@@ -64,7 +64,7 @@ const Hero = async () => {
           </div>
         </div>
         <div className="flex px-10">
-          <p className="text-medium font-semibold text-neutral-black/70 text-justify">
+          <p className="text-medium font-semibold text-base-content-black/70 text-justify">
             Meet passionate tech enthusiasts like you. Join us in exploring the
             fascinating world of electronics and technology.
           </p>

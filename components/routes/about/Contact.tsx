@@ -15,15 +15,17 @@ const ContactUs = () => {
           />
         </div>
         <div className="w-fit md:w-1/2 gap-8 shadow backdrop-blur rounded-2xl py-10 px-10">
-          <h1 className="text-3xl font-semibold text-neutral">Contact Us</h1>
-          <p className="text-base font-normal text-neutral/70">
+          <h1 className="text-3xl font-semibold text-base-content">
+            Contact Us
+          </h1>
+          <p className="text-base font-normal text-base-content/70">
             Visit us at our headquarters and explore the vibrant environment
             where innovation happens.
           </p>
 
           <Link
             href="https://maps.app.goo.gl/EfTzvMRGeyo8tt717"
-            className="flex items-center text-primary/70 "
+            className="flex items-center text-info "
           >
             <MapPin className="mr-2" />
             Nanogram HQ

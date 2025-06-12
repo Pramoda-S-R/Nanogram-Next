@@ -6,7 +6,7 @@ const Unique = () => {
       <div className="mx-auto max-w-2xl px-6 lg:px-8 grid grid-cols-1 gap-x-8 gap-y-16 sm:gap-y-24 lg:mx-0 lg:max-w-7xl lg:grid-cols-2">
         <div>
           <div className="text-base leading-7 lg:mx-w-lg">
-            <div className="text-base font-semibold leading-7 text-primary/70">
+            <div className="text-base font-semibold leading-7 text-info">
               Formation of Nanogram
             </div>
             <h1 className="mt-2 text-3xl font-bold tracking-tight">

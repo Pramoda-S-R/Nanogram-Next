@@ -5,6 +5,7 @@ import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import SignInButton from "../client/SignInButton";
 import NavSheet from "../client/NavSheet";
 import ProfileDrawer from "../client/shared/ProfileDrawer";
+import ThemeSwitch from "../client/shared/ui/ThemeSwitch";
 
 const navItems = [
   { label: "Home", href: "/" },
@@ -42,7 +43,8 @@ const Navbar = () => {
         </div>
 
         {/* User Avatar */}
-        <div className="flex items-center justify-center">
+        <div className="flex gap-2 items-center justify-center">
+          <ThemeSwitch />
           <SignedOut>
             <SignInButton />
           </SignedOut>

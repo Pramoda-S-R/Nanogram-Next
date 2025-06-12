@@ -37,7 +37,10 @@ const faqData = [
 
 const Faq = () => {
   return (
-    <section className="max-w-7xl mx-auto pb-10 text-neutral-black" id="faq">
+    <section
+      className="max-w-7xl mx-auto pb-10 text-base-content-black"
+      id="faq"
+    >
       <div className="px-4 mx-auto max-w-7xl">
         <div className="grid grid-cols-1 items-center gap-16 md:grid-cols-2 md:gap-24">
           {/* Image Section */}
@@ -56,7 +59,7 @@ const Faq = () => {
                 <p className="font-semibold tracking-widest text-primary uppercase">
                   FAQs
                 </p>
-                <h1 className="text-5xl mb-12 font-semibold text-neutral-black">
+                <h1 className="text-5xl mb-12 font-semibold text-base-content-black">
                   Frequently Asked Questions
                 </h1>
               </div>

@@ -5,8 +5,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Album,
-  ChevronsLeft,
-  ChevronsRight,
   Compass,
   Home,
   MessageCircle,
@@ -14,10 +12,11 @@ import {
   Users,
 } from "lucide-react";
 import Image from "next/image";
+import ThemeSwitch from "./shared/ui/ThemeSwitch";
+import ProfileDrawer from "./shared/ProfileDrawer";
 
 const Sidebar = () => {
   const pathname = usePathname();
-  const [colapsed, setColapsed] = useState(true);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -48,7 +47,7 @@ const Sidebar = () => {
     },
     { href: "/create-post", label: "Create", icon: <PlusSquare height={24} /> },
   ];
-  
+
   const islandItems = [
     { href: "/community", label: "FYP", icon: <Home height={24} /> },
     { href: "/explore", label: "Explore", icon: <Compass height={24} /> },
@@ -69,36 +68,11 @@ const Sidebar = () => {
           height={24}
         />
       ),
-    }
+    },
   ];
 
   const isActive = (href: string) =>
     pathname === href || pathname?.startsWith(href + "/");
-
-  const renderNav = (isCollapsed: boolean) => (
-    <nav className="flex flex-col gap-5 px-1 pt-3">
-      {linkItems.map(({ href, label, icon }) => (
-        <Link
-          key={href}
-          href={href}
-          aria-label={label}
-          aria-current={isActive(href) ? "page" : undefined}
-          className={`group transition-colors duration-150 ${
-            isCollapsed
-              ? "justify-center"
-              : "flex items-center gap-1 text-md font-semibold"
-          } ${
-            isActive(href)
-              ? "text-base-content"
-              : "text-base-content/50 hover:text-primary"
-          }`}
-        >
-          {icon}
-          {!isCollapsed && label}
-        </Link>
-      ))}
-    </nav>
-  );
 
   const renderBottomNav = () => (
     <nav className="fixed bottom-0 left-0 right-0 z-50 flex justify-around bg-base-100 border-t-2 border-base-300 py-2 md:hidden">
@@ -111,7 +85,7 @@ const Sidebar = () => {
           className={`flex flex-col items-center text-xs ${
             isActive(href)
               ? "text-primary"
-              : "text-base-content/50 hover:text-primary"
+              : "text-base-content/50 hover:text-info"
           }`}
         >
           {icon}
@@ -125,23 +99,32 @@ const Sidebar = () => {
     <>
       {/* Desktop Sidebar */}
       <div className="hidden sticky top-0 md:flex h-dvh bg-base-100">
-        <div className="p-1 pl-3">
-          {mounted ? renderNav(colapsed) : renderNav(false)}
+        <div className="p-1 pl-3 pb-5 flex flex-col justify-between h-full">
+          <nav className="flex flex-col gap-5 px-1 pt-3">
+            {linkItems.map(({ href, label, icon }) => (
+              <Link
+                key={href}
+                href={href}
+                aria-label={label}
+                aria-current={isActive(href) ? "page" : undefined}
+                className={`group transition-colors duration-150 tooltip tooltip-right flex items-center gap-1 text-md font-semibold ${
+                  isActive(href)
+                    ? "text-base-content"
+                    : "text-base-content/50 hover:text-info"
+                }`}
+                data-tip={label}
+              >
+                {icon}
+              </Link>
+            ))}
+          </nav>
+          <div className="flex flex-col items-center gap-3">
+            <ThemeSwitch />
+            <ProfileDrawer />
+          </div>
         </div>
         {mounted && (
-          <div
-            className="divider divider-horizontal divider-start ml-0 group cursor-pointer text-base-content"
-            onClick={() => setColapsed(!colapsed)}
-            aria-label="Toggle sidebar"
-            role="button"
-            tabIndex={0}
-          >
-            {colapsed ? (
-              <ChevronsRight height={40} className="hidden group-hover:block" />
-            ) : (
-              <ChevronsLeft height={40} className="hidden group-hover:block" />
-            )}
-          </div>
+          <div className="divider divider-horizontal divider-start ml-0 group text-base-content"></div>
         )}
       </div>
 

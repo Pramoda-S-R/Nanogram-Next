@@ -74,7 +74,7 @@ export default function AnimatedTestimonial({
           dragConstraints={{ left: 0, right: 0 }}
           dragElastic={0.2}
           onDragEnd={handleDragEnd}
-          className="bg-base-100 shadow-xl rounded-lg p-8 cursor-grab active:cursor-grabbing"
+          className="bg-base-300 shadow-xl rounded-lg p-8 cursor-grab active:cursor-grabbing"
         >
           <TestimonialDiv testimonial={testimonials[currentIndex]} />
         </motion.div>

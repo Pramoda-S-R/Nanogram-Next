@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "../styles/globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
+import { ThemeInit } from "@/components/client/ThemeInit";
 
 export const metadata: Metadata = {
   title: {
@@ -16,7 +17,7 @@ export const metadata: Metadata = {
     "STEM Learning",
     "Engineering Projects",
     "Workshops",
-    "Industry Knowledge"
+    "Industry Knowledge",
   ],
   openGraph: {
     title: "Nanogram",
@@ -47,7 +48,6 @@ export const metadata: Metadata = {
   },
 };
 
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -55,8 +55,11 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang="en">
-        <body className="nano-scrollbar">{children}</body>
+      <html lang="en" data-theme="dark">
+        <body className="nano-scrollbar">
+          <ThemeInit />
+          {children}
+        </body>
       </html>
     </ClerkProvider>
   );

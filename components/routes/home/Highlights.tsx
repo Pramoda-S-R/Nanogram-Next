@@ -41,7 +41,7 @@ const Highlights = () => {
           members updated with the latest trends in technology.
         </p>
         <Button
-          className="btn btn-link w-fit no-underline"
+          className="btn btn-link text-info w-fit no-underline"
           navigateTo="/events"
         >
           Events at Nanogram

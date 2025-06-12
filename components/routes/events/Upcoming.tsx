@@ -3,14 +3,14 @@ import EventCard from "@/components/server/EventCard";
 import React from "react";
 
 // Upcoming Component
-const Upcoming = async() => {
+const Upcoming = async () => {
   const events = await getUpcomingEvents();
 
   return (
     <>
       {events.length !== 0 ? (
         <section
-          className="max-w-7xl mx-auto w-full text-neutral-black py-16 sm:py-10"
+          className="max-w-7xl mx-auto w-full text-base-content-black py-16 sm:py-10"
           id="new-events"
         >
           <div className="mx-auto max-w-7xl px-6 lg:px-10">

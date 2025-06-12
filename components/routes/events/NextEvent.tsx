@@ -31,9 +31,9 @@ const NextEvent = async () => {
         </div>
         <div className="w-full flex justify-between flex-col p-10 gap-10">
           <div className="flex flex-col w-full gap-5">
-            <h1 className="text-3xl font-bold text-neutral">{event?.title}</h1>
-            <p className="text-lg text-neutral/70 p-2">{event?.content}</p>
-            <div className="text-lg text-neutral/70 font-semibold p-4">
+            <h1 className="text-3xl font-bold text-base-content">{event?.title}</h1>
+            <p className="text-lg text-base-content/70 p-2">{event?.content}</p>
+            <div className="text-lg text-base-content/70 font-semibold p-4">
               <div className="flex justify-start items-center gap-2">
                 <CalendarDays />{" "}
                 {event.date &&

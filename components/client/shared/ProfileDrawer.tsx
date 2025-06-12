@@ -120,11 +120,29 @@ const ProfileDrawer = () => {
     }
   }
 
+  const navbarRoutes = [
+    "/",
+    "/about-us",
+    "/events",
+    "/gallery",
+    "/blog",
+    "/newsletter",
+    "/developers",
+    "/feedback",
+    "/privacy-policy",
+    "/terms-of-service",
+    "/sitemap",
+  ];
+
   return (
     <Drawer>
       <DrawerTrigger>
         <div
-          className="flex h-full items-center tooltip tooltip-bottom"
+          className={`flex h-full items-center tooltip ${
+            navbarRoutes.some((route) => pathname.startsWith(route))
+              ? "tooltip-bottom"
+              : "tooltip-right"
+          }`}
           data-tip={`${user?.firstName || "User"} ${
             user?.lastName || "Profile"
           }`}
@@ -160,6 +178,7 @@ const ProfileDrawer = () => {
         <DrawerDescription className="text-sm ml-4 mb-2">
           Manage your account settings and preferences.
         </DrawerDescription>
+
         {isExpanded ? (
           <div className="mx-4 max-h-132 md:max-h-70 flex md:flex-row flex-col overflow-y-scroll">
             <div className="flex flex-col md:flex-row sticky top-0 bg-base-100">
@@ -168,12 +187,12 @@ const ProfileDrawer = () => {
                   className={`md:w-fit w-full flex justify-center py-1 md:px-2 rounded-lg ${
                     currentTab === 1
                       ? "text-primary bg-base-300"
-                      : "text-neutral/70"
+                      : "text-base-content/70"
                   }`}
                 >
                   <User
                     className={`${
-                      currentTab === 1 ? "text-primary" : "text-neutral/70"
+                      currentTab === 1 ? "text-primary" : "text-base-content/70"
                     }`}
                     onClick={() => setCurrentTab(1)}
                   />
@@ -182,7 +201,7 @@ const ProfileDrawer = () => {
                   className={`md:w-fit w-full flex justify-center py-1 md:px-2 rounded-lg ${
                     currentTab === 2
                       ? "text-primary bg-base-300"
-                      : "text-neutral/70"
+                      : "text-base-content/70"
                   }`}
                 >
                   <Shield onClick={() => setCurrentTab(2)} />
@@ -1092,7 +1111,7 @@ function UpdateUserDialog({ user }: { user: UserResource }) {
         <form onSubmit={handleSubmit(updateProfile)}>
           <div className="md:h-100 h-140 overflow-y-scroll">
             <div className="mb-2.5">
-              <label className="input validator w-full">
+              <label htmlFor="first name" className="input validator w-full">
                 <input
                   type="text"
                   required
@@ -1107,7 +1126,7 @@ function UpdateUserDialog({ user }: { user: UserResource }) {
               )}
             </div>
             <div className="mb-2.5">
-              <label className="input validator w-full">
+              <label htmlFor="last name" className="input validator w-full">
                 <input
                   type="text"
                   required

@@ -33,9 +33,7 @@ const KeyInitiativeItem = ({
       <div className="rounded-full bg-secondary hover:bg-primary/70 p-4 flex justify-center items-center transition-transform duration-300 hover:scale-110">
         <Icon className="w-8 h-8 text-primary-content" />
       </div>
-      <p className="text-lg font-normal mt-4 text-center">
-        {label}
-      </p>
+      <p className="text-lg font-normal mt-4 text-center">{label}</p>
     </div>
   );
 };
@@ -45,7 +43,7 @@ const Initiatives = () => {
     <section className="max-w-7xl mx-auto flex-grow p-8 border-none outline-none pb-20">
       <div className="w-full text-center">
         <h1 className="text-5xl font-medium mb-4">Our Key Initiatives</h1>
-        <p className="text-lg font-normal text-neutral-black/70">
+        <p className="text-lg font-normal text-base-content-black/70">
           Explore the main activities and projects our club is engaged in.
         </p>
       </div>

@@ -10,7 +10,7 @@ const FooterLink = ({
   children: React.ReactNode;
 }) => (
   <li>
-    <Link href={to} className="font-semibold text-neutral-black">
+    <Link href={to} className="font-semibold text-base-content-black">
       {children}
     </Link>
   </li>
@@ -28,7 +28,7 @@ const SocialMediaLink = ({
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="font-semibold text-neutral-black"
+      className="font-semibold text-base-content-black"
     >
       {children}
     </a>
@@ -63,12 +63,12 @@ const Footer = () => {
             </ul>
           </div>
           <div className="flex flex-col items-center gap-8 md:justify-between md:flex-row">
-            <p className="w-auto text-sm lg:text-left text-neutral-black/70 sm:text-justify">
+            <p className="w-auto text-sm lg:text-left text-base-content-black/70 sm:text-justify">
               Dept. of Electronics and Communication Engineering
               <br />
               Dr. Ambedkar Institute of Technology, Bengaluru
             </p>
-            <p className="w-auto text-sm lg:text-right text-neutral-black/70 sm:text-justify">
+            <p className="w-auto text-sm lg:text-right text-base-content-black/70 sm:text-justify">
               © Nanogram - The Tech Hub 2024, All Rights Reserved
               <br />
               Made with ❤️ by Pramoda S R - Viceroy, Nanogram
