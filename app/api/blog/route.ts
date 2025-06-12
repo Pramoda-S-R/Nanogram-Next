@@ -38,6 +38,12 @@ export async function GET(req: NextRequest) {
     }
 
     const documents = await cursor.toArray();
+    if (documents.length === 0) {
+      return NextResponse.json(
+        { error: "No documents found" },
+        { status: 404 }
+      );
+    }
     return NextResponse.json({ documents }, { status: 200 });
   } catch (error: any) {
     return NextResponse.json(

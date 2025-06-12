@@ -31,7 +31,10 @@
 - subscribe to newsletter
 <!-- - connect cloudinary and test out it's usage -->
 <!-- - Revamped Navbar and community sidebar -->
-- better api authentication allowing api key creation (mailjet perhaps)
+<!-- - better api authentication allowing api key creation (mailjet perhaps) (no mailjet but still doable) -->
+<!-- - admin auth proxy api -->
+- make proxy secure
+- community database rework
 - admin dashboard
 - censor board
 - activity logs

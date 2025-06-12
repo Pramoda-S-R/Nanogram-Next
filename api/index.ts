@@ -13,6 +13,7 @@ const apiKey: string | undefined = process.env.NEXT_PUBLIC_API_KEY;
 // ==================
 // User Functions
 // ==================
+// Remove all these functions and use the built in clerk functions instead, these are exposing the API directly
 // Delete user by ID
 export async function deleteUserById(userId: string): Promise<boolean> {
   try {
@@ -258,13 +259,9 @@ export async function changeUserPassword({
 export async function getHeroNanograms(): Promise<Nanogram[]> {
   try {
     const response = await fetch(
-      `${BASE_URL}/api/nanogram?core=true&sort=priority&order=1&limit=9`,
+      `${BASE_URL}/api/proxy?method=getHeroNanograms`,
       {
         method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": apiKey || "",
-        },
         next: {
           revalidate: 60, // Revalidate every 60 seconds
         },
@@ -286,13 +283,9 @@ export async function getHeroNanograms(): Promise<Nanogram[]> {
 export async function getTestimonials(): Promise<Testimonial[]> {
   try {
     const response = await fetch(
-      `${BASE_URL}/api/nanogram?alumini=true&content=true&sort=priority&order=1`,
+      `${BASE_URL}/api/proxy?method=getTestimonials`,
       {
         method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": apiKey || "",
-        },
         next: {
           revalidate: 60, // 1 minute
         },
@@ -320,13 +313,9 @@ export async function getTestimonials(): Promise<Testimonial[]> {
 export async function getCoreMembers(): Promise<Nanogram[]> {
   try {
     const response = await fetch(
-      `${BASE_URL}/api/nanogram?core=true&sort=priority&order=1`,
+      `${BASE_URL}/api/proxy?method=getCoreMembers`,
       {
         method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": apiKey || "",
-        },
         next: {
           revalidate: 60, // 1 minute
         },
@@ -346,13 +335,9 @@ export async function getCoreMembers(): Promise<Nanogram[]> {
 export async function getAluminiMembers(): Promise<Nanogram[]> {
   try {
     const response = await fetch(
-      `${BASE_URL}/api/nanogram?alumini=true&sort=priority&order=1`,
+      `${BASE_URL}/api/proxy?method=getAlumniMembers`,
       {
         method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": apiKey || "",
-        },
         next: {
           revalidate: 60, // 1 minute
         },
@@ -375,19 +360,12 @@ export async function getAluminiMembers(): Promise<Nanogram[]> {
 // Get events for the event gallery
 export async function getEvents(): Promise<Event[]> {
   try {
-    const response = await fetch(
-      `${BASE_URL}/api/events?completed=true&sort=date&order=-1`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": apiKey || "",
-        },
-        next: {
-          revalidate: 60, // 1 minute
-        },
-      }
-    );
+    const response = await fetch(`${BASE_URL}/api/proxy?method=getEvents`, {
+      method: "GET",
+      next: {
+        revalidate: 60, // 1 minute
+      },
+    });
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -404,13 +382,9 @@ export async function getEvents(): Promise<Event[]> {
 export async function getUpcomingEvents(): Promise<Event[]> {
   try {
     const response = await fetch(
-      `${BASE_URL}/api/events?completed=false&sort=date&order=1`,
+      `${BASE_URL}/api/proxy?method=getUpcomingEvents`,
       {
         method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": apiKey || "",
-        },
         next: {
           revalidate: 60, // 1 minute
         },
@@ -432,13 +406,9 @@ export async function getUpcomingEvents(): Promise<Event[]> {
 export async function getRecentEvent(): Promise<Event | null> {
   try {
     const response = await fetch(
-      `${BASE_URL}/api/events?completed=true&sort=date&order=-1&limit=1`,
+      `${BASE_URL}/api/proxy?method=getRecentEvent`,
       {
         method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": apiKey || "",
-        },
         next: {
           revalidate: 60, // 1 minute
         },
@@ -459,19 +429,12 @@ export async function getRecentEvent(): Promise<Event | null> {
 // Get next event
 export async function getNextEvent(): Promise<Event | null> {
   try {
-    const response = await fetch(
-      `${BASE_URL}/api/events?completed=false&sort=date&order=1&limit=1`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": apiKey || "",
-        },
-        next: {
-          revalidate: 60, // 1 minute
-        },
-      }
-    );
+    const response = await fetch(`${BASE_URL}/api/proxy?method=getNextEvent`, {
+      method: "GET",
+      next: {
+        revalidate: 60, // 1 minute
+      },
+    });
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -511,11 +474,8 @@ export async function createBlogPost({
     if (file) {
       formData.append("file", file);
     }
-    const response = await fetch(`${BASE_URL}/api/blog`, {
+    const response = await fetch(`${BASE_URL}/api/proxy?method=createBlogPost`, {
       method: "POST",
-      headers: {
-        "x-api-key": apiKey || "",
-      },
       body: formData,
     });
 
@@ -524,7 +484,6 @@ export async function createBlogPost({
     }
 
     const data = await response.json();
-    // console.log("Blog post created successfully:", data);
     return data;
   } catch (error) {
     console.error("Error creating blog post:", error);
@@ -534,16 +493,15 @@ export async function createBlogPost({
 // Get all blog posts
 export async function getAllBlogPosts(): Promise<BlogPost[]> {
   try {
-    const response = await fetch(`${BASE_URL}/api/blog`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": apiKey || "",
-      },
-      next: {
-        revalidate: 60, // 1 minute
-      },
-    });
+    const response = await fetch(
+      `${BASE_URL}/api/proxy?method=getAllBlogPosts`,
+      {
+        method: "GET",
+        next: {
+          revalidate: 60, // 1 minute
+        },
+      }
+    );
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -559,15 +517,15 @@ export async function getAllBlogPosts(): Promise<BlogPost[]> {
 // Get a single blog post by ID
 export async function getBlogPostById(id: string): Promise<BlogPost | null> {
   try {
-    const response = await fetch(`${BASE_URL}/api/blog?route=${id}`, {
-      method: "GET",
-      headers: {
-        "x-api-key": apiKey || "",
-      },
-      next: {
-        revalidate: 60, // 1 minute
-      },
-    });
+    const response = await fetch(
+      `${BASE_URL}/api/proxy?method=getPostById&id=${id}`,
+      {
+        method: "GET",
+        next: {
+          revalidate: 60, // 1 minute
+        },
+      }
+    );
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -587,15 +545,15 @@ export async function getBlogPostById(id: string): Promise<BlogPost | null> {
 // Get all newsletters
 export async function getAllNewsletters(): Promise<Newsletters[]> {
   try {
-    const response = await fetch(`${BASE_URL}/api/newsletter`, {
-      method: "GET",
-      headers: {
-        "x-api-key": apiKey || "",
-      },
-      next: {
-        revalidate: 60, // 1 minute
-      },
-    });
+    const response = await fetch(
+      `${BASE_URL}/api/proxy?method=getAllNewsletters`,
+      {
+        method: "GET",
+        next: {
+          revalidate: 60, // 1 minute
+        },
+      }
+    );
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);

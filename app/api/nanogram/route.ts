@@ -1,11 +1,11 @@
-import { withAdminAuth, withDevAuth } from "@/lib/apiauth";
+import { withAuth } from "@/lib/apiauth";
 import clientPromise from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
 import { NextRequest, NextResponse } from "next/server";
 
 const database: string | undefined = process.env.DATABASE;
 
-export const GET = withDevAuth(async (req: NextRequest) => {
+export const GET = withAuth(async (req: NextRequest) => {
   const { searchParams } = new URL(req.url);
   const alumini = searchParams.get("alumini");
   const core = searchParams.get("core");
@@ -53,7 +53,7 @@ export const GET = withDevAuth(async (req: NextRequest) => {
   }
 });
 
-export const POST = withAdminAuth(async (req: NextRequest) => {
+export const POST = withAuth(async (req: NextRequest) => {
   try {
     const client = await clientPromise;
     const collection = client.db(database).collection("nanogram");
@@ -72,9 +72,10 @@ export const POST = withAdminAuth(async (req: NextRequest) => {
       { status: 500 }
     );
   }
-});
+},
+  { adminOnly: true });
 
-export const PUT = withAdminAuth(async (req: NextRequest) => {
+export const PUT = withAuth(async (req: NextRequest) => {
   const { searchParams } = new URL(req.url);
   const id = searchParams.get("id");
   if (!id) {
@@ -103,9 +104,10 @@ export const PUT = withAdminAuth(async (req: NextRequest) => {
       { status: 500 }
     );
   }
-});
+},
+  { adminOnly: true });
 
-export const DELETE = withAdminAuth(async (req: NextRequest) => {
+export const DELETE = withAuth(async (req: NextRequest) => {
   const { searchParams } = new URL(req.url);
   const id = searchParams.get("id");
 
@@ -134,4 +136,5 @@ export const DELETE = withAdminAuth(async (req: NextRequest) => {
       { status: 500 }
     );
   }
-});
+},
+  { adminOnly: true });

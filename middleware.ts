@@ -17,13 +17,9 @@ const isPublicRoute = createRouteMatcher([
   "/sitemap",
 ]);
 
-const isPrivateRoute = createRouteMatcher(["/blog/write-blog"]);
-
-// const isAdminApiRoute = createRouteMatcher([
-//   "/api/nanogram(.*)",
-//   "/api/events(.*)",
-//   "/api/newsletter(.*)",
-// ]);
+const isPrivateRoute = createRouteMatcher([
+  "/blog/write-blog",
+]);
 
 export default clerkMiddleware(async (auth, req) => {
   if (isPrivateRoute(req) || !isPublicRoute(req)) {
