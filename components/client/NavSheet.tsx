@@ -36,7 +36,7 @@ const NavSheet = ({ navItems }: { navItems: NavItem[] }) => {
             Explore Nanogram and discover our community, events, and more.
           </SheetDescription>
         </SheetHeader>
-        <nav className="flex flex-col gap-2 mt-10 overflow-y-scroll nano-scrollbar h-[calc(100vh-200px)]">
+        <nav className="flex flex-col gap-2 mt-10 overflow-y-scroll nano-scrollbar bg-transparent h-[calc(100vh-200px)]">
           {navItems.map((item) => (
             <Link
               key={item.label}

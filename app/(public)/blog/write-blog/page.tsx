@@ -6,7 +6,8 @@ import "../styles/blog.css";
 import matter from "gray-matter";
 import { createBlogPost } from "@/app/actions/api";
 
-const example = `---
+const example = `
+---
 title: "How to Blog"
 desc: "A comprehensive guide on how to write and publish a blog post effectively."
 date: "2025-05-20"
