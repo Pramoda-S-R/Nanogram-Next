@@ -1,7 +1,7 @@
 import ParticleRing from "@/components/client/ParticleRing";
 import Button from "@/components/client/shared/ui/Button";
 import { ArrowRight, Plus } from "lucide-react";
-import { getHeroNanograms } from "@/api";
+import { getHeroNanograms } from "@/app/actions/api";
 
 const Hero = async () => {
   const teamMembers = await getHeroNanograms();

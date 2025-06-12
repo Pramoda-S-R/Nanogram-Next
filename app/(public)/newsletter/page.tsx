@@ -1,5 +1,5 @@
-import { getAllNewsletters } from "@/api";
 import React from "react";
+import { getAllNewsletters } from "@/app/actions/api";
 
 const Newsletter = async () => {
   const newsletters = await getAllNewsletters();
@@ -8,7 +8,10 @@ const Newsletter = async () => {
       Newsletter
       <div className="flex flex-col gap-4">
         {newsletters.map((newsletter) => (
-          <div key={newsletter._id.toString()} className="p-4 border rounded-lg">
+          <div
+            key={newsletter._id.toString()}
+            className="p-4 border rounded-lg"
+          >
             <h2 className="text-xl font-bold">{newsletter.title}</h2>
             <a
               href={newsletter.fileUrl}

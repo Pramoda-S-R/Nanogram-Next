@@ -1,4 +1,4 @@
-import { getRecentEvent } from "@/api";
+import { getRecentEvent } from "@/app/actions/api";
 import React from "react";
 
 const RecentEvent = async () => {

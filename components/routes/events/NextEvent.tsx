@@ -1,4 +1,4 @@
-import { getNextEvent } from "@/api";
+import { getNextEvent } from "@/app/actions/api";
 import Button from "@/components/client/shared/ui/Button";
 import ShiftingCountdown from "@/components/client/ShiftingCountdown";
 import Banner from "@/components/server/Banner";

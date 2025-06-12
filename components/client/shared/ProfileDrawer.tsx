@@ -69,7 +69,7 @@ import {
   updateUserEmail,
   updateUsernameById,
   updateUserProfile,
-} from "@/api";
+} from "@/app/actions/api";
 import FileUploader from "./ui/FileUploader";
 import OtpInput from "./OtpInput";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/Popover";

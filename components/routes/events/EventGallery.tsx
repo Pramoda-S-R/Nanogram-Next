@@ -6,7 +6,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/client/shared/ui/Carousel";
-import { getEvents } from "@/api";
+import { getEvents } from "@/app/actions/api";
 
 const EventGallery = async () => {
   const events = await getEvents();

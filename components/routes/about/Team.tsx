@@ -1,7 +1,7 @@
 import React from "react";
 
 import GridTeamList from "@/components/server/shared/GridTeamList";
-import { getCoreMembers } from "@/api";
+import { getCoreMembers } from "@/app/actions/api";
 
 const Team = async () => {
   const teamMembers = await getCoreMembers();

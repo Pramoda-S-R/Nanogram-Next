@@ -3,7 +3,7 @@ import { getMD } from "@/lib/blog";
 import ReactMarkdown from "react-markdown";
 import "../styles/blog.css";
 import remarkGfm from "remark-gfm";
-import { getBlogPostById } from "@/api";
+import { getBlogPostById } from "@/app/actions/api";
 
 export default async function BlogPage({
   params,

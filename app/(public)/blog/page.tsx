@@ -1,5 +1,5 @@
-import { getAllBlogPosts } from "@/api";
 import React from "react";
+import { getAllBlogPosts } from "@/app/actions/api";
 
 const Blog = async () => {
   const blogs = await getAllBlogPosts();

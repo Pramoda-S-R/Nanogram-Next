@@ -1,3 +1,4 @@
+import { withAuth } from "@/lib/apiauth";
 import clientPromise from "@/lib/mongodb";
 import { slugify } from "@/utils";
 import { ObjectId } from "mongodb";
@@ -5,13 +6,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { UTApi } from "uploadthing/server";
 
 const database: string | undefined = process.env.DATABASE;
-const apiKey: string | undefined = process.env.NEXT_PUBLIC_API_KEY;
 
-export async function GET(req: NextRequest) {
-  const apiKeyHeader = req.headers.get("x-api-key");
-  if (apiKey && apiKeyHeader !== apiKey) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+export const GET = withAuth(async (req: NextRequest) => {
   const { searchParams } = new URL(req.url);
   const blogId = searchParams.get("id");
   const route = searchParams.get("route");
@@ -51,17 +47,10 @@ export async function GET(req: NextRequest) {
       { status: 500 }
     );
   }
-}
+});
 
-export async function POST(req: NextRequest) {
-  const apiKeyHeader = req.headers.get("x-api-key");
-  if (apiKey && apiKeyHeader !== apiKey) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+export const POST = withAuth(async (req: NextRequest) => {
   try {
-    const client = await clientPromise;
-    const collection = client.db(database).collection("blogs");
-
     const formData = await req.formData();
     const title = formData.get("title") as string;
     const desc = formData.get("desc") as string;
@@ -69,6 +58,9 @@ export async function POST(req: NextRequest) {
     const tags = formData.get("tags") as string;
     const authors = formData.get("authors") as string;
     const file = formData.get("file") as File;
+
+    const client = await clientPromise;
+    const collection = client.db(database).collection("blogs");
 
     const utapi = new UTApi();
 
@@ -100,13 +92,9 @@ export async function POST(req: NextRequest) {
       { status: 500 }
     );
   }
-}
+});
 
-export async function PUT(req: NextRequest) {
-  const apiKeyHeader = req.headers.get("x-api-key");
-  if (apiKey && apiKeyHeader !== apiKey) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+export const PUT = withAuth(async (req: NextRequest) => {
   const { searchParams } = new URL(req.url);
   const id = searchParams.get("id");
   if (!id) {
@@ -166,13 +154,9 @@ export async function PUT(req: NextRequest) {
       { status: 500 }
     );
   }
-}
+});
 
-export async function DELETE(req: NextRequest) {
-  const apiKeyHeader = req.headers.get("x-api-key");
-  if (apiKey && apiKeyHeader !== apiKey) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+export const DELETE = withAuth(async (req: NextRequest) => {
   const { searchParams } = new URL(req.url);
   const id = searchParams.get("id");
   if (!id) {
@@ -209,4 +193,4 @@ export async function DELETE(req: NextRequest) {
       { status: 500 }
     );
   }
-}
+});

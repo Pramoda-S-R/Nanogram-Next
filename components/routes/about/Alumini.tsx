@@ -1,5 +1,5 @@
 import GridTeamList from "@/components/server/shared/GridTeamList";
-import { getAluminiMembers } from "@/api";
+import { getAluminiMembers } from "@/app/actions/api";
 
 const Alumini = async () => {
   const alumini = await getAluminiMembers();

@@ -1,4 +1,4 @@
-import { getUpcomingEvents } from "@/api";
+import { getUpcomingEvents } from "@/app/actions/api";
 import EventCard from "@/components/server/EventCard";
 import React from "react";
 

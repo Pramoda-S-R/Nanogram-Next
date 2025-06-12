@@ -4,7 +4,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import "../styles/blog.css";
 import matter from "gray-matter";
-import { createBlogPost } from "@/api";
+import { createBlogPost } from "@/app/actions/api";
 
 const example = `---
 title: "How to Blog"
