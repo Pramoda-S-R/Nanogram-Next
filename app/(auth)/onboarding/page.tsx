@@ -204,7 +204,7 @@ export default function Onboarding() {
             <div className="mb-2.5">
               <label className="w-full">
                 <textarea
-                  placeholder="Tell us about yourself"
+                  placeholder="Tell us about yourself (optional)"
                   rows={4}
                   className="w-full textarea"
                   {...register("bio")}

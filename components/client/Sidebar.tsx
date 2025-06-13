@@ -92,7 +92,7 @@ const Sidebar = () => {
     <>
       {/* Desktop Sidebar */}
       <div className="hidden sticky top-0 md:flex h-screen bg-base-100">
-        <div className="flex flex-col justify-between p-1 pl-3 pb-5 w-full">
+        <div className="flex flex-col justify-between p-1 pb-5 w-full">
           {/* Navigation Section */}
           <nav className="flex flex-col gap-5 px-1 pt-3">
             {linkItems.map(({ href, label, icon }) => (
@@ -100,13 +100,13 @@ const Sidebar = () => {
                 key={href}
                 href={href}
                 aria-label={label}
-                title={label}
                 aria-current={isActive(href) ? "page" : undefined}
-                className={`group transition-colors duration-150 flex items-center gap-1 text-md font-semibold ${
+                className={`group transition-colors duration-150 flex tooltip tooltip-right items-center justify-center gap-1 text-md font-semibold ${
                   isActive(href)
                     ? "text-base-content"
                     : "text-base-content/50 hover:text-info"
                 }`}
+                data-tip={label}
               >
                 {icon}
               </Link>
