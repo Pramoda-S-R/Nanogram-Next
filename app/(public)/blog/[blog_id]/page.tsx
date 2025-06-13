@@ -1,9 +1,19 @@
 import React from "react";
-import { getMD } from "@/lib/blog";
 import ReactMarkdown from "react-markdown";
 import "../styles/blog.css";
 import remarkGfm from "remark-gfm";
 import { getBlogPostById } from "@/app/actions/api";
+import matter from "gray-matter";
+
+export async function getMD(url: URL) {
+  const res = await fetch(url.toString());
+  if (!res.ok) throw new Error(`Failed to fetch ${url}`);
+  const raw = await res.text();
+
+  const { data: metadata, content: markdown } = matter(raw);
+
+  return { metadata, markdown };
+}
 
 export default async function BlogPage({
   params,

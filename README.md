@@ -9,6 +9,7 @@
 - UploadThing (storage) (2 GB 🤩)
 - Clerk.dev (auth)
 - Upstash (Redis) (rate limiting)
+- Ably (Web Socket) (messaging)
 - Cleaner UI/UX with daisy UI
 - Form builder and Blog builder
 
@@ -24,9 +25,10 @@
 <!-- - api logic for the entirity of events route -->
 <!-- - fix the inconsistency in home and events route -->
 
-- customize reverify dialog window
-- bring all the clerk manage functions to frontend using reverification
-- redo previous manage account features
+<!-- - customize reverify dialog window -->
+<!-- - bring all the clerk manage functions to frontend using reverification -->
+<!-- - redo previous manage account features -->
+- test very email, delete email, profile update, remove social connection, delete account
 - start work on the community group
 - community ui
 <!-- - connect uploadthing and establish blogs and newsletters -->
@@ -40,7 +42,7 @@
 - relationships using aggregate
 - add ai mascot
 - admin dashboard
-- check if admin by comparing a database
+- check if admin by comparing a admin database
 - censor board
 - activity logs
 - Dev/API page for developers
@@ -80,6 +82,9 @@
 - proxy route added
 - proxy route removed (I hate myself)
 - server actions added
+- added onboarding and user api route
+- fixed manage account drawer completely testing remaining
+
 
 ## Challenges
 

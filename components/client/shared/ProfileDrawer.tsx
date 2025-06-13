@@ -44,7 +44,7 @@ import {
   AlertDialogTrigger,
 } from "./ui/AlertDialog";
 import { z } from "zod";
-import { set, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   SignOutButton,
@@ -56,29 +56,26 @@ import {
   CreateExternalAccountParams,
   EmailAddressResource,
   ExternalAccountResource,
+  SessionResource,
   SessionWithActivitiesResource,
   UpdateUserPasswordParams,
   UserResource,
 } from "@clerk/types";
 import { formatRelativeTime, getCurrentSessionIdFromCookie } from "@/utils";
-import {
-  deleteEmailById,
-  deleteUserById,
-  removeUserProfileImage,
-  revokeUserSession,
-  updateUserEmail,
-  updateUsernameById,
-  updateUserProfile,
-} from "@/app/actions/api";
 import FileUploader from "./ui/FileUploader";
 import OtpInput from "./OtpInput";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/Popover";
+import { VerificationComponent } from "@/components/client/shared/Reverification";
 
 const ProfileDrawer = () => {
   // const router = useRouter();
   const { isLoaded, user } = useUser();
   const [sessions, setSessions] = useState<SessionWithActivitiesResource[]>([]);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
+
+  const revokeSessionById = useReverification((sessionId: string) => {
+    return sessions.find((s) => s.id === sessionId)?.revoke();
+  });
 
   const [loading, setLoading] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -107,7 +104,7 @@ const ProfileDrawer = () => {
   async function handleSessionDelete(sessionId: string) {
     setLoading(true);
     try {
-      const response = await revokeUserSession(sessionId);
+      const response = await revokeSessionById(sessionId);
       if (!response) {
         console.error("Failed to revoke session");
         return;
@@ -124,8 +121,10 @@ const ProfileDrawer = () => {
     <Drawer>
       <DrawerTrigger>
         <div
-          className={"flex h-full items-center"}
-          title={`${user?.firstName || "User"} ${user?.lastName || "Profile"}`}
+          className="flex h-full items-center tooltip tooltip-bottom"
+          data-tip={`${user?.firstName || "User"} ${
+            user?.lastName || "Profile"
+          }`}
         >
           <div className="relative group w-7 h-7 overflow-hidden rounded-full">
             <img
@@ -158,7 +157,6 @@ const ProfileDrawer = () => {
         <DrawerDescription className="text-sm ml-4 mb-2">
           Manage your account settings and preferences.
         </DrawerDescription>
-
         {isExpanded ? (
           <div className="mx-4 max-h-132 md:max-h-70 flex md:flex-row flex-col overflow-y-scroll">
             <div className="flex flex-col md:flex-row sticky top-0 bg-base-100">
@@ -330,13 +328,10 @@ const ProfileDrawer = () => {
                             )}
                           </p>
                         </div>
-                        <button
-                          className="btn btn-ghost"
-                          disabled={currentSessionId === session.id}
-                          onClick={() => handleSessionDelete(session.id)}
-                        >
-                          Sign out
-                        </button>
+                        <RevokeSessionPopover
+                          session={session}
+                          currentSessionId={currentSessionId}
+                        />
                       </div>
                     ))}
                   </div>
@@ -390,7 +385,17 @@ function ConnectionsActions({
   user: UserResource;
   externalAccount: ExternalAccountResource;
 }) {
-  const removeConnection = useReverification(() => externalAccount.destroy());
+  const [vrState, setVrState] = useState<{
+    inProgress: boolean;
+    complete: () => void;
+    cancel: () => void;
+    level?: "first_factor" | "second_factor" | "multi_factor";
+  } | null>(null);
+  const removeConnection = useReverification(() => externalAccount.destroy(), {
+    onNeedsReverification: ({ level, complete, cancel }) => {
+      setVrState({ inProgress: true, complete, cancel, level });
+    },
+  });
   async function handleRemoveConnection() {
     try {
       await removeConnection();
@@ -453,12 +458,20 @@ function ConnectionsActions({
         )}
       </PopoverTrigger>
       <PopoverContent>
-        <button
-          className="btn btn-error"
-          onClick={() => handleRemoveConnection()}
-        >
-          Remove
-        </button>
+        {vrState?.inProgress ? (
+          <VerificationComponent
+            level={vrState?.level}
+            onComplete={vrState?.complete}
+            onCancel={vrState?.cancel}
+          />
+        ) : (
+          <button
+            className="btn btn-error"
+            onClick={() => handleRemoveConnection()}
+          >
+            Remove
+          </button>
+        )}
       </PopoverContent>
     </Popover>
   );
@@ -471,8 +484,20 @@ function ConnectionsPopover({ user }: { user: UserResource }) {
   const [connections, setConnections] = useState(
     user.primaryEmailAddress?.linkedTo || []
   );
+  const [vrState, setVrState] = useState<{
+    inProgress: boolean;
+    complete: () => void;
+    cancel: () => void;
+    level?: "first_factor" | "second_factor" | "multi_factor";
+  } | null>(null);
   const createExternalConnection = useReverification(
-    (params: CreateExternalAccountParams) => user?.createExternalAccount(params)
+    (params: CreateExternalAccountParams) =>
+      user?.createExternalAccount(params),
+    {
+      onNeedsReverification: ({ level, complete, cancel }) => {
+        setVrState({ inProgress: true, complete, cancel, level });
+      },
+    }
   );
 
   const handleConnect = async (type: "oauth_google" | "oauth_github") => {
@@ -501,71 +526,14 @@ function ConnectionsPopover({ user }: { user: UserResource }) {
           + Connect Account
         </PopoverTrigger>
         <PopoverContent className="flex flex-col gap-2">
-          <button
-            className="btn  bg-white text-black border-[#e5e5e5]"
-            onClick={() => handleConnect("oauth_google")}
-          >
-            <svg
-              aria-label="Google logo"
-              width="16"
-              height="16"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 512 512"
-            >
-              <g>
-                <path d="m0 0H512V512H0" fill="#fff"></path>
-                <path
-                  fill="#34a853"
-                  d="M153 292c30 82 118 95 171 60h62v48A192 192 0 0190 341"
-                ></path>
-                <path
-                  fill="#4285f4"
-                  d="m386 400a140 175 0 0053-179H260v74h102q-7 37-38 57"
-                ></path>
-                <path
-                  fill="#fbbc02"
-                  d="m90 341a208 200 0 010-171l63 49q-12 37 0 73"
-                ></path>
-                <path
-                  fill="#ea4335"
-                  d="m153 219c22-69 116-109 179-50l55-54c-78-75-230-72-297 55"
-                ></path>
-              </g>
-            </svg>
-            Google
-          </button>
-          <button
-            className="btn bg-black text-white border-black"
-            onClick={() => handleConnect("oauth_github")}
-          >
-            <svg
-              aria-label="GitHub logo"
-              width="16"
-              height="16"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-            >
-              <path
-                fill="white"
-                d="M12,2A10,10 0 0,0 2,12C2,16.42 4.87,20.17 8.84,21.5C9.34,21.58 9.5,21.27 9.5,21C9.5,20.77 9.5,20.14 9.5,19.31C6.73,19.91 6.14,17.97 6.14,17.97C5.68,16.81 5.03,16.5 5.03,16.5C4.12,15.88 5.1,15.9 5.1,15.9C6.1,15.97 6.63,16.93 6.63,16.93C7.5,18.45 8.97,18 9.54,17.76C9.63,17.11 9.89,16.67 10.17,16.42C7.95,16.17 5.62,15.31 5.62,11.5C5.62,10.39 6,9.5 6.65,8.79C6.55,8.54 6.2,7.5 6.75,6.15C6.75,6.15 7.59,5.88 9.5,7.17C10.29,6.95 11.15,6.84 12,6.84C12.85,6.84 13.71,6.95 14.5,7.17C16.41,5.88 17.25,6.15 17.25,6.15C17.8,7.5 17.45,8.54 17.35,8.79C18,9.5 18.38,10.39 18.38,11.5C18.38,15.32 16.04,16.16 13.81,16.41C14.17,16.72 14.5,17.33 14.5,18.26C14.5,19.6 14.5,20.68 14.5,21C14.5,21.27 14.66,21.59 15.17,21.5C19.14,20.16 22,16.42 22,12A10,10 0 0,0 12,2Z"
-              ></path>
-            </svg>
-            GitHub
-          </button>
-        </PopoverContent>
-      </Popover>
-    );
-  }
-
-  return (
-    <Popover open={isOpen} onOpenChange={setIsOpen}>
-      <PopoverTrigger className="btn btn-ghost">
-        + Connect Account
-      </PopoverTrigger>
-      <PopoverContent>
-        {connections.map((connection, idx) => (
-          <div key={idx} className="flex felx-col items-center gap-2">
-            {connection.type !== "oauth_google" && (
+          {vrState?.inProgress ? (
+            <VerificationComponent
+              level={vrState?.level}
+              onComplete={vrState?.complete}
+              onCancel={vrState?.cancel}
+            />
+          ) : (
+            <div className="flex flex-col items-center gap-2">
               <button
                 className="btn  bg-white text-black border-[#e5e5e5]"
                 onClick={() => handleConnect("oauth_google")}
@@ -599,8 +567,6 @@ function ConnectionsPopover({ user }: { user: UserResource }) {
                 </svg>
                 Google
               </button>
-            )}
-            {connection.type !== "oauth_github" && (
               <button
                 className="btn bg-black text-white border-black"
                 onClick={() => handleConnect("oauth_github")}
@@ -619,9 +585,88 @@ function ConnectionsPopover({ user }: { user: UserResource }) {
                 </svg>
                 GitHub
               </button>
-            )}
+            </div>
+          )}
+        </PopoverContent>
+      </Popover>
+    );
+  }
+
+  return (
+    <Popover open={isOpen} onOpenChange={setIsOpen}>
+      <PopoverTrigger className="btn btn-ghost">
+        + Connect Account
+      </PopoverTrigger>
+      <PopoverContent>
+        {vrState?.inProgress ? (
+          <VerificationComponent
+            level={vrState?.level}
+            onComplete={vrState?.complete}
+            onCancel={vrState?.cancel}
+          />
+        ) : (
+          <div className="flex flex-col items-center gap-2">
+            {connections.map((connection, idx) => (
+              <div key={idx} className="flex felx-col items-center gap-2">
+                {connection.type !== "oauth_google" && (
+                  <button
+                    className="btn  bg-white text-black border-[#e5e5e5]"
+                    onClick={() => handleConnect("oauth_google")}
+                  >
+                    <svg
+                      aria-label="Google logo"
+                      width="16"
+                      height="16"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 512 512"
+                    >
+                      <g>
+                        <path d="m0 0H512V512H0" fill="#fff"></path>
+                        <path
+                          fill="#34a853"
+                          d="M153 292c30 82 118 95 171 60h62v48A192 192 0 0190 341"
+                        ></path>
+                        <path
+                          fill="#4285f4"
+                          d="m386 400a140 175 0 0053-179H260v74h102q-7 37-38 57"
+                        ></path>
+                        <path
+                          fill="#fbbc02"
+                          d="m90 341a208 200 0 010-171l63 49q-12 37 0 73"
+                        ></path>
+                        <path
+                          fill="#ea4335"
+                          d="m153 219c22-69 116-109 179-50l55-54c-78-75-230-72-297 55"
+                        ></path>
+                      </g>
+                    </svg>
+                    Google
+                  </button>
+                )}
+                {connection.type !== "oauth_github" && (
+                  <button
+                    className="btn bg-black text-white border-black"
+                    onClick={() => handleConnect("oauth_github")}
+                  >
+                    <svg
+                      aria-label="GitHub logo"
+                      width="16"
+                      height="16"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        fill="white"
+                        d="M12,2A10,10 0 0,0 2,12C2,16.42 4.87,20.17 8.84,21.5C9.34,21.58 9.5,21.27 9.5,21C9.5,20.77 9.5,20.14 9.5,19.31C6.73,19.91 6.14,17.97 6.14,17.97C5.68,16.81 5.03,16.5 5.03,16.5C4.12,15.88 5.1,15.9 5.1,15.9C6.1,15.97 6.63,16.93 6.63,16.93C7.5,18.45 8.97,18 9.54,17.76C9.63,17.11 9.89,16.67 10.17,16.42C7.95,16.17 5.62,15.31 5.62,11.5C5.62,10.39 6,9.5 6.65,8.79C6.55,8.54 6.2,7.5 6.75,6.15C6.75,6.15 7.59,5.88 9.5,7.17C10.29,6.95 11.15,6.84 12,6.84C12.85,6.84 13.71,6.95 14.5,7.17C16.41,5.88 17.25,6.15 17.25,6.15C17.8,7.5 17.45,8.54 17.35,8.79C18,9.5 18.38,10.39 18.38,11.5C18.38,15.32 16.04,16.16 13.81,16.41C14.17,16.72 14.5,17.33 14.5,18.26C14.5,19.6 14.5,20.68 14.5,21C14.5,21.27 14.66,21.59 15.17,21.5C19.14,20.16 22,16.42 22,12A10,10 0 0,0 12,2Z"
+                      ></path>
+                    </svg>
+                    GitHub
+                  </button>
+                )}
+              </div>
+            ))}
           </div>
-        ))}
+        )}
       </PopoverContent>
     </Popover>
   );
@@ -638,13 +683,33 @@ function EmailActionsPopover({
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [successful, setSuccessful] = useState(false);
+  const [vrState, setVrState] = useState<{
+    inProgress: boolean;
+    complete: () => void;
+    cancel: () => void;
+    level?: "first_factor" | "second_factor" | "multi_factor";
+  } | null>(null);
+
+  const setPrimaryEmailAddress = useReverification(
+    (params) => user.update(params),
+    {
+      onNeedsReverification: ({ level, complete, cancel }) => {
+        setVrState({ inProgress: true, complete, cancel, level });
+      },
+    }
+  );
+
+  const destroyEmailAddress = useReverification(() => email.destroy(), {
+    onNeedsReverification: ({ level, complete, cancel }) => {
+      setVrState({ inProgress: true, complete, cancel, level });
+    },
+  });
 
   async function setPrimaryEmail() {
     setLoading(true);
     try {
-      const res = await updateUserEmail({
-        userId: user.id,
-        primaryEmailAddressID: email.id,
+      const res = await setPrimaryEmailAddress({
+        primaryEmailAddressId: email.id,
       });
       await user.reload();
       if (!res) {
@@ -661,12 +726,8 @@ function EmailActionsPopover({
   async function deleteEmail() {
     setLoading(true);
     try {
-      const res = await deleteEmailById({ emailAddressID: email.id });
+      await destroyEmailAddress();
       await user.reload();
-      if (!res) {
-        console.error("Failed to delete email:", res);
-        return;
-      }
     } catch (err) {
       console.error("Error deleting email:", err);
     } finally {
@@ -713,6 +774,12 @@ function EmailActionsPopover({
               {successful ? "Verified ✔️" : "Verify"}
             </button>
           </form>
+        ) : vrState?.inProgress ? (
+          <VerificationComponent
+            level={vrState?.level}
+            onComplete={vrState?.complete}
+            onCancel={vrState?.cancel}
+          />
         ) : (
           <div className="flex flex-col w-40 gap-2">
             {email.verification.status !== "verified" && (
@@ -766,8 +833,19 @@ function UpdateEmailDialog({ user }: { user: UserResource }) {
   const [emailObj, setEmailObj] = React.useState<
     EmailAddressResource | undefined
   >();
-  const createEmailAddress = useReverification((email: string) =>
-    user?.createEmailAddress({ email })
+  const [vrState, setVrState] = useState<{
+    inProgress: boolean;
+    complete: () => void;
+    cancel: () => void;
+    level?: "first_factor" | "second_factor" | "multi_factor";
+  } | null>(null);
+  const createEmailAddress = useReverification(
+    (email: string) => user?.createEmailAddress({ email }),
+    {
+      onNeedsReverification: ({ level, complete, cancel }) => {
+        setVrState({ inProgress: true, complete, cancel, level });
+      },
+    }
   );
 
   const AddEmailSchema = z.object({
@@ -791,6 +869,7 @@ function UpdateEmailDialog({ user }: { user: UserResource }) {
     setLoading(true);
     try {
       // Add an unverified email address to user
+      console.log("Adding email address:", data.email);
       const res = await createEmailAddress(data.email);
       // Reload user to get updated User object
       await user.reload();
@@ -861,6 +940,12 @@ function UpdateEmailDialog({ user }: { user: UserResource }) {
               </DialogClose>
             </DialogFooter>
           </form>
+        ) : vrState?.inProgress ? (
+          <VerificationComponent
+            level={vrState?.level}
+            onComplete={vrState?.complete}
+            onCancel={vrState?.cancel}
+          />
         ) : (
           <form onSubmit={handleAddEmailSubmit(handleSubmit)}>
             <div className="mb-2.5">
@@ -904,6 +989,18 @@ function UpdateEmailDialog({ user }: { user: UserResource }) {
 function UpdateUsernameDialog({ user }: { user: UserResource }) {
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
+  const [vrState, setVrState] = useState<{
+    inProgress: boolean;
+    complete: () => void;
+    cancel: () => void;
+    level?: "first_factor" | "second_factor" | "multi_factor";
+  } | null>(null);
+
+  const changeUsername = useReverification((params) => user.update(params), {
+    onNeedsReverification: ({ complete, cancel, level }) => {
+      setVrState({ inProgress: true, complete, cancel, level });
+    },
+  });
 
   const UsernameSchema = z.object({
     // Validate username with Zod no spaces, special characters, and length
@@ -937,8 +1034,7 @@ function UpdateUsernameDialog({ user }: { user: UserResource }) {
     console.log("Updating username with data:", data);
     setLoading(true);
     try {
-      const res = await updateUsernameById({
-        userId: user.id,
+      const res = await changeUsername({
         username: data.username,
       });
       if (!res) {
@@ -964,39 +1060,51 @@ function UpdateUsernameDialog({ user }: { user: UserResource }) {
             Enter a new username for your account.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit(updateUsername)}>
-          <div className="mb-2.5">
-            <label className="input validator w-full">
-              <input
-                type="text"
-                required
-                placeholder="New Username"
-                {...register("username")}
-              />
-            </label>
-            {errors.username && (
-              <p className="text-sm mt-1 text-warning">
-                {errors.username.message}
-              </p>
-            )}
-          </div>
-          <DialogFooter>
-            <DialogClose disabled={loading} className="btn btn-error brn-block">
-              Close
-            </DialogClose>
-            <button
-              type="submit"
-              className="btn btn-primary"
-              disabled={loading}
-            >
-              {loading ? (
-                <span className="loading loading-spinner loading-sm"></span>
-              ) : (
-                "Update Username"
+        {vrState?.inProgress ? (
+          <VerificationComponent
+            level={vrState?.level}
+            onComplete={vrState?.complete}
+            onCancel={vrState?.cancel}
+          />
+        ) : (
+          <form onSubmit={handleSubmit(updateUsername)}>
+            <div className="mb-2.5">
+              <label className="input validator w-full">
+                <input
+                  type="text"
+                  required
+                  placeholder="New Username"
+                  {...register("username")}
+                />
+              </label>
+              {errors.username && (
+                <p className="text-sm mt-1 text-warning">
+                  {errors.username.message}
+                </p>
               )}
-            </button>
-          </DialogFooter>
-        </form>
+            </div>
+
+            <DialogFooter>
+              <DialogClose
+                disabled={loading}
+                className="btn btn-error brn-block"
+              >
+                Close
+              </DialogClose>
+              <button
+                type="submit"
+                className="btn btn-primary"
+                disabled={loading}
+              >
+                {loading ? (
+                  <span className="loading loading-spinner loading-sm"></span>
+                ) : (
+                  "Update Username"
+                )}
+              </button>
+            </DialogFooter>
+          </form>
+        )}
       </DialogContent>
     </Dialog>
   );
@@ -1005,6 +1113,26 @@ function UpdateUsernameDialog({ user }: { user: UserResource }) {
 function UpdateUserDialog({ user }: { user: UserResource }) {
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
+  const [vrState, setVrState] = useState<{
+    inProgress: boolean;
+    complete: () => void;
+    cancel: () => void;
+    level?: "first_factor" | "second_factor" | "multi_factor";
+  } | null>(null);
+
+  const updateUserProfile = useReverification((params) => user.update(params), {
+    onNeedsReverification: ({ complete, cancel, level }) => {
+      setVrState({ inProgress: true, complete, cancel, level });
+    },
+  });
+  const updateProfileImage = useReverification(
+    (params) => user.setProfileImage(params),
+    {
+      onNeedsReverification: ({ complete, cancel, level }) => {
+        setVrState({ inProgress: true, complete, cancel, level });
+      },
+    }
+  );
 
   const ProfileSchema = z.object({
     firstName: z.string().min(1, "First name is required"),
@@ -1037,11 +1165,20 @@ function UpdateUserDialog({ user }: { user: UserResource }) {
     console.log("Updating profile with data:", data);
     setLoading(true);
     try {
+      // If a file is provided, upload it
+      if (data.file) {
+        const uploadResult = await updateProfileImage({
+          file: data.file,
+        });
+        if (!uploadResult) {
+          console.error("Failed to upload profile image:", uploadResult);
+          return;
+        }
+        console.log("Profile image uploaded successfully");
+      }
       const res = await updateUserProfile({
-        userId: user.id,
         firstName: data.firstName,
         lastName: data.lastName,
-        file: data.file,
       });
       if (!res) {
         console.error("Failed to update profile:", res);
@@ -1061,7 +1198,9 @@ function UpdateUserDialog({ user }: { user: UserResource }) {
     }
     setLoading(true);
     try {
-      const res = await removeUserProfileImage(user.id);
+      const res = await updateProfileImage({
+        file: null, // Set file to null to remove the profile image
+      });
       if (!res) {
         console.error("Failed to remove profile image:", res);
         return;
@@ -1073,7 +1212,6 @@ function UpdateUserDialog({ user }: { user: UserResource }) {
     } finally {
       user.reload();
       setLoading(false);
-      setOpen(false);
     }
   }
 
@@ -1088,83 +1226,94 @@ function UpdateUserDialog({ user }: { user: UserResource }) {
             picture.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit(updateProfile)}>
-          <div className="md:h-100 h-140 overflow-y-scroll">
-            <div className="mb-2.5">
-              <label htmlFor="first name" className="input validator w-full">
-                <input
-                  type="text"
-                  required
-                  placeholder="First Name"
-                  {...register("firstName")}
-                />
-              </label>
-              {errors.firstName && (
-                <p className="text-sm mt-1 text-warning">
-                  {errors.firstName.message}
-                </p>
-              )}
+        {vrState?.inProgress ? (
+          <VerificationComponent
+            level={vrState?.level}
+            onComplete={vrState?.complete}
+            onCancel={vrState?.cancel}
+          />
+        ) : (
+          <form onSubmit={handleSubmit(updateProfile)}>
+            <div className="md:h-100 h-140 overflow-y-scroll">
+              <div className="mb-2.5">
+                <label htmlFor="first name" className="input validator w-full">
+                  <input
+                    type="text"
+                    required
+                    placeholder="First Name"
+                    {...register("firstName")}
+                  />
+                </label>
+                {errors.firstName && (
+                  <p className="text-sm mt-1 text-warning">
+                    {errors.firstName.message}
+                  </p>
+                )}
+              </div>
+              <div className="mb-2.5">
+                <label htmlFor="last name" className="input validator w-full">
+                  <input
+                    type="text"
+                    required
+                    placeholder="last Name"
+                    {...register("lastName")}
+                  />
+                </label>
+                {errors.lastName && (
+                  <p className="text-sm mt-1 text-warning">
+                    {errors.lastName.message}
+                  </p>
+                )}
+              </div>
+              <div className="divider"></div>
+              <div className="mb-2.5">
+                <label className="w-full flex items-center justify-center">
+                  <FileUploader
+                    onFileChange={(file) => setValue("file", file)}
+                    initialFileUrl={user.imageUrl}
+                    acceptedFileTypes={{ "image/*": [".jpg", ".jpeg", ".png"] }}
+                    enableImageCropping={true}
+                    cropAspectRatio={1}
+                    cropperStyle={{ width: "100%", height: "25%" }}
+                  />
+                </label>
+                {typeof errors.file?.message === "string" && (
+                  <p className="text-sm mt-1 text-warning">
+                    {errors.file.message}
+                  </p>
+                )}
+              </div>
+              <div className="divider"></div>
             </div>
-            <div className="mb-2.5">
-              <label htmlFor="last name" className="input validator w-full">
-                <input
-                  type="text"
-                  required
-                  placeholder="last Name"
-                  {...register("lastName")}
-                />
-              </label>
-              {errors.lastName && (
-                <p className="text-sm mt-1 text-warning">
-                  {errors.lastName.message}
-                </p>
-              )}
-            </div>
-            <div className="divider"></div>
-            <div className="mb-2.5">
-              <label className="w-full flex items-center justify-center">
-                <FileUploader
-                  onFileChange={(file) => setValue("file", file)}
-                  initialFileUrl={user.imageUrl}
-                  acceptedFileTypes={{ "image/*": [".jpg", ".jpeg", ".png"] }}
-                  enableImageCropping={true}
-                  cropAspectRatio={1}
-                  cropperStyle={{ width: "100%", height: "25%" }}
-                />
-              </label>
-              {typeof errors.file?.message === "string" && (
-                <p className="text-sm mt-1 text-warning">
-                  {errors.file.message}
-                </p>
-              )}
-            </div>
-            <div className="divider"></div>
-          </div>
-          <DialogFooter className="mt-2">
-            <DialogClose disabled={loading} className="btn btn-error brn-block">
-              Close
-            </DialogClose>
-            <button
-              type="button"
-              className="btn btn-error btn-outline"
-              onClick={removeProfileImage}
-              disabled={loading}
-            >
-              Remove Profile Image
-            </button>
-            <button
-              type="submit"
-              className="btn btn-primary"
-              disabled={loading}
-            >
-              {loading ? (
-                <span className="loading loading-spinner loading-sm"></span>
-              ) : (
-                "Update Profile"
-              )}
-            </button>
-          </DialogFooter>
-        </form>
+            <DialogFooter className="mt-2">
+              <DialogClose
+                disabled={loading}
+                className="btn btn-error brn-block"
+              >
+                Close
+              </DialogClose>
+              <button
+                type="button"
+                className="btn btn-error btn-outline"
+                onClick={removeProfileImage}
+                disabled={loading}
+              >
+                Remove Profile Image
+              </button>
+              <button
+                type="submit"
+                className="btn btn-primary"
+                disabled={loading}
+              >
+                {loading ? (
+                  <span className="loading loading-spinner loading-sm"></span>
+                ) : (
+                  "Update Profile"
+                )}
+              </button>
+            </DialogFooter>
+          </form>
+        )}
       </DialogContent>
     </Dialog>
   );
@@ -1173,8 +1322,19 @@ function UpdateUserDialog({ user }: { user: UserResource }) {
 function UpdatePasswordDialog({ user }: { user: UserResource }) {
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
+  const [vrState, setVrState] = useState<{
+    inProgress: boolean;
+    complete: () => void;
+    cancel: () => void;
+    level?: "first_factor" | "second_factor" | "multi_factor";
+  } | null>(null);
   const changeUserPassword = useReverification(
-    (params: UpdateUserPasswordParams) => user.updatePassword(params)
+    (params: UpdateUserPasswordParams) => user.updatePassword(params),
+    {
+      onNeedsReverification: ({ complete, cancel, level }) => {
+        setVrState({ inProgress: true, complete, cancel, level });
+      },
+    }
   );
 
   const UpdatePasswordSchema = z.object({
@@ -1193,6 +1353,11 @@ function UpdatePasswordDialog({ user }: { user: UserResource }) {
     formState: { errors },
   } = useForm<UpdatePasswordFormData>({
     resolver: zodResolver(UpdatePasswordSchema),
+    defaultValues: {
+      currentPassword: "",
+      newPassword: "",
+      signOutOfOtherSessions: false,
+    },
   });
 
   async function updatePassword(data: UpdatePasswordFormData) {
@@ -1221,96 +1386,188 @@ function UpdatePasswordDialog({ user }: { user: UserResource }) {
             Enter your current password and new password.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit(updatePassword)}>
-          <div className="mb-2.5">
-            <label className="input validator w-full">
-              <input
-                type="text"
-                required
-                placeholder="Current Password"
-                {...register("currentPassword")}
-              />
-            </label>
-            {errors.currentPassword && (
-              <p className="text-sm mt-1 text-warning">
-                {errors.currentPassword.message}
-              </p>
-            )}
-          </div>
-          <div className="mb-2.5">
-            <label className="input validator w-full">
-              <input
-                type="text"
-                required
-                placeholder="New Password"
-                {...register("newPassword")}
-              />
-            </label>
-            {errors.newPassword && (
-              <p className="text-sm mt-1 text-warning">
-                {errors.newPassword.message}
-              </p>
-            )}
-          </div>
-          <div className="mb-2.5">
-            <label className="validator w-full flex">
-              <input
-                type="checkbox"
-                required
-                className="checkbox checkbox-primary mt-2"
-                {...register("signOutOfOtherSessions")}
-              />
-              <div className="ml-3">
-                <p className="text-sm">Sign out of all other devices</p>
-                <p className="text-xs">
-                  It is recommended to sign out of all other devices which may
-                  have used your old password.
-                </p>
+        {vrState?.inProgress ? (
+          <VerificationComponent
+            level={vrState?.level}
+            onComplete={vrState?.complete}
+            onCancel={vrState?.cancel}
+          />
+        ) : (
+          <form onSubmit={handleSubmit(updatePassword)}>
+            <div>
+              <div className="mb-2.5">
+                <label className="input validator w-full">
+                  <input
+                    type="text"
+                    required
+                    placeholder="Current Password"
+                    {...register("currentPassword")}
+                  />
+                </label>
+                {errors.currentPassword && (
+                  <p className="text-sm mt-1 text-warning">
+                    {errors.currentPassword.message}
+                  </p>
+                )}
               </div>
-            </label>
-            {errors.signOutOfOtherSessions && (
-              <p className="text-sm mt-1 text-warning">
-                {errors.signOutOfOtherSessions.message}
-              </p>
-            )}
-          </div>
-          <DialogFooter>
-            <DialogClose>
-              <p className="btn btn-error">Cancel</p>
-            </DialogClose>
-            <button
-              type="submit"
-              className="btn btn-primary"
-              disabled={loading}
-            >
-              {loading ? (
-                <span className="loading loading-spinner loading-sm"></span>
-              ) : (
-                "Update Password"
-              )}
-            </button>
-          </DialogFooter>
-        </form>
+              <div className="mb-2.5">
+                <label className="input validator w-full">
+                  <input
+                    type="text"
+                    required
+                    placeholder="New Password"
+                    {...register("newPassword")}
+                  />
+                </label>
+                {errors.newPassword && (
+                  <p className="text-sm mt-1 text-warning">
+                    {errors.newPassword.message}
+                  </p>
+                )}
+              </div>
+              <div className="mb-2.5">
+                <label className="validator w-full flex">
+                  <input
+                    type="checkbox"
+                    className="checkbox checkbox-primary mt-2"
+                    {...register("signOutOfOtherSessions")}
+                  />
+                  <div className="ml-3">
+                    <p className="text-sm">Sign out of all other devices</p>
+                    <p className="text-xs">
+                      It is recommended to sign out of all other devices which
+                      may have used your old password.
+                    </p>
+                  </div>
+                </label>
+                {errors.signOutOfOtherSessions && (
+                  <p className="text-sm mt-1 text-warning">
+                    {errors.signOutOfOtherSessions.message}
+                  </p>
+                )}
+              </div>
+            </div>
+            <DialogFooter>
+              <DialogClose>
+                <p className="btn btn-error">Cancel</p>
+              </DialogClose>
+              <button
+                type="submit"
+                className="btn btn-primary"
+                disabled={loading}
+              >
+                {loading ? (
+                  <span className="loading loading-spinner loading-sm"></span>
+                ) : (
+                  "Update Password"
+                )}
+              </button>
+            </DialogFooter>
+          </form>
+        )}
       </DialogContent>
     </Dialog>
   );
 }
 
+function RevokeSessionPopover({
+  session,
+  currentSessionId,
+}: {
+  session: SessionWithActivitiesResource;
+  currentSessionId: string | null;
+}) {
+  const [vrState, setVrState] = useState<{
+    inProgress: boolean;
+    complete: () => void;
+    cancel: () => void;
+    level?: "first_factor" | "second_factor" | "multi_factor";
+  } | null>(null);
+
+  const [open, setOpen] = useState(false); // control Popover visibility
+
+  const revokeSession = useReverification(() => session.revoke(), {
+    onNeedsReverification: ({ complete, cancel, level }) => {
+      setVrState({
+        inProgress: true,
+        level,
+        complete: () => {
+          complete();
+          setOpen(false); // close popover on complete
+        },
+        cancel: () => {
+          cancel();
+          setOpen(false); // close popover on cancel
+        },
+      });
+    },
+  });
+
+  async function revokeSessionHandler() {
+    if (!session) return;
+    await revokeSession()
+      .then(() => {
+        console.log("Session revoked successfully");
+        setOpen(false);
+      })
+      .catch((error) => {
+        console.error("Error revoking session:", error);
+      });
+  }
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger
+        className="btn btn-ghost"
+        disabled={currentSessionId === session.id}
+        onClick={() => {
+          setOpen(true);
+          revokeSessionHandler();
+        }}
+      >
+        Sign Out
+      </PopoverTrigger>
+      <PopoverContent>
+        {vrState?.inProgress ? (
+          <VerificationComponent
+            level={vrState.level}
+            onComplete={vrState.complete}
+            onCancel={vrState.cancel}
+          />
+        ) : (
+          <div className="w-full flex items-center justify-center text-base-content">
+            <span className="loading loading-spinner loading-md"></span>
+          </div>
+        )}
+      </PopoverContent>
+    </Popover>
+  );
+}
+
 function DeleteAccountAlert({ user }: { user: UserResource }) {
   const { signOut } = useClerk();
+  const pathname = usePathname();
 
   const [value, setValue] = useState("");
-  const pathname = usePathname();
+  const [vrState, setVrState] = useState<{
+    inProgress: boolean;
+    complete: () => void;
+    cancel: () => void;
+    level?: "first_factor" | "second_factor" | "multi_factor";
+  } | null>(null);
+
+  const deleteUserAccount = useReverification(() => user.delete(), {
+    onNeedsReverification: ({ complete, cancel, level }) => {
+      setVrState({ inProgress: true, complete, cancel, level });
+    },
+  });
 
   async function deleteUser() {
     if (!user) {
       return;
     }
-    const res = await deleteUserById(user.id);
-    if (!res) {
-      console.error("Failed to delete user");
-      return;
-    }
+    await deleteUserAccount();
+
     signOut({ redirectUrl: pathname });
   }
 
@@ -1320,31 +1577,44 @@ function DeleteAccountAlert({ user }: { user: UserResource }) {
         <div className="btn btn-soft btn-error">Delete Account</div>
       </AlertDialogTrigger>
       <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-          <AlertDialogDescription>
-            This action cannot be undone. This will permanently delete your
-            account and remove your data from our servers.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <label htmlFor="confirmation" className="text-sm text-base-content/70">
-          Type "DELETE" to confirm
-          <input
-            type="text"
-            className="input mt-2"
-            onChange={(e) => setValue(e.target.value)}
+        {vrState?.inProgress ? (
+          <VerificationComponent
+            level={vrState?.level}
+            onComplete={vrState?.complete}
+            onCancel={vrState?.cancel}
           />
-        </label>
-        <AlertDialogFooter>
-          <AlertDialogCancel className="btn">Cancel</AlertDialogCancel>
-          <AlertDialogAction
-            className="btn btn-error"
-            disabled={value !== "DELETE"}
-            onClick={deleteUser}
-          >
-            Delete
-          </AlertDialogAction>
-        </AlertDialogFooter>
+        ) : (
+          <>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This action cannot be undone. This will permanently delete your
+                account and remove your data from our servers.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <label
+              htmlFor="confirmation"
+              className="text-sm text-base-content/70"
+            >
+              Type "DELETE" to confirm
+              <input
+                type="text"
+                className="input mt-2"
+                onChange={(e) => setValue(e.target.value)}
+              />
+            </label>
+            <AlertDialogFooter>
+              <AlertDialogCancel className="btn">Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                className="btn btn-error"
+                disabled={value !== "DELETE"}
+                onClick={deleteUser}
+              >
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </>
+        )}
       </AlertDialogContent>
     </AlertDialog>
   );
