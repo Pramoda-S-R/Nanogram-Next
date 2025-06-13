@@ -99,6 +99,7 @@ export interface User {
   bio?: string;
   avatarUrl?: string;
   karma?: number;
+  role?: "user" | "admin" | "moderator" | "dev"; // For cool badges
   posts?: ObjectId[];
   likedPosts?: ObjectId[];
   savedPosts?: ObjectId[];

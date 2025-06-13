@@ -10,6 +10,7 @@
 - Clerk.dev (auth)
 - Upstash (Redis) (rate limiting)
 - Ably (Web Socket) (messaging)
+- Mailjet (Newsletters)
 - Cleaner UI/UX with daisy UI
 - Form builder and Blog builder
 
@@ -21,36 +22,37 @@
 
 ## What to do next
 
-<!-- - api routes for events collection -->
-<!-- - api logic for the entirity of events route -->
-<!-- - fix the inconsistency in home and events route -->
-
-<!-- - customize reverify dialog window -->
-<!-- - bring all the clerk manage functions to frontend using reverification -->
-<!-- - redo previous manage account features -->
-- test very email, delete email, profile update, remove social connection, delete account
-- start work on the community group
-- community ui
-<!-- - connect uploadthing and establish blogs and newsletters -->
-- subscribe to newsletter
-  <!-- - connect cloudinary and test out it's usage -->
-  <!-- - Revamped Navbar and community sidebar -->
-  <!-- - better api authentication allowing api key creation (mailjet perhaps) (no mailjet but still doable) -->
-  <!-- - admin auth proxy api -->
-  <!-- - make proxy secure/ ditch proxy for server actions "use server" -->
-- community database rework
-- relationships using aggregate
-- add ai mascot
-- admin dashboard
-- check if admin by comparing a admin database
-- censor board
-- activity logs
-- Dev/API page for developers
-- Docs for the devs
-- Terms of Service and Privacy policy
-- dedicated backend (are you mental bruv?)
-- mobile app and desktop app (I don't get paid enogh for tis)
-- IP bans (make the game first exquisite young lad)
+- [x] api routes for events collection
+- [x] api logic for the entirity of events route
+- [x] fix the inconsistency in home and events route
+- [x] customize reverify dialog window
+- [x] bring all the clerk manage functions to frontend using reverification
+- [x] redo previous manage account features
+- [ ] test very email, delete email, profile update, remove social connection, delete account
+- [ ] link api when user details are updated. T_T
+- [ ] start work on the community group
+- [ ] community ui
+- [x] connect uploadthing and establish blogs and newsletters
+- [ ] add 2fa check for POST, PUT, DELETE functions for devs
+- [ ] subscribe to newsletter
+- [x] connect cloudinary and test out it's usage
+- [x] Revamped Navbar and community sidebar
+- [x] better api authentication allowing api key creation (mailjet perhaps) (no mailjet but still doable)
+- [x] admin auth proxy api
+- [x] make proxy secure/ ditch proxy for server actions "use server"
+- [ ] community database rework
+- [ ] relationships using aggregate
+- [ ] add ai mascot
+- [ ] admin dashboard
+- [ ] check if admin by comparing a admin database
+- [ ] censor board
+- [ ] activity logs
+- [ ] Dev/API page for developers
+- [ ] Docs for the devs
+- [ ] Terms of Service and Privacy policy
+- [ ] dedicated backend (are you mental bruv?)
+- [ ] mobile app and desktop app (I don't get paid enogh for tis)
+- [ ] IP bans (make the game first exquisite young lad)
 
 ## Current Progress
 
