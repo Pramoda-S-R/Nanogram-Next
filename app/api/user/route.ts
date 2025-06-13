@@ -102,3 +102,85 @@ export const POST = withAuth(
   },
   { adminOnly: true }
 );
+
+export const PUT = withAuth(
+  async (req: NextRequest) => {
+    try {
+      const formData = await req.formData();
+      const userId = formData.get("userId");
+      if (!userId) {
+        return NextResponse.json(
+          { error: "User ID is required" },
+          { status: 400 }
+        );
+      }
+
+      const updateFields: Partial<User> = {};
+      for (const [key, value] of formData.entries()) {
+        if (value && key !== "userId") {
+          // Only assign string values to fields that are not explicitly undefined in User type
+          if (typeof (updateFields as any)[key] !== "undefined" || (key !== "avatarUrl")) {
+            (updateFields as any)[key] = value;
+          }
+        }
+      }
+      updateFields.updatedAt = new Date();
+
+      const client = await clientPromise;
+      const collection = client.db(database).collection("user");
+      const result = await collection.updateOne(
+        { userId: userId as string },
+        { $set: updateFields }
+      );
+
+      if (result.matchedCount === 0) {
+        return NextResponse.json({ error: "User not found" }, { status: 404 });
+      }
+
+      return NextResponse.json(
+        { message: "User updated successfully" },
+        { status: 200 }
+      );
+    } catch (error: any) {
+      return NextResponse.json(
+        { error: "Failed to connect to database", message: error.message },
+        { status: 500 }
+      );
+    }
+  },
+  { adminOnly: true }
+);
+
+export const DELETE = withAuth(
+  async (req: NextRequest) => {
+    try {
+      const { searchParams } = new URL(req.url);
+      const userId = searchParams.get("user_id");
+      if (!userId) {
+        return NextResponse.json(
+          { error: "User ID is required" },
+          { status: 400 }
+        );
+      }
+
+      const client = await clientPromise;
+      const collection = client.db(database).collection("user");
+      const result = await collection.deleteOne({ userId: userId });
+
+      if (result.deletedCount === 0) {
+        return NextResponse.json({ error: "User not found" }, { status: 404 });
+      }
+
+      return NextResponse.json(
+        { message: "User deleted successfully" },
+        { status: 200 }
+      );
+    } catch (error: any) {
+      return NextResponse.json(
+        { error: "Failed to connect to database", message: error.message },
+        { status: 500 }
+      );
+    }
+  },
+  { adminOnly: true }
+);

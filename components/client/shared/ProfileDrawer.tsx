@@ -120,32 +120,12 @@ const ProfileDrawer = () => {
     }
   }
 
-  const navbarRoutes = [
-    "/",
-    "/about-us",
-    "/events",
-    "/gallery",
-    "/blog",
-    "/newsletter",
-    "/developers",
-    "/feedback",
-    "/privacy-policy",
-    "/terms-of-service",
-    "/sitemap",
-  ];
-
   return (
     <Drawer>
       <DrawerTrigger>
         <div
-          className={`flex h-full items-center tooltip ${
-            navbarRoutes.some((route) => pathname.startsWith(route))
-              ? "tooltip-bottom"
-              : "tooltip-right"
-          }`}
-          data-tip={`${user?.firstName || "User"} ${
-            user?.lastName || "Profile"
-          }`}
+          className={"flex h-full items-center"}
+          title={`${user?.firstName || "User"} ${user?.lastName || "Profile"}`}
         >
           <div className="relative group w-7 h-7 overflow-hidden rounded-full">
             <img

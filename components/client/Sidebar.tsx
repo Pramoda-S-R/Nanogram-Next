@@ -91,31 +91,35 @@ const Sidebar = () => {
   return (
     <>
       {/* Desktop Sidebar */}
-      <div className="hidden sticky top-0 md:flex h-dvh bg-base-100">
-        <div className="p-1 pl-3 pb-5 flex flex-col justify-between h-full">
+      <div className="hidden sticky top-0 md:flex h-screen bg-base-100">
+        <div className="flex flex-col justify-between p-1 pl-3 pb-5 w-full">
+          {/* Navigation Section */}
           <nav className="flex flex-col gap-5 px-1 pt-3">
             {linkItems.map(({ href, label, icon }) => (
               <Link
                 key={href}
                 href={href}
                 aria-label={label}
+                title={label}
                 aria-current={isActive(href) ? "page" : undefined}
-                className={`group transition-colors duration-150 tooltip tooltip-right flex items-center gap-1 text-md font-semibold ${
+                className={`group transition-colors duration-150 flex items-center gap-1 text-md font-semibold ${
                   isActive(href)
                     ? "text-base-content"
                     : "text-base-content/50 hover:text-info"
                 }`}
-                data-tip={label}
               >
                 {icon}
               </Link>
             ))}
           </nav>
-          <div className="flex flex-col items-center gap-3">
+
+          {/* Additional Content Section */}
+          <div className="flex flex-col items-center gap-2 mt-5">
             <ThemeSwitch />
             <ProfileDrawer />
           </div>
         </div>
+
         {mounted && (
           <div className="divider divider-horizontal divider-start ml-0 group text-base-content"></div>
         )}
