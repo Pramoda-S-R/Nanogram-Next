@@ -167,7 +167,7 @@ export default function BlogPage() {
           Upload Blog
         </button>
       </div>
-      <div className="blog w-full px-4 md:px-2 md:pr-6 pb-20 overflow-y-scroll">
+      <div className="blog w-full px-4 md:px-2 md:pr-6 pb-20 overflow-y-auto">
         {metadata.cover && (
           <div className="aspect-[3/1] overflow-hidden">
             <img

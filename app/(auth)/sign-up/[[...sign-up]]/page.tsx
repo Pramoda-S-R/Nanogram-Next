@@ -104,7 +104,7 @@ export default function SignUp() {
 
       if (result.status === "complete") {
         await setActive({ session: result.createdSessionId });
-        router.push(redirectUrl); // ✅ Final redirect after verification
+        router.push("/onboarding"); // ✅ Final redirect after verification
       }
     } catch (err: any) {
       console.error("Verification failed", err);
@@ -296,7 +296,7 @@ export default function SignUp() {
 
       {error && <p className="text-error">{error}</p>}
 
-      <button className="btn btn-link mt-5" onClick={switchToSignIn}>
+      <button className="btn btn-link text-info mt-5" onClick={switchToSignIn}>
         Already have an account? Sign In
       </button>
     </div>

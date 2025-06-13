@@ -40,6 +40,7 @@
 - relationships using aggregate
 - add ai mascot
 - admin dashboard
+- check if admin by comparing a database
 - censor board
 - activity logs
 - Dev/API page for developers

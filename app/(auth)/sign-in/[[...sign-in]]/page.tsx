@@ -240,12 +240,12 @@ export default function CustomSignIn() {
 
       {/* Forgot Password Button */}
       <div className="flex justify-between mt-4">
-        <button className="btn btn-link p-0" onClick={switchToSignUp}>
+        <button className="btn btn-link text-info p-0" onClick={switchToSignUp}>
           Don't have an account? Sign Up
         </button>
         <button
           type="button"
-          className="btn btn-link p-0"
+          className="btn btn-link text-info p-0"
           onClick={resetPassword}
         >
           Forgot Password?

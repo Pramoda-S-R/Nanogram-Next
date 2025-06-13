@@ -88,3 +88,48 @@ export interface Newsletters {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export interface User {
+  _id: ObjectId;
+  userId: string;
+  username: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  bio?: string;
+  avatarUrl?: string;
+  karma?: number;
+  posts?: ObjectId[];
+  likedPosts?: ObjectId[];
+  savedPosts?: ObjectId[];
+  following?: ObjectId[];
+  followers?: ObjectId[];
+  comments?: ObjectId[];
+  likedComments?: ObjectId[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface Post {
+  _id: ObjectId;
+  creator: ObjectId;
+  caption: string;
+  tags: string[];
+  imageId: string;
+  imageUrl: string;
+  savedBy: ObjectId[];
+  likes: ObjectId[];
+  comments: ObjectId[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface Comment {
+  _id: ObjectId;
+  postId: ObjectId;
+  commenter: ObjectId;
+  content: string;
+  likes: ObjectId[];
+  createdAt: Date;
+  updatedAt: Date;
+}

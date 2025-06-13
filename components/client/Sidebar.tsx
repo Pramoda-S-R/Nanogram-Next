@@ -11,9 +11,9 @@ import {
   PlusSquare,
   Users,
 } from "lucide-react";
-import Image from "next/image";
 import ThemeSwitch from "./shared/ui/ThemeSwitch";
 import ProfileDrawer from "./shared/ProfileDrawer";
+import Image from "next/image";
 
 const Sidebar = () => {
   const pathname = usePathname();
@@ -33,6 +33,7 @@ const Sidebar = () => {
           alt="logo"
           width={24}
           height={24}
+          className="rounded-sm"
         />
       ),
     },
@@ -57,18 +58,6 @@ const Sidebar = () => {
       label: "Messages",
       icon: <MessageCircle height={24} />,
     },
-    {
-      href: "/",
-      label: "Profile",
-      icon: (
-        <Image
-          src={"/assets/images/nanogram_logo-bg-primary.svg"}
-          alt="logo"
-          width={24}
-          height={24}
-        />
-      ),
-    },
   ];
 
   const isActive = (href: string) =>
@@ -92,6 +81,10 @@ const Sidebar = () => {
           <span>{label}</span>
         </Link>
       ))}
+      <div className="flex flex-col items-center text-xs text-base-content/50 hover:text-info">
+        <ProfileDrawer />
+        <span>Profile</span>
+      </div>
     </nav>
   );
 

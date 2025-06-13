@@ -254,6 +254,82 @@ export async function changeUserPassword({
   }
 }
 
+// ===================
+// User Functions
+// ===================
+// Check if user exists by ID
+export async function userExistsById(userId: string): Promise<boolean> {
+  try {
+    const response = await fetch(`${BASE_URL}/api/user?user_id=${userId}`, {
+      method: "GET",
+      headers: {
+        "x-api-key": apiKey || "",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.documents.length > 0;
+  } catch (error) {
+    console.error("Error checking user existence:", error);
+    return false;
+  }
+}
+// Add user to db
+export async function addUserToDb({
+  userId,
+  username,
+  firstName,
+  lastName,
+  email,
+  bio,
+  avatarUrl,
+}: {
+  userId: string;
+  username: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  bio?: string;
+  avatarUrl?: string;
+}): Promise<boolean> {
+  try {
+    const formData = new FormData();
+    formData.append("userId", userId);
+    formData.append("username", username);
+    formData.append("firstName", firstName);
+    formData.append("lastName", lastName);
+    formData.append("email", email);
+
+    if (bio) {
+      formData.append("bio", bio);
+    }
+    if (avatarUrl) {
+      formData.append("avatarUrl", avatarUrl);
+    }
+    const response = await fetch(`${BASE_URL}/api/user`, {
+      method: "POST",
+      headers: {
+        "x-api-key": apiKey || "",
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to add user to database");
+    }
+
+    console.log("User added to database successfully");
+    return true;
+  } catch (error) {
+    console.error("Error adding user to database:", error);
+    return false;
+  }
+}
+
 // ==================
 // Nanogram Functions
 // ==================
