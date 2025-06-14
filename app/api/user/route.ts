@@ -74,6 +74,7 @@ export const POST = withAuth(
         bio: bio ? (bio as string) : "",
         avatarUrl: avatarUrl ? (avatarUrl as string) : undefined,
         karma: 0,
+        role: "user",
         posts: [],
         likedPosts: [],
         savedPosts: [],
@@ -119,7 +120,10 @@ export const PUT = withAuth(
       for (const [key, value] of formData.entries()) {
         if (value && key !== "userId") {
           // Only assign string values to fields that are not explicitly undefined in User type
-          if (typeof (updateFields as any)[key] !== "undefined" || (key !== "avatarUrl")) {
+          if (
+            typeof (updateFields as any)[key] !== "undefined" ||
+            key !== "avatarUrl"
+          ) {
             (updateFields as any)[key] = value;
           }
         }

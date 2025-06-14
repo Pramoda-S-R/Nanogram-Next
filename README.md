@@ -12,6 +12,7 @@
 - Ably (Web Socket) (messaging)
 - Mailjet (Newsletters)
 - Cleaner UI/UX with daisy UI
+- Shadcn for amazing UI
 - Form builder and Blog builder
 
 ## Minor features (brainstorm)

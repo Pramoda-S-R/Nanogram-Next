@@ -34,7 +34,7 @@ const Navbar = () => {
           </Link>
         ))}
       </nav>
-      <div className="w-full max-w-7xl flex justify-between items-center px-6 py-1">
+      <div className="w-full flex justify-between items-center px-6 py-1">
         {/* Logo & Menu */}
         <div className="flex items-center gap-4">
           {/* Dropdown */}

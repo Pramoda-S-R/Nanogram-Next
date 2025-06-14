@@ -118,6 +118,7 @@ export interface Post {
   tags: string[];
   imageId: string;
   imageUrl: string;
+  source: string;
   savedBy: ObjectId[];
   likes: ObjectId[];
   comments: ObjectId[];

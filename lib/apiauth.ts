@@ -80,7 +80,8 @@ export function withAuth(
     // Attach headers (optional – for internal use or logging)
     req.headers.set("x-dev-id", dev._id.toString());
     req.headers.set("x-dev-tier", tier);
-    req.headers.set("x-dev-userid", dev.userId || "");
+    req.headers.set("x-dev-userid", dev.userId.toString() || "");
+    req.headers.set("x-dev-appname", dev.appName || "");
 
     const response = await handler(req, dev);
 

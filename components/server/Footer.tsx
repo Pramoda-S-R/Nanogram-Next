@@ -39,7 +39,7 @@ const Footer = () => {
   return (
     <footer className=" px-6 py-10 md:px-8">
       <div>
-        <div className="mx-auto max-w-7xl flex flex-col gap-12">
+        <div className="mx-auto flex flex-col gap-12">
           <div className="flex flex-col items-center gap-8 md:justify-between md:flex-row">
             <ul className="flex items-center gap-8">
               <FooterLink to="/">Home</FooterLink>

@@ -121,10 +121,8 @@ const ProfileDrawer = () => {
     <Drawer>
       <DrawerTrigger>
         <div
-          className="flex h-full items-center tooltip tooltip-bottom"
-          data-tip={`${user?.firstName || "User"} ${
-            user?.lastName || "Profile"
-          }`}
+          className="flex h-full items-center"
+          title={`${user?.firstName || "User"} ${user?.lastName || "Profile"}`}
         >
           <div className="relative group w-7 h-7 overflow-hidden rounded-full">
             <img
@@ -261,7 +259,7 @@ const ProfileDrawer = () => {
                     Connections
                   </p>
                   <div className="flex w-full">
-                    <div className="flex w-full">
+                    <div className="flex w-full gap-2">
                       {user.externalAccounts.map((account, idx) => (
                         <ConnectionsActions
                           key={idx}
@@ -385,6 +383,7 @@ function ConnectionsActions({
   user: UserResource;
   externalAccount: ExternalAccountResource;
 }) {
+  const [open, setOpen] = useState(false);
   const [vrState, setVrState] = useState<{
     inProgress: boolean;
     complete: () => void;
@@ -405,7 +404,7 @@ function ConnectionsActions({
     }
   }
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger>
         {externalAccount.provider === "google" && (
           <div className="btn bg-white text-black border-[#e5e5e5]">
@@ -467,7 +466,10 @@ function ConnectionsActions({
         ) : (
           <button
             className="btn btn-error"
-            onClick={() => handleRemoveConnection()}
+            onClick={() => {
+              handleRemoveConnection();
+              setOpen(false);
+            }}
           >
             Remove
           </button>

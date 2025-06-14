@@ -13,13 +13,29 @@ function generateApiKey() {
 export const GET = withAuth(
   async (req: NextRequest, dev: any) => {
     const searchParams = req.nextUrl.searchParams;
-    const id = searchParams.get("id");
+    const id = searchParams.get("id") as string;
+    const clerkid = searchParams.get("clerkid") as string;
     try {
       const client = await clientPromise;
       const collection = client.db(database).collection("developers");
 
+      let userId: ObjectId;
+
+      // If clerkid is provided, fetch by clerkid
+      if (clerkid) {
+        const userCollection = client.db(database).collection("user");
+        const user = await userCollection.findOne({ userId: clerkid });
+        if (!user) {
+          return NextResponse.json(
+            { error: "User not found" },
+            { status: 404 }
+          );
+        }
+        userId = new ObjectId(user._id);
+      }
+
       // Fetch all developers
-      const developers = await collection.findOne({ userId: id });
+      const developers = await collection.findOne({ userId: new ObjectId(id) });
 
       return NextResponse.json(developers, { status: 200 });
     } catch (error) {
@@ -40,6 +56,7 @@ export const POST = withAuth(
       const userId = formData.get("id") as string;
       const name = formData.get("name") as string;
       const email = formData.get("email") as string;
+      const appName = formData.get("appName") as string;
       const tier = "free";
       const client = await clientPromise;
       const collection = client.db(database).collection("developers");
@@ -49,6 +66,7 @@ export const POST = withAuth(
         name,
         email,
         tier,
+        appName,
         apiKey: generateApiKey(),
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -95,7 +113,7 @@ export const PUT = withAuth(
       const formData = await req.formData();
       const name = formData.get("name") as string;
       const email = formData.get("email") as string;
-      const tier = "free";
+      const tier = formData.get("tier") as string;
 
       const client = await clientPromise;
       const collection = client.db(database).collection("developers");

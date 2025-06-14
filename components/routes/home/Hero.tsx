@@ -6,7 +6,7 @@ import { getHeroNanograms } from "@/app/actions/api";
 const Hero = async () => {
   const teamMembers = await getHeroNanograms();
   return (
-    <section className="max-w-7xl mx-auto w-full h-screen flex flex-col">
+    <section className="mx-auto w-full h-screen flex flex-col">
       <div className="w-full h-5/6 relative">
         <ParticleRing />
         <div className="absolute top-0 left-0 max-w-full w-full h-full flex flex-col justify-end pointer-events-none md:p-20 p-4">
@@ -21,7 +21,7 @@ const Hero = async () => {
             </p>
             <div className="w-full flex md:flex-row flex-col gap-5 pointer-events-auto">
               <Button
-                className={"btn btn-secondary text-base-content w-fit"}
+                className={"btn btn-info text-base-content w-fit"}
                 navigateTo="/community"
               >
                 Join the Community for Free!

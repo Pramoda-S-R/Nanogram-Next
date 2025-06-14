@@ -6,7 +6,7 @@ const ContactUs = () => {
   return (
     <section className="relative w-full" id="contact">
       <div className="max-w-7xl mx-auto py-28 px-4 ">
-        <div className="max-w-7xl mx-auto absolute inset-0 w-full">
+        <div className="mx-auto absolute inset-0 w-full">
           <iframe
             className="w-full h-full"
             src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3888.1278150071275!2d77.50345041027362!3d12.963672087298189!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bae3e9c40000001%3A0x2d368cebf691c5fb!2sDr.%20Ambedkar%20Institute%20Of%20Technology!5e0!3m2!1sen!2sin!4v1727277912673!5m2!1sen!2sin"

@@ -2,15 +2,11 @@ import clientPromise from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
 import { NextRequest, NextResponse } from "next/server";
 import cloudinary from "@/lib/cloudinary";
+import { withAuth } from "@/lib/apiauth";
 
 const database: string | undefined = process.env.DATABASE;
-const apiKey: string | undefined = process.env.NEXT_PUBLIC_API_KEY;
 
-export async function GET(req: NextRequest) {
-  const apiKeyHeader = req.headers.get("x-api-key");
-  if (apiKey && apiKeyHeader !== apiKey) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+export const GET = withAuth(async (req: NextRequest) => {
   const { searchParams } = new URL(req.url);
   const postId = searchParams.get("id");
   const sort = searchParams.get("sort") || "createdAt";
@@ -40,27 +36,29 @@ export async function GET(req: NextRequest) {
       { status: 500 }
     );
   }
-}
+});
 
-export async function POST(req: NextRequest) {
-  const apiKeyHeader = req.headers.get("x-api-key");
-  if (apiKey && apiKeyHeader !== apiKey) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
+export const POST = withAuth(async (req: NextRequest) => {
   try {
-    const client = await clientPromise;
-    const collection = client.db(database).collection("posts");
+    const dev = req.headers.get("x-dev-userid") as string;
+    const tier = req.headers.get("x-dev-tier") as string;
+    const source = req.headers.get("x-dev-appname") as string;
 
     const formData = await req.formData();
-    const title = formData.get("title") as string;
-    const content = formData.get("content") as string;
-    const author = formData.get("author") as string;
-    const image = formData.get("image") as File;
-
-    if (!title || !content || !author) {
+    const creator = formData.get("creator") as string;
+    if (tier === "free" && creator !== dev) {
       return NextResponse.json(
-        { error: "Title, content, and author are required." },
+        { error: "Creator ID does not match developer user ID." },
+        { status: 400 }
+      );
+    }
+    const caption = formData.get("caption") as string;
+    const image = formData.get("image") as File;
+    const tags = formData.getAll("tags") as string[];
+
+    if (!caption || !creator) {
+      return NextResponse.json(
+        { error: "Caption and Creator Id is required" },
         { status: 400 }
       );
     }
@@ -88,14 +86,21 @@ export async function POST(req: NextRequest) {
     }
 
     const post = {
-      title,
-      content,
-      author,
+      creator,
+      caption,
+      tags,
       imageId,
       imageUrl,
+      source,
+      savedBy: [],
+      likes: [],
+      comments: [],
       createdAt: new Date(),
+      updatedAt: new Date(),
     };
 
+    const client = await clientPromise;
+    const collection = client.db(database).collection("posts");
     const response = await collection.insertOne(post);
 
     return NextResponse.json(
@@ -111,31 +116,40 @@ export async function POST(req: NextRequest) {
       { status: 500 }
     );
   }
-}
+});
 
-export async function PUT(req: NextRequest) {
-  const apiKeyHeader = req.headers.get("x-api-key");
-  if (apiKey && apiKeyHeader !== apiKey) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-  const { searchParams } = new URL(req.url);
-  const postId = searchParams.get("id");
-  if (!postId) {
-    return NextResponse.json(
-      { error: "Post ID is required." },
-      { status: 400 }
-    );
-  }
+export const PUT = withAuth(async (req: NextRequest) => {
   try {
+    const dev = req.headers.get("x-dev-userid") as string;
+    const tier = req.headers.get("x-dev-tier") as string;
+    const source = req.headers.get("x-dev-appname") as string;
+
     const client = await clientPromise;
     const collection = client.db(database).collection("posts");
 
     const formData = await req.formData();
-    const title = formData.get("title") as string;
-    const content = formData.get("content") as string;
-    const author = formData.get("author") as string;
-    const oldImageUrl = formData.get("imageUrl") as string;
-    const oldImageId = formData.get("imageId") as string;
+    const postId = formData.get("id") as string;
+    if (!postId) {
+      return NextResponse.json(
+        { error: "Post ID is required." },
+        { status: 400 }
+      );
+    }
+    const post = await collection.findOne({ _id: new ObjectId(postId) });
+    if (!post) {
+      return NextResponse.json({ error: "Post not found." }, { status: 404 });
+    }
+    // Ensure the developer is authorized to update this post
+    if (tier === "free" && post.creator !== dev) {
+      return NextResponse.json(
+        { error: "You are not authorized to update this post." },
+        { status: 403 }
+      );
+    }
+    const oldImageId = post.imageId; // Store the old image ID for deletion if a new image is uploaded
+
+    const caption = formData.get("caption") as string;
+    const tags = formData.getAll("tags") as string[];
     const image = formData.get("image") as File;
 
     let imageUrl = null;
@@ -167,13 +181,13 @@ export async function PUT(req: NextRequest) {
     }
 
     const update: any = {
-      title,
-      content,
-      author,
+      caption,
+      tags,
+      source,
       updatedAt: new Date(),
     };
 
-    if (imageUrl) {
+    if (image) {
       update.imageUrl = imageUrl;
       update.imageId = imageId;
     }
@@ -200,13 +214,12 @@ export async function PUT(req: NextRequest) {
       { status: 500 }
     );
   }
-}
+});
 
-export async function DELETE(req: NextRequest) {
-  const apiKeyHeader = req.headers.get("x-api-key");
-  if (apiKey && apiKeyHeader !== apiKey) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+export const DELETE = withAuth(async (req: NextRequest) => {
+  const dev = req.headers.get("x-dev-userid") as string;
+  const tier = req.headers.get("x-dev-tier") as string;
+
   const { searchParams } = new URL(req.url);
   const postId = searchParams.get("id");
   if (!postId) {
@@ -224,7 +237,13 @@ export async function DELETE(req: NextRequest) {
     if (!post) {
       return NextResponse.json({ error: "Post not found." }, { status: 404 });
     }
-
+    // Ensure the developer is authorized to delete this post
+    if (tier === "free" && post.creator !== dev) {
+      return NextResponse.json(
+        { error: "You are not authorized to delete this post." },
+        { status: 403 }
+      );
+    }
     // Delete the post
     const response = await collection.deleteOne({ _id: new ObjectId(postId) });
 
@@ -247,4 +266,4 @@ export async function DELETE(req: NextRequest) {
       { status: 500 }
     );
   }
-}
+});
