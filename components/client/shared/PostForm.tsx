@@ -16,7 +16,11 @@ const PostFormSchema = z.object({
     .string()
     .min(1, "Caption is required")
     .max(3000, "Caption must be less than 3000 characters"),
-  tags: z.string().array().optional(),
+  tags: z
+    .string()
+    .array()
+    .max(10, "A Maximum of 10 tags are allowed")
+    .optional(),
   file: z
     .any()
     .refine((file) => file instanceof File || file === null, {
@@ -45,15 +49,18 @@ const PostForm = ({
     register,
     handleSubmit,
     setValue,
+    watch,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(PostFormSchema),
     defaultValues: {
       caption: post ? post?.caption : "",
       tags: post ? post?.tags : [],
-      file: [],
+      file: undefined,
     },
   });
+
+  const caption = watch("caption");
 
   if (!isLoaded) {
     return (
@@ -75,41 +82,54 @@ const PostForm = ({
   // Form Submission
   const onSubmit = async (data: PostFormData) => {
     if (post && action === "Update") {
-      setIsLoadingUpdate(true);
-      const updatedPost = await updatePost({
-        ...data,
-        postId: post._id.toString(),
-      });
-
-      if (!updatedPost) {
-        toast("Upload Failed!", {
-          description:
-            "There was an error in updating your post. Please try again.",
+      try {
+        setIsLoadingUpdate(true);
+        const updatedPost = await updatePost({
+          ...data,
+          postId: post._id.toString(),
         });
-      }
-      toast("Update Successful!", {
-        description: "Your post has been updated successfully. 🎉",
-      });
-      setIsLoadingUpdate(false);
-      return router.push(`/posts/${post._id}`);
-    }
-    setIsLoadingCreate(true);
-    const newPost = await createPost({
-      ...data,
-      userId: user.id,
-    });
 
-    if (!newPost) {
-      toast("Upload Failed!", {
-        description:
-          "There was an error in Uploading your post. Please try again.",
+        if (!updatedPost) {
+          throw new Error("Failed to update post");
+        }
+        toast("Update Successful!", {
+          description: "Your post has been updated successfully. 🎉",
+        });
+        return router.push(`/posts/${post._id}`);
+      } catch (error) {
+        console.error("Error updating post:", error);
+        toast("Update Failed!", {
+          description: `There was an error in updating your post. Please try again.\nerror: ${error}`,
+        });
+        setIsLoadingUpdate(false);
+        return;
+      } finally {
+        setIsLoadingUpdate(false);
+      }
+    }
+    try {
+      setIsLoadingCreate(true);
+      const newPost = await createPost({
+        ...data,
+        userId: user.id,
       });
-    } else {
-      toast("Upload Successful!", {
-        description: "Your post has been uploaded successfully. 🎉",
+      console.log("New Post Created:", { ...data, userId: user.id });
+
+      if (!newPost) {
+        throw new Error("Failed to create post");
+      } else {
+        toast("Upload Successful!", {
+          description: "Your post has been uploaded successfully. 🎉",
+        });
+        setIsLoadingCreate(false);
+        router.push("/community");
+      }
+    } catch (error) {
+      toast("Upload Failed!", {
+        description: `There was an error in Uploading your post. Please try again. \nerror: ${error}`,
       });
       setIsLoadingCreate(false);
-      router.push("/community");
+      return;
     }
   };
 
@@ -120,14 +140,18 @@ const PostForm = ({
         className="flex flex-col gap-2 w-full px-3 pb-10"
       >
         {/* Caption Field */}
-        <fieldset className="fieldset px-3">
-          <legend className="fieldset-legend">Caption</legend>
+        <fieldset className="fieldset px-3 relative">
+          <legend className="fieldset-legend">Caption <span className="text-error">*</span></legend>
           <textarea
             placeholder="Write a caption..."
+            maxLength={3000}
             rows={4}
             className="mt-2 textarea textarea-ghost w-full"
             {...register("caption")}
           />
+          <p className="text-xs font-thin absolute bottom-1 right-5">
+            {caption.length}/3000
+          </p>
           {errors.caption && (
             <p className="text-error text-sm mt-1">{errors.caption.message}</p>
           )}
@@ -135,7 +159,7 @@ const PostForm = ({
 
         {/* Add Photos */}
         <fieldset className="px-3 fieldset">
-          <legend className="fieldset-legend">Add Photo</legend>
+          <legend className="fieldset-legend">Add Photo (optional)</legend>
           <label className="flex items-center justify-center">
             <FileUploader
               onFileChange={(file) => setValue("file", file)}
@@ -151,17 +175,56 @@ const PostForm = ({
         </fieldset>
 
         {/* Add Tags */}
+        {/* Add Tags */}
         <fieldset className="px-3 fieldset">
-          <legend className="input input-ghost w-full">
-            <Hash className="inline mr-2" />
-            <input
-              type="text"
-              id="tags"
-              placeholder="VLSI, Semiconductors, Analog Circuits, ..."
-              className=""
-              {...register("tags")}
-            />
-          </legend>
+          <legend className="fieldset-legend">Tags (optional)</legend>
+          <div className="flex flex-wrap gap-2 items-center">
+            {watch("tags")?.map((tag, index) => (
+              <div
+                key={index}
+                className="badge badge-outline badge-info flex items-center gap-1"
+              >
+                {tag}
+                <button
+                  type="button"
+                  onClick={() => {
+                    const newTags =
+                      watch("tags")?.filter((_, i) => i !== index) || [];
+                    setValue("tags", newTags, { shouldValidate: true });
+                  }}
+                  className="ml-1 text-xs text-error"
+                >
+                  ✕
+                </button>
+              </div>
+            ))}
+          </div>
+
+          <input
+            type="text"
+            placeholder="Type and press Enter to add a tag"
+            className="input input-sm input-ghost mt-2 w-full"
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === ",") {
+                e.preventDefault();
+                const value = e.currentTarget.value.trim();
+                const existingTags = watch("tags") || [];
+                if (value && !existingTags.includes(value)) {
+                  const newTags = [...existingTags, value];
+                  if (newTags.length <= 10) {
+                    setValue("tags", newTags, { shouldValidate: true });
+                    e.currentTarget.value = "";
+                  } else {
+                    toast("Maximum of 10 tags allowed.");
+                  }
+                }
+              }
+            }}
+          />
+
+          {errors.tags && (
+            <p className="text-warning text-sm mt-1">{errors.tags.message}</p>
+          )}
         </fieldset>
 
         {/* Submit & Cancel Buttons */}

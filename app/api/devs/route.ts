@@ -81,6 +81,22 @@ export const POST = withAuth(
         );
       }
 
+      // Change the role
+      const userCollection = client.db(database).collection("user");
+      const updateResult = await userCollection.updateOne(
+        { username: userId },
+        {
+          $set: { role: "dev" },
+        }
+      );
+
+      if (updateResult.modifiedCount === 0) {
+        return NextResponse.json(
+          { error: "Failed to update user role" },
+          { status: 500 }
+        );
+      }
+
       return NextResponse.json(
         {
           message: "Developer created successfully",

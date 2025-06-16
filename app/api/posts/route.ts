@@ -3,6 +3,7 @@ import { ObjectId } from "mongodb";
 import { NextRequest, NextResponse } from "next/server";
 import cloudinary from "@/lib/cloudinary";
 import { withAuth } from "@/lib/apiauth";
+import { User } from "@/types";
 
 const database: string | undefined = process.env.DATABASE;
 
@@ -12,28 +13,63 @@ export const GET = withAuth(async (req: NextRequest) => {
   const sort = searchParams.get("sort") || "createdAt";
   const order = parseInt(searchParams.get("order") || "1"); // 1 for ascending, -1 for descending
   const limit = parseInt(searchParams.get("limit") || "0");
+
   const query: any = {};
   if (postId.length > 0) {
     query._id = {
-      $in: postId
-        .filter((id) => typeof id === "string")
-        .map((id) => new ObjectId(id as string)),
+      $in: postId.map((id) => {
+        return /^[a-f\d]{24}$/i.test(id) ? new ObjectId(id) : id; // fallback to string
+      }),
     };
   }
   try {
     const client = await clientPromise;
     const collection = client.db(database).collection("posts");
 
-    let cursor = collection.find(query);
-    if (sort) {
-      cursor = cursor.sort({ [sort]: order } as Record<string, 1 | -1>);
-    }
+    const pipeline: any[] = [
+      { $match: query },
+      { $sort: { [sort]: order } },
+      {
+        $lookup: {
+          from: "user",
+          let: { creatorId: "$creator" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: [
+                    "$_id",
+                    {
+                      $cond: {
+                        if: { $eq: [{ $type: "$$creatorId" }, "objectId"] },
+                        then: "$$creatorId",
+                        else: { $toObjectId: "$$creatorId" },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          ],
+          as: "creator",
+        },
+      },
+      {
+        $unwind: {
+          path: "$creator",
+          preserveNullAndEmptyArrays: true, // Keep posts without a creator
+        },
+      },
+    ];
+
     if (limit > 0) {
-      cursor = cursor.limit(limit);
+      pipeline.push({ $limit: limit });
     }
 
-    const documents = await cursor.toArray();
-    return NextResponse.json({ documents }, { status: 200 });
+    const cursor = collection.aggregate(pipeline);
+    const posts = await cursor.toArray();
+
+    return NextResponse.json({ documents: posts }, { status: 200 });
   } catch (error: any) {
     return NextResponse.json(
       { error: error.message || "An error occurred." },
@@ -106,6 +142,20 @@ export const POST = withAuth(async (req: NextRequest) => {
     const client = await clientPromise;
     const collection = client.db(database).collection("posts");
     const response = await collection.insertOne(post);
+
+    // Update the creator's posts array
+    const userCollection = client.db(database).collection("user");
+    await userCollection.updateOne(
+      { _id: new ObjectId(creator) },
+      { $addToSet: { posts: response.insertedId } }
+    );
+
+    if (!userCollection) {
+      return NextResponse.json(
+        { error: "Failed to update user posts." },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json(
       {
@@ -250,6 +300,15 @@ export const DELETE = withAuth(async (req: NextRequest) => {
     }
     // Delete the post
     const response = await collection.deleteOne({ _id: new ObjectId(postId) });
+
+    // Remove the post from the creator's posts array
+    const userCollection = client.db(database).collection<User>("user");
+    await userCollection.updateOne(
+      { _id: post.creator },
+      {
+        $pull: { posts: new ObjectId(postId) },
+      }
+    );
 
     // If an imageId exists, delete the image from Cloudinary
     if (post.imageId) {

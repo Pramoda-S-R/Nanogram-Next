@@ -34,8 +34,8 @@ const PostStats = ({
             {liked ? <Liked /> : <Like />}
           </div>
         )}
-        {showComments && <MessageCircle />}
-        {showShare && <ShareIcon />}
+        {showComments && <MessageCircle strokeWidth={1.5} />}
+        {showShare && <ShareIcon strokeWidth={1.5} />}
         {showSave && (
           <div
             className="text-base-content w-5 h-5"

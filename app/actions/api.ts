@@ -9,6 +9,7 @@ import {
   Newsletters,
   Post,
   Testimonial,
+  User,
 } from "@/types";
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
@@ -89,6 +90,64 @@ export async function addUserToDb({
     return false;
   }
 }
+// Get user by username
+export async function getUserByUsername({
+  username,
+}: {
+  username: string;
+}): Promise<User | null> {
+  try {
+    const response = await fetch(
+      `${BASE_URL}/api/user?username=${username}&limit=1`,
+      {
+        method: "GET",
+        headers: {
+          "x-api-key": apiKey || "",
+        },
+        next: {
+          revalidate: 60, // Revalidate every 60 seconds
+        },
+      }
+    );
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+    return data.documents.length > 0 ? data.documents[0] : null;
+  } catch (error) {
+    console.error("Error fetching user by username:", error);
+    return null;
+  }
+}
+// Get current user
+export async function getCurrentUser({
+  user_id,
+}: {
+  user_id: string;
+}): Promise<User | null> {
+  try {
+    const response = await fetch(
+      `${BASE_URL}/api/user?user_id=${user_id}&limit=1`,
+      {
+        method: "GET",
+        headers: {
+          "x-api-key": apiKey || "",
+        },
+        next: {
+          revalidate: 60, // Revalidate every 60 seconds
+        },
+      }
+    );
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+    return data.documents.length > 0 ? data.documents[0] : null;
+  } catch (error) {
+    console.error("Error fetching current user:", error);
+    return null;
+  }
+}
 
 // ==================
 // Post Functions
@@ -120,6 +179,9 @@ export async function createPost({
       `${BASE_URL}/api/user?user_id=${userId}&limit=1`,
       {
         method: "GET",
+        headers: {
+          "x-api-key": apiKey || "",
+        },
       }
     );
     if (!userResponse.ok) {
@@ -152,15 +214,12 @@ export async function createPost({
 // Read a post by ID
 export async function getPostById(postId: string): Promise<any> {
   try {
-    const response = await fetch(
-      `${BASE_URL}/api/posts/aggregate?id=${postId}`,
-      {
-        method: "GET",
-        headers: {
-          "x-api-key": apiKey || "",
-        },
-      }
-    );
+    const response = await fetch(`${BASE_URL}/api/posts?id=${postId}`, {
+      method: "GET",
+      headers: {
+        "x-api-key": apiKey || "",
+      },
+    });
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -239,7 +298,7 @@ export async function deletePostById(postId: string): Promise<boolean> {
 export async function getFypPosts(): Promise<AggregatePost[]> {
   try {
     const response = await fetch(
-      `${BASE_URL}/api/posts/aggregate?sort=createdAt&order=-1&limit=25`,
+      `${BASE_URL}/api/posts?sort=createdAt&order=-1&limit=25`,
       {
         method: "GET",
         headers: {
@@ -259,6 +318,33 @@ export async function getFypPosts(): Promise<AggregatePost[]> {
     return data.documents as AggregatePost[];
   } catch (error) {
     console.error("Error fetching FYP posts:", error);
+    return [];
+  }
+}
+// Get posts by post _id array
+export async function getPostsByIds(
+  postIds: string[]
+): Promise<AggregatePost[]> {
+  try {
+    const params = postIds.map((id) => `id=${id}`).join("&");
+    const response = await fetch(`${BASE_URL}/api/posts?${params}`, {
+      method: "GET",
+      headers: {
+        "x-api-key": apiKey || "",
+      },
+      next: {
+        revalidate: 60, // Revalidate every 60 seconds
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.documents as AggregatePost[];
+  } catch (error) {
+    console.error("Error fetching posts by IDs:", error);
     return [];
   }
 }

@@ -43,6 +43,28 @@ export interface AggregatePost {
   updatedAt: Date;
 }
 
+export interface Aggregateuser {
+  _id: ObjectId;
+  userId: string;
+  username: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  bio?: string;
+  avatarUrl?: string;
+  karma?: number;
+  role?: "user" | "admin" | "moderator" | "dev"; // For cool badges
+  posts?: Post[];
+  likedPosts?: ObjectId[];
+  savedPosts?: ObjectId[];
+  following?: ObjectId[];
+  followers?: ObjectId[];
+  comments?: ObjectId[];
+  likedComments?: ObjectId[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 // MongoDB Schemas of various collections used in the application
 export interface Nanogram {
   _id: ObjectId;
