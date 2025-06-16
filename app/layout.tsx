@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "../styles/globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import { ThemeInit } from "@/components/client/ThemeInit";
+import { Toaster } from "@/components/client/shared/ui/Sonner";
 
 export const metadata: Metadata = {
   title: {
@@ -59,6 +60,7 @@ export default function RootLayout({
         <body className="nano-scrollbar">
           <ThemeInit />
           {children}
+          <Toaster />
         </body>
       </html>
     </ClerkProvider>

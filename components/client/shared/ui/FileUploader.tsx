@@ -71,7 +71,7 @@ const FileUploader = ({
   };
 
   return (
-    <div className="w-3/4 h-1/2 flex justify-center">
+    <div className="flex justify-center">
       {cropping ? (
         <div className="flex flex-col items-center justify-center w-full h-full">
           <Cropper
@@ -116,7 +116,7 @@ const FileUploader = ({
                   <img
                     src={fileUrl}
                     alt="Uploaded file"
-                    className="h-fit w-full rounded-[8px] object-cover object-top pointer-events-none"
+                    className="h-fit w-1/2 rounded-[8px] object-cover object-top pointer-events-none"
                     loading="lazy"
                   />
                 ) : (

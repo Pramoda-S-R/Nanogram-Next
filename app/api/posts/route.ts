@@ -8,13 +8,17 @@ const database: string | undefined = process.env.DATABASE;
 
 export const GET = withAuth(async (req: NextRequest) => {
   const { searchParams } = new URL(req.url);
-  const postId = searchParams.get("id");
+  const postId = searchParams.getAll("id");
   const sort = searchParams.get("sort") || "createdAt";
   const order = parseInt(searchParams.get("order") || "1"); // 1 for ascending, -1 for descending
   const limit = parseInt(searchParams.get("limit") || "0");
   const query: any = {};
-  if (postId) {
-    query._id = new ObjectId(postId);
+  if (postId.length > 0) {
+    query._id = {
+      $in: postId
+        .filter((id) => typeof id === "string")
+        .map((id) => new ObjectId(id as string)),
+    };
   }
   try {
     const client = await clientPromise;

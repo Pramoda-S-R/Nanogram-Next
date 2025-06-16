@@ -401,6 +401,8 @@ function ConnectionsActions({
       console.log("Connection removed successfully");
     } catch (error) {
       console.error("Error removing connection:", error);
+    } finally {
+      setOpen(false);
     }
   }
   return (
@@ -468,7 +470,6 @@ function ConnectionsActions({
             className="btn btn-error"
             onClick={() => {
               handleRemoveConnection();
-              setOpen(false);
             }}
           >
             Remove
@@ -497,7 +498,16 @@ function ConnectionsPopover({ user }: { user: UserResource }) {
       user?.createExternalAccount(params),
     {
       onNeedsReverification: ({ level, complete, cancel }) => {
-        setVrState({ inProgress: true, complete, cancel, level });
+        setVrState({
+          inProgress: true,
+          complete,
+          cancel: () => {
+            setVrState(null);
+            setIsOpen(false);
+            cancel();
+          },
+          level,
+        });
       },
     }
   );
@@ -683,6 +693,7 @@ function EmailActionsPopover({
 }) {
   const [option, setOption] = useState<"verify" | "button">("button");
   const [code, setCode] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [successful, setSuccessful] = useState(false);
   const [vrState, setVrState] = useState<{
@@ -696,14 +707,32 @@ function EmailActionsPopover({
     (params) => user.update(params),
     {
       onNeedsReverification: ({ level, complete, cancel }) => {
-        setVrState({ inProgress: true, complete, cancel, level });
+        setVrState({
+          inProgress: true,
+          complete,
+          cancel: () => {
+            setVrState(null);
+            setIsOpen(false);
+            cancel();
+          },
+          level,
+        });
       },
     }
   );
 
   const destroyEmailAddress = useReverification(() => email.destroy(), {
     onNeedsReverification: ({ level, complete, cancel }) => {
-      setVrState({ inProgress: true, complete, cancel, level });
+      setVrState({
+        inProgress: true,
+        complete,
+        cancel: () => {
+          setVrState(null);
+          setIsOpen(false);
+          cancel();
+        },
+        level,
+      });
     },
   });
 
@@ -739,6 +768,7 @@ function EmailActionsPopover({
 
   async function verifyEmail() {
     setOption("verify");
+    setLoading(true);
     try {
       email.prepareVerification({ strategy: "email_code" });
       const emailVerifyAttempt = await email?.attemptVerification({
@@ -753,10 +783,12 @@ function EmailActionsPopover({
       }
     } catch (err) {
       console.error("Error verifying email:", err);
+    } finally {
+      setLoading(false);
     }
   }
   return (
-    <Popover>
+    <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger className="btn btn-ghost">
         <Ellipsis />
       </PopoverTrigger>
@@ -772,6 +804,7 @@ function EmailActionsPopover({
             <button
               type="submit"
               className={`btn ${successful ? "btn-success" : "btn-primary"}`}
+              disabled={loading || successful}
             >
               {successful ? "Verified ✔️" : "Verify"}
             </button>
@@ -829,6 +862,7 @@ function EmailActionsPopover({
 
 function UpdateEmailDialog({ user }: { user: UserResource }) {
   const [code, setCode] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isVerifying, setIsVerifying] = React.useState(false);
   const [successful, setSuccessful] = React.useState(false);
@@ -845,7 +879,16 @@ function UpdateEmailDialog({ user }: { user: UserResource }) {
     (email: string) => user?.createEmailAddress({ email }),
     {
       onNeedsReverification: ({ level, complete, cancel }) => {
-        setVrState({ inProgress: true, complete, cancel, level });
+        setVrState({
+          inProgress: true,
+          complete,
+          cancel: () => {
+            setVrState(null);
+            setIsOpen(false);
+            cancel();
+          },
+          level,
+        });
       },
     }
   );
@@ -920,7 +963,7 @@ function UpdateEmailDialog({ user }: { user: UserResource }) {
   };
 
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger className="btn btn-ghost w-fit">
         + Add email address
       </DialogTrigger>
@@ -1113,6 +1156,7 @@ function UpdateUsernameDialog({ user }: { user: UserResource }) {
 }
 
 function UpdateUserDialog({ user }: { user: UserResource }) {
+  const [imageUrl, setImageUrl] = useState(user.imageUrl || undefined);
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const [vrState, setVrState] = useState<{
@@ -1208,6 +1252,7 @@ function UpdateUserDialog({ user }: { user: UserResource }) {
         return;
       }
       console.log("Profile image removed successfully");
+      setImageUrl(res?.publicUrl || undefined);
       setValue("file", null); // Reset file input
     } catch (error) {
       console.error("Error removing profile image:", error);
@@ -1272,7 +1317,7 @@ function UpdateUserDialog({ user }: { user: UserResource }) {
                 <label className="w-full flex items-center justify-center">
                   <FileUploader
                     onFileChange={(file) => setValue("file", file)}
-                    initialFileUrl={user.imageUrl}
+                    initialFileUrl={imageUrl}
                     acceptedFileTypes={{ "image/*": [".jpg", ".jpeg", ".png"] }}
                     enableImageCropping={true}
                     cropAspectRatio={1}
@@ -1551,6 +1596,7 @@ function DeleteAccountAlert({ user }: { user: UserResource }) {
   const pathname = usePathname();
 
   const [value, setValue] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
   const [vrState, setVrState] = useState<{
     inProgress: boolean;
     complete: () => void;
@@ -1560,7 +1606,16 @@ function DeleteAccountAlert({ user }: { user: UserResource }) {
 
   const deleteUserAccount = useReverification(() => user.delete(), {
     onNeedsReverification: ({ complete, cancel, level }) => {
-      setVrState({ inProgress: true, complete, cancel, level });
+      setVrState({
+        inProgress: true,
+        complete,
+        cancel: () => {
+          setVrState(null);
+          setIsOpen(false);
+          cancel();
+        },
+        level,
+      });
     },
   });
 
@@ -1574,7 +1629,7 @@ function DeleteAccountAlert({ user }: { user: UserResource }) {
   }
 
   return (
-    <AlertDialog>
+    <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
       <AlertDialogTrigger>
         <div className="btn btn-soft btn-error">Delete Account</div>
       </AlertDialogTrigger>
@@ -1607,13 +1662,13 @@ function DeleteAccountAlert({ user }: { user: UserResource }) {
             </label>
             <AlertDialogFooter>
               <AlertDialogCancel className="btn">Cancel</AlertDialogCancel>
-              <AlertDialogAction
+              <button
                 className="btn btn-error"
                 disabled={value !== "DELETE"}
                 onClick={deleteUser}
               >
                 Delete
-              </AlertDialogAction>
+              </button>
             </AlertDialogFooter>
           </>
         )}

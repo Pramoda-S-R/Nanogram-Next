@@ -29,7 +29,7 @@
 - [x] customize reverify dialog window
 - [x] bring all the clerk manage functions to frontend using reverification
 - [x] redo previous manage account features
-- [ ] test very email, delete email, profile update, remove social connection, delete account
+- [x] test very email, delete email, (profile update, remove social connection, delete account)
 - [ ] link api when user details are updated. T_T
 - [ ] start work on the community group
 - [ ] community ui
@@ -87,6 +87,7 @@
 - server actions added
 - added onboarding and user api route
 - fixed manage account drawer completely testing remaining
+- added posts api routes
 
 
 ## Challenges

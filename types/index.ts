@@ -17,6 +17,33 @@ export interface UploadedFile {
   cropperStyle?: React.CSSProperties;
 }
 
+export interface BlogSchema {
+  title: string;
+  desc: string;
+  publishedAt: Date;
+  authors: string[];
+  tags: string[];
+  cover?: string;
+  file?: File;
+  key?: string;
+}
+
+export interface AggregatePost {
+  _id: ObjectId;
+  creator: User;
+  caption: string;
+  tags: string[];
+  imageId: string;
+  imageUrl: string;
+  source: string;
+  savedByCount: number;
+  likesCount: number;
+  commentsCount: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// MongoDB Schemas of various collections used in the application
 export interface Nanogram {
   _id: ObjectId;
   name: string;
@@ -51,42 +78,6 @@ export interface Event {
   location?: string;
   registration?: string;
   completed?: boolean;
-}
-
-export interface BlogSchema {
-  title: string;
-  desc: string;
-  publishedAt: Date;
-  authors: string[];
-  tags: string[];
-  cover?: string;
-  file?: File;
-  key?: string;
-}
-
-export interface BlogPost {
-  _id: ObjectId;
-  title: string;
-  desc: string;
-  publishedAt: Date;
-  authors: string[];
-  tags: string[];
-  cover?: string;
-  route?: string;
-  fileUrl: string;
-  fileId: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export interface Newsletters {
-  _id: ObjectId;
-  title: string;
-  publishedAt: Date;
-  fileUrl: string;
-  fileId: string;
-  createdAt: Date;
-  updatedAt: Date;
 }
 
 export interface User {
@@ -132,6 +123,31 @@ export interface Comment {
   commenter: ObjectId;
   content: string;
   likes: ObjectId[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface BlogPost {
+  _id: ObjectId;
+  title: string;
+  desc: string;
+  publishedAt: Date;
+  authors: string[];
+  tags: string[];
+  cover?: string;
+  route?: string;
+  fileUrl: string;
+  fileId: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface Newsletters {
+  _id: ObjectId;
+  title: string;
+  publishedAt: Date;
+  fileUrl: string;
+  fileId: string;
   createdAt: Date;
   updatedAt: Date;
 }

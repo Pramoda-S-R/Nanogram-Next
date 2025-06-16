@@ -1,11 +1,13 @@
 // app/actions/fetchData.ts
 "use server";
 import {
+  AggregatePost,
   BlogPost,
   BlogSchema,
   Event,
   Nanogram,
   Newsletters,
+  Post,
   Testimonial,
 } from "@/types";
 
@@ -85,6 +87,179 @@ export async function addUserToDb({
   } catch (error) {
     console.error("Error adding user to database:", error);
     return false;
+  }
+}
+
+// ==================
+// Post Functions
+// ==================
+// Create a new post
+export async function createPost({
+  userId,
+  caption,
+  tags,
+  image,
+}: {
+  userId: string;
+  caption: string;
+  tags?: string[];
+  image?: File;
+}): Promise<any> {
+  try {
+    const formData = new FormData();
+    formData.append("caption", caption);
+    if (image) {
+      formData.append("image", image);
+    }
+    if (tags && tags.length > 0) {
+      tags.forEach((tag) => {
+        formData.append("tags", tag);
+      });
+    }
+    const userResponse = await fetch(
+      `${BASE_URL}/api/user?user_id=${userId}&limit=1`,
+      {
+        method: "GET",
+      }
+    );
+    if (!userResponse.ok) {
+      throw new Error(`Failed to fetch user: ${userResponse.statusText}`);
+    }
+    const userData = await userResponse.json();
+    if (userData.documents.length === 0) {
+      throw new Error("User not found");
+    }
+    formData.append("creator", userData.documents[0]._id);
+    const response = await fetch(`${BASE_URL}/api/posts`, {
+      method: "POST",
+      headers: {
+        "x-api-key": apiKey || "",
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error creating post:", error);
+    return null;
+  }
+}
+// Read a post by ID
+export async function getPostById(postId: string): Promise<any> {
+  try {
+    const response = await fetch(
+      `${BASE_URL}/api/posts/aggregate?id=${postId}`,
+      {
+        method: "GET",
+        headers: {
+          "x-api-key": apiKey || "",
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.documents.length > 0 ? data.documents[0] : null;
+  } catch (error) {
+    console.error("Error fetching post by ID:", error);
+    return null;
+  }
+}
+// Update an existing post
+export async function updatePost({
+  postId,
+  caption,
+  tags,
+  file,
+}: {
+  postId: string;
+  caption: string;
+  tags?: string[];
+  file?: File;
+}): Promise<any> {
+  try {
+    const formData = new FormData();
+    formData.append("id", postId);
+    formData.append("caption", caption);
+    if (file) {
+      formData.append("file", file);
+    }
+    if (tags && tags.length > 0) {
+      tags.forEach((tag) => {
+        formData.append("tags", tag);
+      });
+    }
+    const response = await fetch(`${BASE_URL}/api/posts`, {
+      method: "PUT",
+      headers: {
+        "x-api-key": apiKey || "",
+      },
+      body: formData,
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error updating post:", error);
+    return null;
+  }
+}
+// Delete a post by ID
+export async function deletePostById(postId: string): Promise<boolean> {
+  try {
+    const response = await fetch(`${BASE_URL}/api/posts?id=${postId}`, {
+      method: "DELETE",
+      headers: {
+        "x-api-key": apiKey || "",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    console.log("Post deleted successfully");
+    return true;
+  } catch (error) {
+    console.error("Error deleting post:", error);
+    return false;
+  }
+}
+// Get FYP posts
+export async function getFypPosts(): Promise<AggregatePost[]> {
+  try {
+    const response = await fetch(
+      `${BASE_URL}/api/posts/aggregate?sort=createdAt&order=-1&limit=25`,
+      {
+        method: "GET",
+        headers: {
+          "x-api-key": apiKey || "",
+        },
+        next: {
+          revalidate: 60, // Revalidate every 60 seconds
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.documents as AggregatePost[];
+  } catch (error) {
+    console.error("Error fetching FYP posts:", error);
+    return [];
   }
 }
 
