@@ -44,7 +44,7 @@ const PostCard = async ({
           </figure>
         </Link>
       )}
-      <PostStats post={post} />
+      <PostStats post={post} user={user} align='between' />
     </div>
   );
 };

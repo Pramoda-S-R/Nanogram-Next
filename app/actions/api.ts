@@ -412,9 +412,6 @@ export async function getFypPosts(): Promise<AggregatePost[]> {
         headers: {
           "x-api-key": apiKey || "",
         },
-        next: {
-          revalidate: 60, // Revalidate every 60 seconds
-        },
       }
     );
 
@@ -443,9 +440,6 @@ export async function getPostsByIds(
       headers: {
         "x-api-key": apiKey || "",
       },
-      next: {
-        revalidate: 60, // Revalidate every 60 seconds
-      },
     });
 
     if (!response.ok) {
@@ -457,6 +451,66 @@ export async function getPostsByIds(
   } catch (error) {
     console.error("Error fetching posts by IDs:", error);
     return [];
+  }
+}
+// Like a post
+export async function likePost({
+  postId,
+  userId,
+}: {
+  postId: string;
+  userId: string;
+}): Promise<boolean> {
+  try {
+    const formData = new FormData();
+    formData.append("postId", postId);
+    formData.append("userId", userId);
+    const response = await fetch(`${BASE_URL}/api/posts/like`, {
+      method: "PUT",
+      headers: {
+        "x-api-key": apiKey || "",
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return true;
+  } catch (error) {
+    console.error("Error liking post:", error);
+    return false;
+  }
+}
+// Save a post
+export async function savePost({
+  postId,
+  userId,
+}: {
+  postId: string;
+  userId: string;
+}): Promise<boolean> {
+  try {
+    const formData = new FormData();
+    formData.append("postId", postId);
+    formData.append("userId", userId);
+    const response = await fetch(`${BASE_URL}/api/posts/save`, {
+      method: "PUT",
+      headers: {
+        "x-api-key": apiKey || "",
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return true;
+  } catch (error) {
+    console.error("Error saving post:", error);
+    return false;
   }
 }
 

@@ -48,8 +48,8 @@ const SearchUsers = ({ currentuser }: { currentuser: User }) => {
       {shouldShowSearchResults && (
         <ul className="bg-base-200 flex flex-col py-8 px-4 mb-8 w-full">
           {searchedUsers?.map((creator, idx) => (
-            <>
-              <li key={idx} className="flex justify-between w-full">
+            <div key={idx}>
+              <li className="flex justify-between w-full">
                 <Link
                   href={`/profile/@${creator.username}`}
                   className="flex item-center gap-4"
@@ -82,7 +82,7 @@ const SearchUsers = ({ currentuser }: { currentuser: User }) => {
               {idx !== searchedUsers.length - 1 && (
                 <div className="divider"></div>
               )}
-            </>
+            </div>
           ))}
         </ul>
       )}

@@ -23,7 +23,7 @@ const Saved = async () => {
   }
   return (
     <div className="md:max-w-5xl mx-auto max-w-full md:px-0 px-2 pt-10 mb-18">
-      <GridPosts posts={savedPosts} />
+      <GridPosts posts={savedPosts} user={currentUserObj} showStats={true}/>
     </div>
   );
 };

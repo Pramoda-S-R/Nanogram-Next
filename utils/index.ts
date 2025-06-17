@@ -1,5 +1,5 @@
 import { ObjectId } from "mongodb";
-import type { Point } from "../types";
+import type { AggregatePost, Comment, Point, Post, User } from "../types";
 
 const MIN_RADIUS = 7.5;
 const MAX_RADIUS = 15;
@@ -241,4 +241,17 @@ export function timeAgo(dateString: string) {
 
 export function objectIdsToStrings(ids: ObjectId[]): string[] {
   return ids.map((id) => id.toString());
+}
+
+export function hasLiked(
+  post: Post | Comment | AggregatePost,
+  user: User
+): boolean {
+  if (!post.likes || !user._id) return false;
+  return post.likes.some((like) => like.toString() === user._id.toString());
+}
+
+export function hasSaved(post: Post | AggregatePost, user: User): boolean {
+  if (!post.savedBy || !user._id) return false;
+  return post.savedBy.some((save) => save.toString() === user._id.toString());
 }

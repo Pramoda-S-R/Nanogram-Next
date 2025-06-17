@@ -36,9 +36,9 @@ export interface AggregatePost {
   imageId: string;
   imageUrl: string;
   source: string;
-  savedByCount: number;
-  likesCount: number;
-  commentsCount: number;
+  savedBy: ObjectId[];
+  likes: ObjectId[];
+  comments: ObjectId[];
   createdAt: Date;
   updatedAt: Date;
 }
