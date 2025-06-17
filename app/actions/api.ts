@@ -136,6 +136,33 @@ export async function getUserByUsername({
     return null;
   }
 }
+// Search users by name or username
+export async function searchUsers(name: string): Promise<User[]> {
+  try {
+    const response = await fetch(
+      `${BASE_URL}/api/user?name=${encodeURIComponent(name)}&limit=10`,
+      {
+        method: "GET",
+        headers: {
+          "x-api-key": apiKey || "",
+        },
+        next: {
+          revalidate: 60, // Revalidate every 60 seconds
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.documents as User[];
+  } catch (error) {
+    console.error("Error searching users:", error);
+    return [];
+  }
+}
 // Get current user
 export async function getCurrentUser({
   user_id,

@@ -14,6 +14,7 @@ export const GET = withAuth(async (req: NextRequest) => {
     const limit = parseInt(searchParams.get("limit") || "0");
     const userId = searchParams.get("user_id");
     const username = searchParams.get("username");
+    const name = searchParams.get("name");
     const ids = searchParams.getAll("id");
 
     const query: any = {};
@@ -30,6 +31,14 @@ export const GET = withAuth(async (req: NextRequest) => {
     }
     if (username) {
       query.username = username;
+    }
+    if (name) {
+      const nameRegex = new RegExp(name, "i"); // Case-insensitive search
+      query.$or = [
+        { firstName: nameRegex },
+        { lastName: nameRegex },
+        { username: nameRegex },
+      ];
     }
 
     const client = await clientPromise;
