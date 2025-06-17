@@ -5,8 +5,10 @@ import { Edit, Ellipsis, Trash2, TriangleAlert } from "lucide-react";
 import { AggregatePost, User } from "@/types";
 import { deletePostById } from "@/app/actions/api";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 const PostActions = ({ post, user }: { post: AggregatePost; user: User }) => {
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const deleteThisPost = async () => {
     setLoading(true);
@@ -37,7 +39,10 @@ const PostActions = ({ post, user }: { post: AggregatePost; user: User }) => {
         <div className="flex flex-col gap-2">
           {/* {user._id === post.creator._id && ( */}
           <>
-            <button className="btn btn-primary justify-start">
+            <button
+              className="btn btn-primary justify-start"
+              onClick={() => router.push(`/update-post/${post._id}`)}
+            >
               <Edit strokeWidth={1.5} />
               Edit Post
             </button>

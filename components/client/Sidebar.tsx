@@ -26,7 +26,7 @@ const Sidebar = () => {
   const linkItems = [
     {
       href: "/",
-      label: "Home",
+      label: "Website",
       icon: (
         <Image
           src={"/assets/images/nanogram_logo-bg-primary.svg"}

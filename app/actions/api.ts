@@ -157,18 +157,18 @@ export async function createPost({
   userId,
   caption,
   tags,
-  image,
+  file,
 }: {
   userId: string;
   caption: string;
   tags?: string[];
-  image?: File;
+  file?: File;
 }): Promise<any> {
   try {
     const formData = new FormData();
     formData.append("caption", caption);
-    if (image) {
-      formData.append("image", image);
+    if (file) {
+      formData.append("image", file);
     }
     if (tags && tags.length > 0) {
       tags.forEach((tag) => {
@@ -212,7 +212,9 @@ export async function createPost({
   }
 }
 // Read a post by ID
-export async function getPostById(postId: string): Promise<any> {
+export async function getPostById(
+  postId: string
+): Promise<AggregatePost | null> {
   try {
     const response = await fetch(`${BASE_URL}/api/posts?id=${postId}`, {
       method: "GET",
@@ -249,13 +251,17 @@ export async function updatePost({
     formData.append("id", postId);
     formData.append("caption", caption);
     if (file) {
-      formData.append("file", file);
+      formData.append("image", file);
     }
     if (tags && tags.length > 0) {
       tags.forEach((tag) => {
         formData.append("tags", tag);
       });
     }
+    console.log("Updating Post:", {
+      postId,
+      formData,
+    });
     const response = await fetch(`${BASE_URL}/api/posts`, {
       method: "PUT",
       headers: {

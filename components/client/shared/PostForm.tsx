@@ -2,9 +2,8 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Hash } from "lucide-react";
 import FileUploader from "./ui/FileUploader";
-import { Post } from "@/types";
+import { AggregatePost } from "@/types";
 import { z } from "zod";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -35,7 +34,7 @@ const PostForm = ({
   post,
   action,
 }: {
-  post?: Post;
+  post?: AggregatePost;
   action: "Create" | "Update";
 }) => {
   const router = useRouter();
@@ -141,7 +140,9 @@ const PostForm = ({
       >
         {/* Caption Field */}
         <fieldset className="fieldset px-3 relative">
-          <legend className="fieldset-legend">Caption <span className="text-error">*</span></legend>
+          <legend className="fieldset-legend">
+            Caption <span className="text-error">*</span>
+          </legend>
           <textarea
             placeholder="Write a caption..."
             maxLength={3000}
@@ -175,7 +176,6 @@ const PostForm = ({
         </fieldset>
 
         {/* Add Tags */}
-        {/* Add Tags */}
         <fieldset className="px-3 fieldset">
           <legend className="fieldset-legend">Tags (optional)</legend>
           <div className="flex flex-wrap gap-2 items-center">
@@ -200,6 +200,7 @@ const PostForm = ({
             ))}
           </div>
 
+          {/* Input for Adding Tags */}
           <input
             type="text"
             placeholder="Type and press Enter to add a tag"

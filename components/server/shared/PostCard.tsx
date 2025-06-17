@@ -1,8 +1,8 @@
-import { getUserByUsername } from "@/app/actions/api";
 import PostActions from "@/components/client/shared/PostActions";
 import PostCreator from "@/components/client/shared/PostCreator";
 import PostStats from "@/components/client/shared/PostStats";
 import { AggregatePost, User } from "@/types";
+import { timeAgo } from "@/utils";
 import React from "react";
 
 const PostCard = async ({
@@ -13,13 +13,13 @@ const PostCard = async ({
   user: User;
 }) => {
   return (
-    <div className="card bg-base-200 w-96 shadow-sm">
+    <div className="card bg-base-200 md:w-96 w-full shadow-sm">
       <div className="card-body">
         <div className="flex justify-between">
           <PostCreator creator={post.creator} />
           <PostActions post={post} user={user} />
         </div>
-        <p className="text-xs text-base-content/30">Posted on {post.source}</p>
+        <p className="text-xs text-base-content/30">Posted on {post.source}, {timeAgo(post.createdAt.toString())}</p>
         <p className="">{post.caption || "No caption provided."}</p>
         <ul className="flex flex-wrap gap-1 mt-1">
           {post.tags.length === 0
