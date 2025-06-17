@@ -10,7 +10,9 @@
 - Clerk.dev (auth)
 - Upstash (Redis) (rate limiting)
 - Ably (Web Socket) (messaging)
+- AIrtable (Tabular form data)
 - Mailjet (Newsletters)
+- Weaviate (Vector search?)
 - Cleaner UI/UX with daisy UI
 - Shadcn for amazing UI
 - Form builder and Blog builder
@@ -35,7 +37,7 @@
 - [ ] community ui
 - [ ] add like share comment save feature
 - [ ] add bio section in manage account
-- [ ] fix all users screen
+- [x] fix all users screen
 - [ ] add report post feature
 - [x] connect uploadthing and establish blogs and newsletters
 - [x] add 2fa check for POST, PUT, DELETE functions for devs
@@ -45,8 +47,8 @@
 - [x] better api authentication allowing api key creation (mailjet perhaps) (no mailjet but still doable)
 - [x] admin auth proxy api
 - [x] make proxy secure/ ditch proxy for server actions "use server"
-- [ ] community database rework
-- [ ] relationships using aggregate
+- [x] community database rework
+- [x] relationships using aggregate
 - [ ] add ai mascot
 - [ ] admin dashboard
 - [ ] check if admin by comparing a admin database
@@ -95,7 +97,6 @@
 - added new routes to handle user profile viewing, following etc.,
 - worked on ui
 - added embeds for posts
-
 
 ## Challenges
 
