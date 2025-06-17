@@ -31,10 +31,14 @@
 - [x] redo previous manage account features
 - [x] test very email, delete email, (profile update, remove social connection, delete account)
 - [ ] link api when user details are updated. T_T
-- [ ] start work on the community group
+- [x] start work on the community group
 - [ ] community ui
+- [ ] add like share comment save feature
+- [ ] add bio section in manage account
+- [ ] fix all users screen
+- [ ] add report post feature
 - [x] connect uploadthing and establish blogs and newsletters
-- [ ] add 2fa check for POST, PUT, DELETE functions for devs
+- [x] add 2fa check for POST, PUT, DELETE functions for devs
 - [ ] subscribe to newsletter
 - [x] connect cloudinary and test out it's usage
 - [x] Revamped Navbar and community sidebar
@@ -88,6 +92,9 @@
 - added onboarding and user api route
 - fixed manage account drawer completely testing remaining
 - added posts api routes
+- added new routes to handle user profile viewing, following etc.,
+- worked on ui
+- added embeds for posts
 
 
 ## Challenges

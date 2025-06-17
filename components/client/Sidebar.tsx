@@ -82,7 +82,7 @@ const Sidebar = () => {
         </Link>
       ))}
       <div className="flex flex-col items-center text-xs text-base-content/50 hover:text-info">
-        <ProfileDrawer />
+        {mounted && <ProfileDrawer />}
         <span>Profile</span>
       </div>
     </nav>
@@ -115,8 +115,12 @@ const Sidebar = () => {
 
           {/* Additional Content Section */}
           <div className="flex flex-col items-center gap-2 mt-5">
-            <ThemeSwitch />
-            <ProfileDrawer />
+            {mounted && (
+              <>
+                <ThemeSwitch />
+                <ProfileDrawer />
+              </>
+            )}
           </div>
         </div>
 

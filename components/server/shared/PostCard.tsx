@@ -3,6 +3,7 @@ import PostCreator from "@/components/client/shared/PostCreator";
 import PostStats from "@/components/client/shared/PostStats";
 import { AggregatePost, User } from "@/types";
 import { timeAgo } from "@/utils";
+import Link from "next/link";
 import React from "react";
 
 const PostCard = async ({
@@ -19,7 +20,9 @@ const PostCard = async ({
           <PostCreator creator={post.creator} />
           <PostActions post={post} user={user} />
         </div>
-        <p className="text-xs text-base-content/30">Posted on {post.source}, {timeAgo(post.createdAt.toString())}</p>
+        <p className="text-xs text-base-content/30">
+          Posted on {post.source}, {timeAgo(post.createdAt.toString())}
+        </p>
         <p className="">{post.caption || "No caption provided."}</p>
         <ul className="flex flex-wrap gap-1 mt-1">
           {post.tags.length === 0
@@ -32,12 +35,14 @@ const PostCard = async ({
         </ul>
       </div>
       {post.imageUrl && (
-        <figure>
-          <img
-            src={post.imageUrl || "/assets/images/placeholder.png"}
-            alt={post._id.toString()}
-          />
-        </figure>
+        <Link href={`/posts/${post._id.toString()}`}>
+          <figure>
+            <img
+              src={post.imageUrl || "/assets/images/placeholder.png"}
+              alt={post._id.toString()}
+            />
+          </figure>
+        </Link>
       )}
       <PostStats post={post} />
     </div>

@@ -1,15 +1,16 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
+// Define public routes that don’t require authentication
 const isPublicRoute = createRouteMatcher([
+  "/",
   "/sign-in(.*)",
   "/sign-up(.*)",
   "/forgot-password(.*)",
   "/callback(.*)",
-  "/api(.*)",
-  "/",
   "/about-us",
   "/events",
   "/blog(.*)",
+  "/embed(.*)",
   "/newsletter",
   "/feedback",
   "/privacy-policy",
@@ -17,9 +18,8 @@ const isPublicRoute = createRouteMatcher([
   "/sitemap",
 ]);
 
-const isPrivateRoute = createRouteMatcher([
-  "/blog/write-blog",
-]);
+// Define any private routes you want explicitly protected
+const isPrivateRoute = createRouteMatcher(["/blog/write-blog"]);
 
 export default clerkMiddleware(async (auth, req) => {
   if (isPrivateRoute(req) || !isPublicRoute(req)) {
@@ -27,9 +27,9 @@ export default clerkMiddleware(async (auth, req) => {
   }
 });
 
+// Only apply middleware to non-static, non-API routes
 export const config = {
   matcher: [
-    "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|otf|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
-    "/(api|trpc)(.*)",
+    "/((?!api|_next|embed|.*\\..*).*)",
   ],
 };

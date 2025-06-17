@@ -18,6 +18,25 @@ const apiKey: string | undefined = process.env.NEXT_PUBLIC_API_KEY;
 // ===================
 // User Functions
 // ===================
+// Get all users
+export async function getAllUsers(): Promise<User[]> {
+  try {
+    const response = await fetch(`${BASE_URL}/api/user`, {
+      method: "GET",
+      headers: {
+        "x-api-key": apiKey || "",
+      },
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+    return data.documents as User[];
+  } catch (error) {
+    console.error("Error fetching all users:", error);
+    return [];
+  }
+}
 // Check if user exists by ID
 export async function userExistsById(userId: string): Promise<boolean> {
   try {
@@ -104,9 +123,7 @@ export async function getUserByUsername({
         headers: {
           "x-api-key": apiKey || "",
         },
-        next: {
-          revalidate: 60, // Revalidate every 60 seconds
-        },
+        cache: "no-store", // Disable caching for this request
       }
     );
     if (!response.ok) {
@@ -146,6 +163,64 @@ export async function getCurrentUser({
   } catch (error) {
     console.error("Error fetching current user:", error);
     return null;
+  }
+}
+// Get user by Id array
+export async function getUsersByIds(userIds: string[]): Promise<User[]> {
+  try {
+    if (userIds.length === 0) {
+      return [];
+    }
+    const params = userIds.map((id) => `id=${id}`).join("&");
+    const response = await fetch(`${BASE_URL}/api/user?${params}`, {
+      method: "GET",
+      headers: {
+        "x-api-key": apiKey || "",
+      },
+      next: {
+        revalidate: 60, // Revalidate every 60 seconds
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.documents as User[];
+  } catch (error) {
+    console.error("Error fetching users by IDs:", error);
+    return [];
+  }
+}
+// Follow a user
+export async function followUser({
+  userId,
+  followUserId,
+}: {
+  userId: string;
+  followUserId: string;
+}): Promise<boolean> {
+  try {
+    const formData = new FormData();
+    formData.append("userId", userId);
+    formData.append("followUserId", followUserId);
+    const response = await fetch(`${BASE_URL}/api/user/follow`, {
+      method: "PUT",
+      headers: {
+        "x-api-key": apiKey || "",
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return true;
+  } catch (error) {
+    console.error("Error following user:", error);
+    return false;
   }
 }
 
@@ -332,6 +407,9 @@ export async function getPostsByIds(
   postIds: string[]
 ): Promise<AggregatePost[]> {
   try {
+    if (postIds.length === 0) {
+      return [];
+    }
     const params = postIds.map((id) => `id=${id}`).join("&");
     const response = await fetch(`${BASE_URL}/api/posts?${params}`, {
       method: "GET",

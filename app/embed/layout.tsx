@@ -1,8 +1,5 @@
 import type { Metadata } from "next";
-import "../styles/globals.css";
-import { ClerkProvider } from "@clerk/nextjs";
-import { ThemeInit } from "@/components/client/ThemeInit";
-import { Toaster } from "@/components/client/shared/ui/Sonner";
+import "../../styles/globals.css";
 
 export const metadata: Metadata = {
   title: {
@@ -55,14 +52,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
-      <html lang="en" data-theme="dark">
-        <body>
-          <ThemeInit />
-          {children}
-          <Toaster />
-        </body>
-      </html>
-    </ClerkProvider>
+    <html lang="en" data-theme="dark">
+      <body>{children}</body>
+    </html>
   );
 }
