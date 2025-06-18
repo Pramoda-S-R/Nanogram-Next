@@ -13,13 +13,11 @@ const schema = z.object({
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required").optional(),
   username: z.string().min(1, "Username is required"),
-  bio: z.string().max(300, "Chill out bro ain't nobody reading an essay (300 char max)").optional(),
-  file: z
-    .any()
-    .refine((file) => file instanceof File || file === null, {
-      message: "A valid image file is required",
-    })
+  bio: z
+    .string()
+    .max(300, "Chill out bro ain't nobody reading an essay (300 char max)")
     .optional(),
+  file: z.any().optional(),
 });
 
 type FormData = z.infer<typeof schema>;
@@ -33,6 +31,7 @@ export default function Onboarding() {
   );
 
   const [loading, setLoading] = useState(false);
+  const [initialFileUrl, setInitialFileUrl] = useState<string | null>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [exists, setExists] = useState(false);
 
@@ -58,7 +57,7 @@ export default function Onboarding() {
     if (isLoaded && user) {
       const checkUserExists = async () => {
         const userExists = await userExistsById(user.id);
-        setExists(userExists);
+        setExists(false);
       };
       checkUserExists();
       reset({
@@ -144,7 +143,7 @@ export default function Onboarding() {
               <label className="w-full flex items-center justify-center">
                 <FileUploader
                   onFileChange={(file) => setValue("file", file)}
-                  initialFileUrl={user.imageUrl}
+                  initialFileUrl={initialFileUrl || undefined}
                   acceptedFileTypes={{ "image/*": [".jpg", ".jpeg", ".png"] }}
                   enableImageCropping={true}
                   cropAspectRatio={1}
@@ -156,6 +155,26 @@ export default function Onboarding() {
                   {errors.file.message}
                 </p>
               )}
+            </div>
+            <div className="divider">OR</div>
+            <div>
+              <label htmlFor="profile icons">
+                <p className="text-center">
+                  Select a profile picture from our prebuilt selection
+                </p>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setInitialFileUrl("http://localhost:3000/assets/images/placeholder.png")
+                  }
+                >
+                  <img
+                    src="/assets/images/placeholder.png"
+                    alt="pfp"
+                    className="size-20"
+                  />
+                </button>
+              </label>
             </div>
             <div className="mb-2.5">
               <label className="input validator w-full">
