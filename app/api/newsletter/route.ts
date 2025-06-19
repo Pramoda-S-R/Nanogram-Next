@@ -1,4 +1,6 @@
+import { withAuth } from "@/lib/apiauth";
 import clientPromise from "@/lib/mongodb";
+import { slugify } from "@/utils";
 import { ObjectId } from "mongodb";
 import { NextRequest, NextResponse } from "next/server";
 import { UTApi } from "uploadthing/server";
@@ -6,11 +8,7 @@ import { UTApi } from "uploadthing/server";
 const database: string | undefined = process.env.DATABASE;
 const apiKey: string | undefined = process.env.NEXT_PUBLIC_API_KEY;
 
-export async function GET(req: NextRequest) {
-  const apiKeyHeader = req.headers.get("x-api-key");
-  if (apiKey && apiKeyHeader !== apiKey) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+export const GET = withAuth(async (req: NextRequest) => {
   const { searchParams } = new URL(req.url);
   const id = searchParams.get("id");
   const sort = searchParams.get("sort") || "createdAt";
@@ -39,165 +37,166 @@ export async function GET(req: NextRequest) {
       { status: 500 }
     );
   }
-}
+});
 
-export async function POST(req: NextRequest) {
-  const apiKeyHeader = req.headers.get("x-api-key");
-  if (apiKey && apiKeyHeader !== apiKey) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-  try {
-    const client = await clientPromise;
-    const collection = client.db(database).collection("newsletter");
+export const POST = withAuth(
+  async (req: NextRequest) => {
+    try {
+      const client = await clientPromise;
+      const collection = client.db(database).collection("newsletter");
 
-    const formData = await req.formData();
-    const title = formData.get("title") as string;
-    const publishedAt = formData.get("publishedAt") as string;
-    const files = formData.getAll("files") as File[];
+      const formData = await req.formData();
+      const title = formData.get("title") as string;
+      const description = formData.get("description") as string;
+      const publishedAt = formData.get("publishedAt") as string;
+      const files = formData.getAll("files") as File[];
 
-    // Upload files using Uploadthing
-    let fileUrl = "";
-    let fileId = "";
-    if (files.length > 0) {
-      const utapi = new UTApi();
-      const uploadResponse = await utapi.uploadFiles(files);
-      fileUrl = uploadResponse[0].data?.ufsUrl || "";
-      fileId = uploadResponse[0].data?.key || "";
+      // Upload files using Uploadthing
+      let fileUrl = "";
+      let fileId = "";
+      if (files.length > 0) {
+        const utapi = new UTApi();
+        const uploadResponse = await utapi.uploadFiles(files);
+        fileUrl = uploadResponse[0].data?.ufsUrl || "";
+        fileId = uploadResponse[0].data?.key || "";
+      }
+
+      const newDocument = {
+        title,
+        description,
+        route: slugify(title),
+        publishedAt: new Date(publishedAt),
+        fileUrl,
+        fileId,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      const result = await collection.insertOne(newDocument);
+      return NextResponse.json(
+        { success: true, id: result.insertedId },
+        { status: 201 }
+      );
+    } catch (error: any) {
+      return NextResponse.json(
+        { error: error.message || "An error occurred." },
+        { status: 500 }
+      );
     }
+  },
+  { adminOnly: true }
+);
 
-    const newDocument = {
-      title,
-      publishedAt: new Date(publishedAt),
-      fileUrl,
-      fileId,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
+export const PUT = withAuth(
+  async (req: NextRequest) => {
+    try {
+      const client = await clientPromise;
+      const collection = client.db(database).collection("newsletter");
 
-    const result = await collection.insertOne(newDocument);
-    return NextResponse.json(
-      { success: true, id: result.insertedId },
-      { status: 201 }
-    );
-  } catch (error: any) {
-    return NextResponse.json(
-      { error: error.message || "An error occurred." },
-      { status: 500 }
-    );
-  }
-}
+      const formData = await req.formData();
+      const id = formData.get("id") as string;
+      if (!id) {
+        return NextResponse.json({ error: "ID is required" }, { status: 400 });
+      }
+      const title = formData.get("title") as string;
+      const description = formData.get("description") as string;
+      const publishedAt = formData.get("publishedAt") as string;
+      const files = formData.getAll("files") as File[];
+      const key = formData.get("key") as string;
 
-export async function PUT(req: NextRequest) {
-  const apiKeyHeader = req.headers.get("x-api-key");
-  if (apiKey && apiKeyHeader !== apiKey) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-  const { searchParams } = new URL(req.url);
-  const id = searchParams.get("id");
-  if (!id) {
-    return NextResponse.json({ error: "ID is required" }, { status: 400 });
-  }
-  try {
-    const client = await clientPromise;
-    const collection = client.db(database).collection("newsletter");
+      // Prepare update object
+      const updateObject: any = {
+        title,
+        description,
+        publishedAt: new Date(publishedAt),
+        updatedAt: new Date(),
+      };
 
-    const formData = await req.formData();
-    const title = formData.get("title") as string;
-    const publishedAt = formData.get("publishedAt") as string;
-    const files = formData.getAll("files") as File[];
-    const key = formData.get("key") as string;
+      // Handle file uploads
+      if (files.length > 0) {
+        const utapi = new UTApi();
+        const { success, deletedCount } = await utapi.deleteFiles(key);
+        if (!success || deletedCount === 0) {
+          return NextResponse.json(
+            { error: "Failed to delete old file" },
+            { status: 500 }
+          );
+        }
+        const uploadResponse = await utapi.uploadFiles(files);
+        updateObject.fileUrl = uploadResponse[0].data?.ufsUrl || "";
+        updateObject.fileId = uploadResponse[0].data?.key || "";
+      }
 
-    // Prepare update object
-    const updateObject: any = {
-      title,
-      publishedAt: new Date(publishedAt),
-      updatedAt: new Date(),
-    };
+      const result = await collection.updateOne(
+        { _id: new ObjectId(id) },
+        { $set: updateObject }
+      );
 
-    // Handle file uploads
-    if (files.length > 0) {
-      const utapi = new UTApi();
-      const { success, deletedCount } = await utapi.deleteFiles(key);
-      if (!success || deletedCount === 0) {
+      if (result.modifiedCount === 0) {
         return NextResponse.json(
-          { error: "Failed to delete old file" },
-          { status: 500 }
+          { error: "No document found with the provided ID" },
+          { status: 404 }
         );
       }
-      const uploadResponse = await utapi.uploadFiles(files);
-      updateObject.fileUrl = uploadResponse[0].data?.ufsUrl || "";
-      updateObject.fileId = uploadResponse[0].data?.key || "";
-    }
 
-    const result = await collection.updateOne(
-      { _id: new ObjectId(id) },
-      { $set: updateObject }
-    );
-
-    if (result.modifiedCount === 0) {
+      return NextResponse.json({ success: true }, { status: 200 });
+    } catch (error: any) {
       return NextResponse.json(
-        { error: "No document found with the provided ID" },
-        { status: 404 }
+        { error: error.message || "An error occurred." },
+        { status: 500 }
       );
     }
+  },
+  { adminOnly: true }
+);
 
-    return NextResponse.json({ success: true }, { status: 200 });
-  } catch (error: any) {
-    return NextResponse.json(
-      { error: error.message || "An error occurred." },
-      { status: 500 }
-    );
-  }
-}
-
-export async function DELETE(req: NextRequest) {
-  const apiKeyHeader = req.headers.get("x-api-key");
-  if (apiKey && apiKeyHeader !== apiKey) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-  const { searchParams } = new URL(req.url);
-  const id = searchParams.get("id");
-  if (!id) {
-    return NextResponse.json({ error: "ID is required" }, { status: 400 });
-  }
-  try {
-    const client = await clientPromise;
-    const collection = client.db(database).collection("newsletter");
-
-    // Find the document to delete
-    const document = await collection.findOne({ _id: new ObjectId(id) });
-    if (!document) {
-      return NextResponse.json(
-        { error: "Document not found" },
-        { status: 404 }
-      );
+export const DELETE = withAuth(
+  async (req: NextRequest) => {
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get("id");
+    if (!id) {
+      return NextResponse.json({ error: "ID is required" }, { status: 400 });
     }
-    // Delete the file from Uploadthing if it exists
-    const utapi = new UTApi();
-    if (document.fileId) {
-      const { success, deletedCount } = await utapi.deleteFiles(
-        document.fileId
-      );
-      if (!success || deletedCount === 0) {
+    try {
+      const client = await clientPromise;
+      const collection = client.db(database).collection("newsletter");
+
+      // Find the document to delete
+      const document = await collection.findOne({ _id: new ObjectId(id) });
+      if (!document) {
         return NextResponse.json(
-          { error: "Failed to delete file from Uploadthing" },
-          { status: 500 }
+          { error: "Document not found" },
+          { status: 404 }
         );
       }
-    }
-    // Delete the document from MongoDB
-    const result = await collection.deleteOne({ _id: new ObjectId(id) });
-    if (result.deletedCount === 0) {
+      // Delete the file from Uploadthing if it exists
+      const utapi = new UTApi();
+      if (document.fileId) {
+        const { success, deletedCount } = await utapi.deleteFiles(
+          document.fileId
+        );
+        if (!success || deletedCount === 0) {
+          return NextResponse.json(
+            { error: "Failed to delete file from Uploadthing" },
+            { status: 500 }
+          );
+        }
+      }
+      // Delete the document from MongoDB
+      const result = await collection.deleteOne({ _id: new ObjectId(id) });
+      if (result.deletedCount === 0) {
+        return NextResponse.json(
+          { error: "Document not found" },
+          { status: 404 }
+        );
+      }
+      return NextResponse.json({ success: true }, { status: 200 });
+    } catch (error: any) {
       return NextResponse.json(
-        { error: "Document not found" },
-        { status: 404 }
+        { error: error.message || "An error occurred." },
+        { status: 500 }
       );
     }
-    return NextResponse.json({ success: true }, { status: 200 });
-  } catch (error: any) {
-    return NextResponse.json(
-      { error: error.message || "An error occurred." },
-      { status: 500 }
-    );
-  }
-}
+  },
+  { adminOnly: true }
+);

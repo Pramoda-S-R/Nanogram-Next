@@ -3,6 +3,12 @@ import "../styles/globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import { ThemeInit } from "@/components/client/ThemeInit";
 import { Toaster } from "@/components/client/shared/ui/Sonner";
+import { Rubik } from "next/font/google";
+
+export const rubik = Rubik({
+  subsets: ["latin"],
+  variable: "--font-rubik",
+});
 
 export const metadata: Metadata = {
   title: {
@@ -57,7 +63,7 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en" data-theme="dark">
-        <body>
+        <body className="font-rubik">
           <ThemeInit />
           {children}
           <Toaster />

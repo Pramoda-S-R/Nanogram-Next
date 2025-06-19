@@ -168,6 +168,8 @@ export interface BlogPost {
 export interface Newsletters {
   _id: ObjectId;
   title: string;
+  description: string;
+  route: string;
   publishedAt: Date;
   fileUrl: string;
   fileId: string;

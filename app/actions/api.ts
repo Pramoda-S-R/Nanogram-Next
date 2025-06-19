@@ -880,7 +880,7 @@ export async function getBlogPostById(id: string): Promise<BlogPost | null> {
 // Get all newsletters
 export async function getAllNewsletters(): Promise<Newsletters[]> {
   try {
-    const response = await fetch(`${BASE_URL}/api/newsletter`, {
+    const response = await fetch(`${BASE_URL}/api/newsletter?order=-1`, {
       method: "GET",
       headers: {
         "x-api-key": apiKey || "",
