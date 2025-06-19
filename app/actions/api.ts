@@ -513,6 +513,36 @@ export async function savePost({
     return false;
   }
 }
+// Get posts infinite scroll with params
+export async function getPostsInfiniteScroll({
+  sortBy,
+  limit = 10,
+  skip = 0,
+}: {
+  sortBy: string;
+  limit?: number;
+  skip?: number;
+}): Promise<AggregatePost[]> {
+  try {
+    const response = await fetch(
+      `${BASE_URL}/api/posts?sort=${sortBy}&limit=${limit}&skip=${skip}`,
+      {
+        method: "GET",
+        headers: {
+          "x-api-key": apiKey || "",
+        },
+      }
+    );
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+    return data.documents as AggregatePost[];
+  } catch (error) {
+    console.error("Error fetching posts:", error);
+    return [];
+  }
+}
 
 // ==================
 // Nanogram Functions

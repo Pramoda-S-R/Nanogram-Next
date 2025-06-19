@@ -13,6 +13,7 @@ export const GET = withAuth(async (req: NextRequest) => {
   const sort = searchParams.get("sort") || "createdAt";
   const order = parseInt(searchParams.get("order") || "1"); // 1 for ascending, -1 for descending
   const limit = parseInt(searchParams.get("limit") || "0");
+  const skip = parseInt(searchParams.get("skip") || "0");
 
   const query: any = {};
   if (postId.length > 0) {
@@ -28,7 +29,18 @@ export const GET = withAuth(async (req: NextRequest) => {
 
     const pipeline: any[] = [
       { $match: query },
-      { $sort: { [sort]: order } },
+
+      ...(sort === "likesCount"
+        ? [
+            {
+              $addFields: {
+                likesCount: { $size: { $ifNull: ["$likes", []] } }, // safely compute likes length
+              },
+            },
+            { $sort: { likesCount: order } },
+          ]
+        : [{ $sort: { [sort]: order } }]),
+
       {
         $lookup: {
           from: "user",
@@ -57,11 +69,14 @@ export const GET = withAuth(async (req: NextRequest) => {
       {
         $unwind: {
           path: "$creator",
-          preserveNullAndEmptyArrays: true, // Keep posts without a creator
+          preserveNullAndEmptyArrays: true,
         },
       },
     ];
 
+    if (skip > 0) {
+      pipeline.push({ $skip: skip });
+    }
     if (limit > 0) {
       pipeline.push({ $limit: limit });
     }

@@ -15,13 +15,13 @@ const GridPosts = ({
   showUser?: boolean;
   showStats?: boolean;
 }) => {
+  if (!posts || posts.length === 0) {
+    return <div className="h-36 flex items-center justify-center text-base-content/50">No posts found.</div>;
+  }
   return (
     <ul className="flex flex-wrap gap-2">
       {posts.map((post) => (
-        <li
-          key={post._id.toString()}
-          className="relative w-72 aspect-square"
-        >
+        <li key={post._id.toString()} className="relative w-72 aspect-square">
           {post.imageUrl ? (
             <div className="w-full h-full rounded-lg overflow-hidden">
               <Link href={`/posts/${post._id.toString()}`}>

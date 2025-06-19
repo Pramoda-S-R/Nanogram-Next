@@ -24,10 +24,13 @@ const PostStats = ({
   showSave?: boolean;
 }) => {
   const [liked, setLiked] = useState(hasLiked(post, user));
+  const [likedCount, setLikedCount] = useState(post.likes.length);
   const [saved, setSaved] = useState(hasSaved(post, user));
 
   const toggleLike = async () => {
     try {
+      // Optimistically update the liked state
+      setLikedCount(liked ? likedCount - 1 : likedCount + 1);
       setLiked(!liked);
       const res = await likePost({
         postId: post._id.toString(),
@@ -64,12 +67,14 @@ const PostStats = ({
         className={`w-[85%] mx-auto flex items-center gap-2 justify-${align}`}
       >
         {showLikes && (
-          <div
-            className="text-base-content flex h-5 gap-1"
-            onClick={() => toggleLike()}
-          >
-            {liked ? <Liked /> : <Like />}{" "}
-            <p className="mt-0.5 text-xs">{post.likes.length}</p>
+          <div className="flex gap-1">
+            <div
+              className="text-base-content flex w-5 h-5"
+              onClick={() => toggleLike()}
+            >
+              {liked ? <Liked /> : <Like />}{" "}
+            </div>
+            <p className="mt-0.5 text-xs">{likedCount}</p>
           </div>
         )}
         {showComments && (

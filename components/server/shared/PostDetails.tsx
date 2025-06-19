@@ -29,7 +29,7 @@ const PostDetails = ({ post, user }: { post: AggregatePost; user: User }) => {
               <p className="text-sm">{post.caption}</p>
             </div>
             <div className="">
-              <PostStats post={post} user={user} />
+              <PostStats post={post} user={user} align="between" />
             </div>
           </div>
         </>
@@ -46,7 +46,7 @@ const PostDetails = ({ post, user }: { post: AggregatePost; user: User }) => {
             <p className="text-md py-10 ml-5">{post.caption}</p>
           </div>
           <div className="">
-            <PostStats post={post} user={user} />
+            <PostStats post={post} user={user} align="between" />
           </div>
         </div>
       )}
