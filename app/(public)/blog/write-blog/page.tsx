@@ -6,8 +6,7 @@ import "../styles/blog.css";
 import matter from "gray-matter";
 import { createBlogPost } from "@/app/actions/api";
 
-const example = `
----
+const example = `---
 title: "How to Blog"
 desc: "A comprehensive guide on how to write and publish a blog post effectively."
 date: "2025-05-20"
@@ -114,7 +113,7 @@ export default function BlogPage() {
         title: metadata.title || "Untitled",
         desc: metadata.desc || "No description provided",
         publishedAt: new Date(metadata.date) || new Date(),
-        authors: metadata.authors || ["Unknown"],
+        authors: metadata.authors || ["Anonymous"],
         tags: metadata.tags || [],
         cover: metadata.cover || "",
         file: new File([md], `${metadata.title || "untitled"}.md`, {
@@ -133,8 +132,8 @@ export default function BlogPage() {
   }
 
   return (
-    <div className="flex w-full h-[91vh]">
-      <div className="w-full h-full flex flex-col">
+    <section className="flex md:flex-row flex-col w-full h-fit">
+      <div className="w-full flex flex-col md:sticky md:top-0 md:w-2/3 h-[95dvh] p-4 bg-base-200">
         {" "}
         {/* Added flex-col for better layout with error */}
         <textarea
@@ -143,12 +142,7 @@ export default function BlogPage() {
             date: "2025-05-20"
             authors: ["Alex Chen", "Priya Kumar"]
             tags: ["JavaScript", "Web Development", "Frontend"]
-            ---
-
-            In the past decade, the web development landscape has changed dramatically.
-
-            **React**, **Angular**, and **Vue.js** have emerged as dominant players, each offering unique approaches to building dynamic user interfaces.
-            `}
+            ---`}
           className="textarea textarea-primary textarea-xs w-full h-full"
           onChange={(e) => setMd(e.target.value)}
           value={md}
@@ -167,7 +161,7 @@ export default function BlogPage() {
           Upload Blog
         </button>
       </div>
-      <div className="blog w-full px-4 md:px-2 md:pr-6 pb-20 overflow-y-auto">
+      <div className="blog w-full px-4 md:px-2 md:pr-6 pb-20 overflow-y-hidden">
         {metadata.cover && (
           <div className="aspect-[3/1] overflow-hidden">
             <img
@@ -190,6 +184,6 @@ export default function BlogPage() {
           {reactContent}
         </ReactMarkdown>
       </div>
-    </div>
+    </section>
   );
 }

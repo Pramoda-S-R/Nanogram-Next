@@ -83,3 +83,7 @@
   --color-primary: #0D2DA2;
   --font-blanka: 'Blanka';
 }
+
+.half-ellipse {
+  clip-path: ellipse(75vw 95% at top);
+}
