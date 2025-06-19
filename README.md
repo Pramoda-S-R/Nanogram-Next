@@ -10,8 +10,9 @@
 - Clerk.dev (auth)
 - Upstash (Redis) (rate limiting)
 - Ably (Web Socket) (messaging)
-- AIrtable (Tabular form data)
+- Airtable (Tabular form data)
 - Mailjet (Newsletters)
+- Google Gemini (embeddings and ai)
 - Weaviate (Vector search?)
 - Cleaner UI/UX with daisy UI
 - Shadcn for amazing UI
@@ -97,6 +98,9 @@
 - added new routes to handle user profile viewing, following etc.,
 - worked on ui
 - added embeds for posts
+- community ui updated
+- made onboarding fancier
+- added explore page partially
 
 ## Challenges
 

@@ -12,10 +12,12 @@ const AllUsers = async () => {
     user_id: clerkCurrentUser?.id || "",
   });
   const creators = await getAllUsers();
+  console.log('creators: ', creators);
 
   const newCreators = creators?.filter(
     (creator) => creator._id !== currentuser?._id
   );
+  console.log("newCreators: ", newCreators);
 
   if (!creators || !currentuser) {
     toast("Something went wrong", {
@@ -44,7 +46,7 @@ const AllUsers = async () => {
               key={creator?._id.toString()}
               className="card bg-base-200 w-56 aspect-square justify-center p-2"
             >
-              <Link href={`/profile/${creator.username}`}>
+              <Link href={`/profile/@${creator.username}`}>
                 <figure>
                   <img
                     src={creator.avatarUrl || "/assets/icons/user.svg"}

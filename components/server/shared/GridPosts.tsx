@@ -19,7 +19,7 @@ const GridPosts = ({
     return <div className="h-36 flex items-center justify-center text-base-content/50">No posts found.</div>;
   }
   return (
-    <ul className="flex flex-wrap gap-2">
+    <ul className="flex flex-wrap md:justify-start justify-center gap-2">
       {posts.map((post) => (
         <li key={post._id.toString()} className="relative w-72 aspect-square">
           {post.imageUrl ? (
