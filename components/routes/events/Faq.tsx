@@ -48,7 +48,7 @@ const Faq = () => {
             <img
               alt="Image"
               className="object-cover rounded-2xl"
-              src="/assets/images/faq.webp"
+              src="/assets/images/undraw_questions_g2px.svg"
               loading="lazy"
             />
           </div>
