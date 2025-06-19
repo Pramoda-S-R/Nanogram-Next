@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import Cropper, { ReactCropperElement } from "react-cropper";
 import "cropperjs/dist/cropper.css";
@@ -8,6 +8,7 @@ import { UploadedFile } from "@/types";
 
 const FileUploader = ({
   onFileChange,
+  imageStyles = "h-fit w-1/2 rounded-[8px]",
   initialFileUrl = "",
   acceptedFileTypes = { "*": ["*"] },
   enableImageCropping = false,
@@ -17,6 +18,12 @@ const FileUploader = ({
   const [fileUrl, setFileUrl] = useState<string>(initialFileUrl);
   const [cropping, setCropping] = useState<boolean>(false);
   const cropperRef = useRef<ReactCropperElement>(null);
+
+  useEffect(() => {
+    if (initialFileUrl) {
+      setFileUrl(initialFileUrl);
+    }
+  }, [initialFileUrl]);
 
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
@@ -116,7 +123,7 @@ const FileUploader = ({
                   <img
                     src={fileUrl}
                     alt="Uploaded file"
-                    className="h-fit w-1/2 rounded-[8px] object-cover object-top pointer-events-none"
+                    className={`${imageStyles} object-cover object-top pointer-events-none`}
                     loading="lazy"
                   />
                 ) : (

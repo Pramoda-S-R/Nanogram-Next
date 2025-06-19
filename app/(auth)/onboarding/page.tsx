@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import FileUploader from "@/components/client/shared/ui/FileUploader";
 import { addUserToDb, userExistsById } from "@/app/actions/api";
 import { User } from "lucide-react";
+import { avatars } from "@/constants";
 
 const schema = z.object({
   firstName: z.string().min(1, "First name is required"),
@@ -67,6 +68,7 @@ export default function Onboarding() {
         bio: "",
         file: null,
       });
+      setInitialFileUrl(user.imageUrl || null);
     }
   }, [isLoaded, user, reset]);
 
@@ -102,6 +104,21 @@ export default function Onboarding() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleImageSelection = async (url: string) => {
+    async function urlToFile(
+      url: string,
+      filename: string,
+      mimeType: "image/jpeg" | "image/png" = "image/jpeg"
+    ) {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      return new File([blob], filename, { type: mimeType });
+    }
+    setInitialFileUrl(url);
+    const file = await urlToFile(url, "selected-avatar.jpg");
+    setValue("file", file);
   };
 
   return (
@@ -143,6 +160,7 @@ export default function Onboarding() {
               <label className="w-full flex items-center justify-center">
                 <FileUploader
                   onFileChange={(file) => setValue("file", file)}
+                  imageStyles="h-40 w-40 rounded-full"
                   initialFileUrl={initialFileUrl || undefined}
                   acceptedFileTypes={{ "image/*": [".jpg", ".jpeg", ".png"] }}
                   enableImageCropping={true}
@@ -159,21 +177,24 @@ export default function Onboarding() {
             <div className="divider">OR</div>
             <div>
               <label htmlFor="profile icons">
-                <p className="text-center">
+                <p className="text-center text-xs mb-3">
                   Select a profile picture from our prebuilt selection
                 </p>
-                <button
-                  type="button"
-                  onClick={() =>
-                    setInitialFileUrl("http://localhost:3000/assets/images/placeholder.png")
-                  }
-                >
-                  <img
-                    src="/assets/images/placeholder.png"
-                    alt="pfp"
-                    className="size-20"
-                  />
-                </button>
+                <div className="flex items-center justify-center gap-3 flex-wrap">
+                  {avatars.map((ourAvatars, idx) => (
+                    <button
+                      type="button"
+                      key={idx}
+                      onClick={() => handleImageSelection(ourAvatars)}
+                    >
+                      <img
+                        src={ourAvatars}
+                        alt="pfp"
+                        className="size-20 rounded-full"
+                      />
+                    </button>
+                  ))}
+                </div>
               </label>
             </div>
             <div className="mb-2.5">

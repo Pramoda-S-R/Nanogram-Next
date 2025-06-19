@@ -10,6 +10,7 @@ export interface Point {
 
 export interface UploadedFile {
   onFileChange: (file: File | null) => void;
+  imageStyles?: string;
   initialFileUrl?: string;
   acceptedFileTypes?: Record<string, string[]>;
   enableImageCropping?: boolean;
