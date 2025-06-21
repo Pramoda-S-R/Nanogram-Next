@@ -133,7 +133,7 @@ export default function BlogPage() {
 
   return (
     <section className="flex md:flex-row flex-col w-full h-fit">
-      <div className="w-full flex flex-col md:sticky md:top-0 md:w-2/3 h-[95dvh] p-4 bg-base-200">
+      <div className="w-full flex flex-col md:sticky md:top-0 md:w-2/3 md:h-screen h-[95dvh] p-4 bg-base-200">
         {" "}
         {/* Added flex-col for better layout with error */}
         <textarea

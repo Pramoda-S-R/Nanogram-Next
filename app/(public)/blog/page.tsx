@@ -13,7 +13,7 @@ const Blog = async () => {
       </div>
       <div className="w-full flex flex-wrap gap-2 p-4">
         {blogs.map((blog, idx) => (
-          <div key={idx} className="card bg-base-100 w-96 shadow-sm">
+          <div key={idx} className="card bg-base-200 w-96 shadow-sm">
             <figure>
               <img
                 src={

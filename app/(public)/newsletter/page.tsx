@@ -20,9 +20,9 @@ const Newsletter = async () => {
     );
   }
   return (
-    <div className="w-full h-screen">
+    <div className="w-full h-screen mb-20">
       <div className="w-full flex justify-center font-serif items-center mt-4">
-        <h1 className="text-7xl">NANO THREADS</h1>
+        <h1 className="text-7xl text-center">NANO THREADS</h1>
       </div>
       <div className="w-full flex justify-center items-center my-4">
         <div className="card card-side flex md:flex-row flex-col bg-base-200 shadow-xl">
@@ -45,7 +45,7 @@ const Newsletter = async () => {
         </div>
       </div>
       <div className="divider"></div>
-      <div className="flex flex-wrap gap-4 p-4 mb-20">
+      <div className="flex flex-wrap gap-4 p-4">
         {newsletters.map((newsletter) => (
           <div
             key={newsletter._id.toString()}
