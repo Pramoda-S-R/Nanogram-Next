@@ -101,6 +101,7 @@
 - community ui updated
 - made onboarding fancier
 - added explore page partially
+- Newsletter and Blog UI updated
 
 ## Challenges
 
