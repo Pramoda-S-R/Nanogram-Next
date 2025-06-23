@@ -2,6 +2,7 @@ import React from "react";
 import { getAllBlogPosts } from "@/app/actions/api";
 import { Plus } from "lucide-react";
 import Link from "next/link";
+import SearchBlogs from "@/components/client/SearchBlogs";
 
 const Blog = async () => {
   const blogs = await getAllBlogPosts();
@@ -11,6 +12,7 @@ const Blog = async () => {
       <div className="w-full h-30 bg-base-200 half-ellipse flex items-center justify-center overflow-hidden">
         <h1 className="text-5xl font-bold">Nanogram Blogs</h1>
       </div>
+      <SearchBlogs />
       <div className="w-full flex flex-wrap gap-2 p-4">
         {blogs.map((blog, idx) => (
           <div key={idx} className="card bg-base-200 w-96 shadow-sm">
@@ -34,14 +36,13 @@ const Blog = async () => {
                 </p>
               </div>
               <div className="card-actions justify-end">
-                <Link href={`/blog/${blog.route}`} className="btn btn-primary">Read</Link>
+                <Link href={`/blog/${blog.route}`} className="btn btn-primary">
+                  Read
+                </Link>
               </div>
             </div>
           </div>
         ))}
-        <div className="card w-96 bg-base-200 shadow-sm">
-          <Link href={"/blog/write-blog"} className="card-body justify-center items-center text-7xl"><Plus size={80} /></Link>
-        </div>
       </div>
     </div>
   );
