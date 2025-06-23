@@ -11,13 +11,14 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
 ).toString();
 
 const PDFPage = ({ width, url }: { width: number; url: string }) => {
+  const deviceWidth = typeof window !== "undefined" ? window.innerWidth : 0;
   return (
-    <div className={`w-${width}`}>
+    <div className={`md:w-${width} w-full`}>
       <Document
         file={url}
         loading={
           <div
-            className={`w-${width} h-56 flex justify-center items-center`}
+            className={`md:w-${width} w-96 md:h-[18.14rem] h-[33.94rem] flex justify-center items-center`}
           >
             <span className="loading loading-bars loading-xl"></span>
           </div>
@@ -27,7 +28,7 @@ const PDFPage = ({ width, url }: { width: number; url: string }) => {
           pageNumber={1}
           renderAnnotationLayer={false}
           renderTextLayer={false}
-          width={4 * width}
+          width={deviceWidth > 768 ? 4 * width : 384}
         />
       </Document>
     </div>

@@ -20,13 +20,13 @@ const Newsletter = async () => {
     );
   }
   return (
-    <div className="w-full h-screen mb-20">
+    <div className="w-full min-h-screen bg-base-100">
       <div className="w-full flex justify-center font-serif items-center mt-4">
         <h1 className="text-7xl text-center">NANO THREADS</h1>
       </div>
       <div className="w-full flex justify-center items-center my-4">
-        <div className="card card-side flex md:flex-row flex-col bg-base-200 shadow-xl">
-          <figure className="md:w-56 w-full">
+        <div className="card md:card-side flex md:flex-row flex-col md:h-[18.14rem] bg-base-200 shadow-xl">
+          <figure className="md:w-56 w-96 h-full">
             <PDFPage width={56} url={featuredNewsletter.fileUrl} />
           </figure>
           <div className="card-body w-96">
@@ -45,7 +45,7 @@ const Newsletter = async () => {
         </div>
       </div>
       <div className="divider"></div>
-      <div className="flex flex-wrap gap-4 p-4">
+      <div className="block gap-4 p-4">
         {newsletters.map((newsletter) => (
           <div
             key={newsletter._id.toString()}
