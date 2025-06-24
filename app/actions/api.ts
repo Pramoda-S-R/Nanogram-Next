@@ -547,7 +547,32 @@ export async function getPostsInfiniteScroll({
 // ===================
 // Post Comment Functions
 // ===================
-
+// Get comments for a post
+export async function getCommentsByPostId({
+  postId,
+}: {
+  postId: string;
+}): Promise<Comment[]> {
+  try {
+    const response = await fetch(
+      `${BASE_URL}/api/posts/comment?postId=${postId}`,
+      {
+        method: "GET",
+        headers: {
+          "x-api-key": apiKey || "",
+        },
+      }
+    );
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+    return data.documents as Comment[];
+  } catch (error) {
+    console.error("Error fetching comments:", error);
+    return [];
+  }
+}
 
 // ==================
 // Nanogram Functions
