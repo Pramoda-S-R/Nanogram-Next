@@ -10,7 +10,7 @@ const PostCreator = ({ creator }: { creator: User }) => {
   const router = useRouter();
   return (
     <HoverCard>
-      <HoverCardTrigger href={creator ? `community/@${creator.username}` : "#"}>
+      <HoverCardTrigger href={creator ? `/community/@${creator.username}` : "#"}>
         <div className="flex items-center gap-2 cursor-pointer">
           <div className="avatar">
             <div className="w-10 rounded-full">

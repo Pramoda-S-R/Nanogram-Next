@@ -5,6 +5,7 @@ import { AggregatePost, User } from "@/types";
 import { hasLiked, hasSaved } from "@/utils";
 import { MessageCircle, ShareIcon } from "lucide-react";
 import React, { useState } from "react";
+import Comments from "./Comments";
 
 const PostStats = ({
   post,
@@ -78,10 +79,7 @@ const PostStats = ({
           </div>
         )}
         {showComments && (
-          <div className="text-base-content flex h-5 gap-1">
-            <MessageCircle strokeWidth={1.5} size={20} />{" "}
-            <p className="mt-0.5 text-xs">{post.comments.length}</p>
-          </div>
+          <Comments post={post} />
         )}
         {showShare && <ShareIcon strokeWidth={1.5} size={20} />}
         {showSave && (

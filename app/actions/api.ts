@@ -4,6 +4,7 @@ import {
   AggregatePost,
   BlogPost,
   BlogSchema,
+  Comment,
   Event,
   Nanogram,
   Newsletters,
