@@ -38,8 +38,9 @@
 - [ ] community ui
 - [ ] add like share comment save feature
 - [ ] add bio section in manage account
+- [ ] add intersection observer to comments and make it infini scroll
 - [x] fix all users screen
-- [ ] add report post feature
+- [ ] add report post and comment feature (combination ui perhaps?)
 - [x] connect uploadthing and establish blogs and newsletters
 - [x] add 2fa check for POST, PUT, DELETE functions for devs
 - [ ] subscribe to newsletter
@@ -102,6 +103,8 @@
 - made onboarding fancier
 - added explore page partially
 - Newsletter and Blog UI updated
+- Comment apis done
+- Comments UI done
 
 ## Challenges
 

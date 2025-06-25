@@ -44,24 +44,12 @@ export interface AggregatePost {
   updatedAt: Date;
 }
 
-export interface Aggregateuser {
+export interface AggregateComment {
   _id: ObjectId;
-  userId: string;
-  username: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  bio?: string;
-  avatarUrl?: string;
-  karma?: number;
-  role?: "user" | "admin" | "moderator" | "dev"; // For cool badges
-  posts?: Post[];
-  likedPosts?: ObjectId[];
-  savedPosts?: ObjectId[];
-  following?: ObjectId[];
-  followers?: ObjectId[];
-  comments?: ObjectId[];
-  likedComments?: ObjectId[];
+  postId: ObjectId;
+  commenter: User;
+  content: string;
+  likes: ObjectId[];
   createdAt: Date;
   updatedAt: Date;
 }

@@ -2,26 +2,25 @@ import clientPromise from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
 import { NextRequest, NextResponse } from "next/server";
 import { withAuth } from "@/lib/apiauth";
-import { Comment, Post, User } from "@/types";
+import { Comment, Post } from "@/types";
 
 const database: string | undefined = process.env.DATABASE;
 
 export const GET = withAuth(async (req: NextRequest) => {
   try {
     const postIdStr = req.nextUrl.searchParams.get("postId");
-    const id = req.nextUrl.searchParams.get("id");
+    const ids = req.nextUrl.searchParams.getAll("id");
+    const sort = req.nextUrl.searchParams.get("sort") || "createdAt";
+    const order = parseInt(req.nextUrl.searchParams.get("order") || "1"); // 1 = asc, -1 = desc
+    const limit = parseInt(req.nextUrl.searchParams.get("limit") || "10", 0);
+    const skip = parseInt(req.nextUrl.searchParams.get("skip") || "0", 0);
     const query: any = {};
-    if (id) {
-      let commentId: ObjectId;
-      try {
-        commentId = new ObjectId(id);
-      } catch (error) {
-        return NextResponse.json(
-          { error: "Invalid Comment ID format." },
-          { status: 400 }
-        );
-      }
-      query._id = commentId;
+    if (ids.length > 0) {
+      query._id = {
+        $in: ids.map((id) => {
+          return /^[a-f\d]{24}$/i.test(id) ? new ObjectId(id) : id; // fallback to string
+        }),
+      };
     }
 
     const client = await clientPromise;
@@ -48,10 +47,63 @@ export const GET = withAuth(async (req: NextRequest) => {
     }
 
     // Fetch comments for the post
-    const comments = await db
-      .collection<Comment>("comments")
-      .find(query)
-      .toArray();
+    const collection = db.collection<Comment>("comments");
+    const pipeline: any[] = [
+      { $match: query },
+
+      ...(sort === "likesCount"
+        ? [
+            {
+              $addFields: {
+                likesCount: { $size: { $ifNull: ["$likes", []] } }, // safely compute likes length
+              },
+            },
+            { $sort: { likesCount: order } },
+          ]
+        : [{ $sort: { [sort]: order } }]),
+
+      {
+        $lookup: {
+          from: "user",
+          let: { commenterId: "$commenter" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: [
+                    "$_id",
+                    {
+                      $cond: {
+                        if: { $eq: [{ $type: "$$commenterId" }, "objectId"] },
+                        then: "$$commenterId",
+                        else: { $toObjectId: "$$commenterId" },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          ],
+          as: "commenter",
+        },
+      },
+      {
+        $unwind: {
+          path: "$commenter",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+    ];
+
+    if (skip > 0) {
+      pipeline.push({ $skip: skip });
+    }
+    if (limit > 0) {
+      pipeline.push({ $limit: limit });
+    }
+
+    const cursor = collection.aggregate(pipeline);
+    const comments = await cursor.toArray();
 
     return NextResponse.json({ documents: comments }, { status: 200 });
   } catch (error) {
@@ -67,7 +119,7 @@ export const POST = withAuth(async (req: NextRequest) => {
   try {
     const dev = req.headers.get("x-dev-userid") as string;
     const tier = req.headers.get("x-dev-tier") as string;
-    
+
     const formData = await req.formData();
     const postId_str = formData.get("postId") as string;
     const commenter_str = formData.get("commenter") as string;
@@ -143,76 +195,78 @@ export const POST = withAuth(async (req: NextRequest) => {
 });
 
 export const PUT = withAuth(async (req: NextRequest) => {
+  try {
+    const dev = req.headers.get("x-dev-userid") as string;
+    const tier = req.headers.get("x-dev-tier") as string;
+    const formData = await req.formData();
+    const id = formData.get("id") as string | null;
+    if (!id) {
+      return NextResponse.json(
+        { error: "Comment ID is required." },
+        { status: 400 }
+      );
+    }
+
+    let commentId: ObjectId;
     try {
-        const dev = req.headers.get("x-dev-userid") as string;
-        const tier = req.headers.get("x-dev-tier") as string;
-        const formData = await req.formData();
-        const id = formData.get("id") as string | null;
-        if (!id) {
-        return NextResponse.json(
-            { error: "Comment ID is required." },
-            { status: 400 }
-        );
-        }
-    
-        let commentId: ObjectId;
-        try {
-        commentId = new ObjectId(id);
-        } catch (error) {
-        return NextResponse.json(
-            { error: "Invalid Comment ID format." },
-            { status: 400 }
-        );
-        }
-    
-        const content = formData.get("content") as string;
-        if (!content) {
-        return NextResponse.json(
-            { error: "Content is required." },
-            { status: 400 }
-        );
-        }
-    
-        const client = await clientPromise;
-        const db = client.db(database);
-    
-        // Check if the comment exists
-        const comment = await db
-        .collection<Comment>("comments")
-        .findOne({ _id: commentId });
-        if (!comment) {
-        return NextResponse.json(
-            { error: "Comment not found." },
-            { status: 404 }
-        );
-        }
-    
-        // Check if the commenter is the same as the developer user ID
-        if (tier === "free" && dev !== comment.commenter.toString()) {
-        return NextResponse.json(
-            { error: "Commenter ID does not match developer user ID." },
-            { status: 403 }
-        );
-        }
-    
-        // Update the comment
-        await db.collection<Comment>("comments").updateOne(
+      commentId = new ObjectId(id);
+    } catch (error) {
+      return NextResponse.json(
+        { error: "Invalid Comment ID format." },
+        { status: 400 }
+      );
+    }
+
+    const content = formData.get("content") as string;
+    if (!content) {
+      return NextResponse.json(
+        { error: "Content is required." },
+        { status: 400 }
+      );
+    }
+
+    const client = await clientPromise;
+    const db = client.db(database);
+
+    // Check if the comment exists
+    const comment = await db
+      .collection<Comment>("comments")
+      .findOne({ _id: commentId });
+    if (!comment) {
+      return NextResponse.json(
+        { error: "Comment not found." },
+        { status: 404 }
+      );
+    }
+
+    // Check if the commenter is the same as the developer user ID
+    if (tier === "free" && dev !== comment.commenter.toString()) {
+      return NextResponse.json(
+        { error: "Commenter ID does not match developer user ID." },
+        { status: 403 }
+      );
+    }
+
+    // Update the comment
+    await db
+      .collection<Comment>("comments")
+      .updateOne(
         { _id: commentId },
         { $set: { content, updatedAt: new Date() } }
-        );
-    
-        return NextResponse.json(
-        { message: "Comment updated successfully." },
-        { status: 200 }
-        );
-    } catch (error) {
-        console.error("Error updating comment:", error);
-        return NextResponse.json(
-        { error: "An error occurred while updating the comment." },
-        { status: 500 }
-        );
-    }
-})
+      );
+
+    return NextResponse.json(
+      { message: "Comment updated successfully." },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Error updating comment:", error);
+    return NextResponse.json(
+      { error: "An error occurred while updating the comment." },
+      { status: 500 }
+    );
+  }
+});
 
 export const DELETE = withAuth(async (req: NextRequest) => {
   try {

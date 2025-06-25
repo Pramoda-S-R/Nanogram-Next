@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { Binary, CakeSlice } from "lucide-react";
 import { formatDate } from "@/utils";
 
-const PostCreator = ({ creator }: { creator: User }) => {
+const PostCreator = ({ creator, onlyImage = false }: { creator: User, onlyImage?: boolean }) => {
   const router = useRouter();
   return (
     <HoverCard>
@@ -20,12 +20,12 @@ const PostCreator = ({ creator }: { creator: User }) => {
               />
             </div>
           </div>
-          <div className="text-start">
+          {!onlyImage && <div className="text-start">
             <h2 className="card-title">
               {creator.firstName} {creator.lastName}
             </h2>
             <p className="text-xs">@{creator.username}</p>
-          </div>
+          </div>}
         </div>
       </HoverCardTrigger>
       <HoverCardContent className="card max-w-120 bg-base-100 shadow-sm px-0 py-0 border-0">

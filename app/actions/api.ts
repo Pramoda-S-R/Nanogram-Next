@@ -1,6 +1,7 @@
 // app/actions/fetchData.ts
 "use server";
 import {
+  AggregateComment,
   AggregatePost,
   BlogPost,
   BlogSchema,
@@ -12,6 +13,7 @@ import {
   Testimonial,
   User,
 } from "@/types";
+import { ObjectId } from "mongodb";
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 const apiKey: string | undefined = process.env.NEXT_PUBLIC_API_KEY;
@@ -548,15 +550,49 @@ export async function getPostsInfiniteScroll({
 // ===================
 // Post Comment Functions
 // ===================
+// Create a new comment
+export async function createComment({
+  postId,
+  commenter,
+  content,
+}: {
+  postId: string;
+  commenter: string;
+  content: string;
+}): Promise<ObjectId | boolean> {
+  try {
+    const formData = new FormData();
+    formData.append("postId", postId);
+    formData.append("content", content);
+    formData.append("commenter", commenter);
+
+    const response = await fetch(`${BASE_URL}/api/posts/comment`, {
+      method: "POST",
+      headers: {
+        "x-api-key": apiKey || "",
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+    return data.commentId as ObjectId;
+  } catch (error) {
+    console.error("Error creating comment:", error);
+    return false;
+  }
+}
 // Get comments for a post
 export async function getCommentsByPostId({
   postId,
 }: {
   postId: string;
-}): Promise<Comment[]> {
+}): Promise<AggregateComment[]> {
   try {
     const response = await fetch(
-      `${BASE_URL}/api/posts/comment?postId=${postId}`,
+      `${BASE_URL}/api/posts/comment?postId=${postId}&order=-1&sort=updatedAt`,
       {
         method: "GET",
         headers: {
@@ -568,10 +604,63 @@ export async function getCommentsByPostId({
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     const data = await response.json();
-    return data.documents as Comment[];
+    return data.documents as AggregateComment[];
   } catch (error) {
     console.error("Error fetching comments:", error);
     return [];
+  }
+}
+// Delete a comment by ID
+export async function deleteCommentById(commentId: string): Promise<boolean> {
+  try {
+    const response = await fetch(
+      `${BASE_URL}/api/posts/comment?id=${commentId}`,
+      {
+        method: "DELETE",
+        headers: {
+          "x-api-key": apiKey || "",
+        },
+      }
+    );
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    console.log("Comment deleted successfully");
+    return true;
+  } catch (error) {
+    console.error("Error deleting comment:", error);
+    return false;
+  }
+}
+// Like a comment
+export async function likeComment({
+  postId,
+  commentId,
+  userId,
+}: {
+  postId: string;
+  commentId: string;
+  userId: string;
+}): Promise<boolean> {
+  try {
+    const formData = new FormData();
+    formData.append("postId", postId);
+    formData.append("commentId", commentId);
+    formData.append("userId", userId);
+    const response = await fetch(`${BASE_URL}/api/posts/comment/like`, {
+      method: "PUT",
+      headers: {
+        "x-api-key": apiKey || "",
+      },
+      body: formData,
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return true;
+  } catch (error) {
+    console.log("Error liking comment:", error);
+    return false;
   }
 }
 
