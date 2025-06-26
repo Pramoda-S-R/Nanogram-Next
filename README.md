@@ -37,6 +37,7 @@
 - [x] start work on the community group
 - [ ] community ui
 - [ ] add like share comment save feature
+- [ ] add karma feature
 - [ ] add bio section in manage account
 - [ ] add intersection observer to comments and make it infini scroll
 - [x] fix all users screen

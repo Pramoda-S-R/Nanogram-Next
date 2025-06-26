@@ -1,4 +1,5 @@
 import { getCurrentUser, getFypPosts } from "@/app/actions/api";
+import Topbar from "@/components/client/shared/Topbar";
 import PostCard from "@/components/server/shared/PostCard";
 import { currentUser } from "@clerk/nextjs/server";
 import React from "react";
@@ -18,6 +19,7 @@ const Community = async () => {
 
   return (
     <div className="flex flex-col items-center justify-center gap-4 md:p-4 p-0">
+      <Topbar />
       {currentUserObj &&
         posts.map((post) => (
           <PostCard

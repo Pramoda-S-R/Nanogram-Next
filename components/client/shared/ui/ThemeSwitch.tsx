@@ -23,7 +23,11 @@ const ThemeSwitch = () => {
       data-act-class="ACTIVECLASS"
       onClick={toggleTheme}
     >
-      {theme === "dark" ? <Sun /> : <Moon />}
+      {theme === "dark" ? (
+        <Sun strokeWidth={1.5} />
+      ) : (
+        <Moon strokeWidth={1.5} />
+      )}
     </button>
   );
 };

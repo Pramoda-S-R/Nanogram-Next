@@ -11,6 +11,7 @@ const isPublicRoute = createRouteMatcher([
   "/events",
   "/blog(.*)",
   "/embed(.*)",
+  "/status(.*)",
   "/newsletter",
   "/feedback",
   "/privacy-policy",
@@ -30,6 +31,6 @@ export default clerkMiddleware(async (auth, req) => {
 // Only apply middleware to non-static, non-API routes
 export const config = {
   matcher: [
-    "/((?!api|_next|embed|.*\\..*).*)",
+    "/((?!api|_next|embed|status|.*\\..*).*)",
   ],
 };

@@ -22,9 +22,9 @@ const apiKey: string | undefined = process.env.NEXT_PUBLIC_API_KEY;
 // User Functions
 // ===================
 // Get all users
-export async function getAllUsers(): Promise<User[]> {
+export async function getNewUsers(): Promise<User[]> {
   try {
-    const response = await fetch(`${BASE_URL}/api/user`, {
+    const response = await fetch(`${BASE_URL}/api/user?order=-1`, {
       method: "GET",
       headers: {
         "x-api-key": apiKey || "",

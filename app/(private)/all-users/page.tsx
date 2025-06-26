@@ -2,7 +2,7 @@ import React from "react";
 import { toast } from "sonner";
 import FollowButton from "@/components/client/shared/FollowButton";
 import Link from "next/link";
-import { getAllUsers, getCurrentUser } from "@/app/actions/api";
+import { getNewUsers, getCurrentUser } from "@/app/actions/api";
 import { currentUser } from "@clerk/nextjs/server";
 import SearchUsers from "@/components/client/shared/SearchUsers";
 
@@ -11,13 +11,12 @@ const AllUsers = async () => {
   const currentuser = await getCurrentUser({
     user_id: clerkCurrentUser?.id || "",
   });
-  const creators = await getAllUsers();
-  console.log('creators: ', creators);
+  const creators = await getNewUsers();
+  console.log("creators: ", creators);
 
   const newCreators = creators?.filter(
     (creator) => creator._id !== currentuser?._id
   );
-  console.log("newCreators: ", newCreators);
 
   if (!creators || !currentuser) {
     toast("Something went wrong", {
@@ -40,7 +39,7 @@ const AllUsers = async () => {
         <h2 className="text-2xl text-left w-full">Other Users</h2>
       </div>
       <div className="flex flex-wrap gap-9 w-full mb-14">
-        <ul className="flex flex-wrap gap-4 w-full">
+        <ul className="flex flex-wrap md:justify-start justify-center gap-4 w-full">
           {newCreators?.map((creator) => (
             <li
               key={creator?._id.toString()}

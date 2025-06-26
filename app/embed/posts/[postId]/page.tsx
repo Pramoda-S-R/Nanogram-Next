@@ -64,7 +64,7 @@ const EmbedPosts = async ({
       )}
       <div className="w-full py-2">
         <div className="w-[85%] mx-auto flex items-center justify-between">
-          <Liked />
+          <Liked className="w-5" />
           <MessageCircle strokeWidth={1.5} />
           <ShareIcon strokeWidth={1.5} />
           <Save />

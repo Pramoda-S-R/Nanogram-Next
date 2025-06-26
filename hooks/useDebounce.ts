@@ -15,7 +15,7 @@ export default function useDebounce(value: string, delay: number): string {
   useEffect(() => {
     // Set a timer to update the debounced value after the specified delay
     const handler = setTimeout(() => {
-      setDebouncedValue(value);
+      setDebouncedValue(value.trim());
     }, delay);
 
     // Clear the timer if the value or delay changes, or when the component unmounts.
