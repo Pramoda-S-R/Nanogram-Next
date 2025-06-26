@@ -122,7 +122,7 @@ const ProfileDrawer = () => {
       <DrawerTrigger>
         <div
           className="flex h-full items-center"
-          title={`${user?.firstName || "User"} ${user?.lastName || "Profile"}`}
+          title={user?.fullName || "User"}
         >
           <div className="relative group w-7 h-7 overflow-hidden rounded-full">
             <img
@@ -145,9 +145,7 @@ const ProfileDrawer = () => {
               className="rounded-full cursor-pointer"
             />
             <div>
-              <p>
-                {user.firstName} {user.lastName}
-              </p>
+              <p>{user.fullName}</p>
               <p className="font-thin text-xs">@{user.username}</p>
             </div>
           </DrawerTitle>
@@ -203,7 +201,7 @@ const ProfileDrawer = () => {
                         className="rounded-full"
                       />
                       <p className="text-sm font-semibold ml-2">
-                        {user.firstName} {user.lastName}
+                        {user.fullName}
                       </p>
                     </div>
                     <UpdateUserDialog user={user} />

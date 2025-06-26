@@ -79,6 +79,9 @@ export const POST = withAuth(
         username: username ? (username as string) : "",
         firstName: firstName ? (firstName as string) : "",
         lastName: lastName ? (lastName as string) : "",
+        fullName: `${firstName ? (firstName as string) : ""} ${
+          lastName ? (lastName as string) : ""
+        }`.trim(),
         email: email ? (email as string) : "",
         bio: bio ? (bio as string) : "",
         avatarUrl: avatarUrl ? (avatarUrl as string) : undefined,

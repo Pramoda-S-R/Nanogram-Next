@@ -51,7 +51,7 @@ const Profile = async ({
               <div className="flex justify-start flex-col">
                 <div>
                   <div className="text-xl font-semibold">
-                    {user?.firstName} {user?.lastName}{" "}
+                    {user?.fullName}{" "}
                     {user?.role !== "user" && (
                       <p
                         className={`badge badge-soft ${

@@ -104,7 +104,7 @@ export const Followers = async ({
               </Link>
               <div className="flex flex-col">
                 <p className="text-md font-semibold">
-                  {follower.firstName} {follower.lastName}
+                  {follower.fullName}
                 </p>
                 <p className="text-xs font-light">@{follower.username}</p>
               </div>
@@ -150,7 +150,7 @@ export const Following = async ({
               </Link>
               <div className="flex flex-col">
                 <p className="text-md font-semibold">
-                  {following.firstName} {following.lastName}
+                  {following.fullName}
                 </p>
                 <p className="text-xs font-light">@{following.username}</p>
               </div>

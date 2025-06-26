@@ -55,7 +55,7 @@ const AllUsers = async () => {
                 </figure>
                 <div className="flex flex-col items-center">
                   <p className="">
-                    {creator.firstName} {creator.lastName}
+                    {creator.fullName}
                   </p>
                   <p className="small-regular text-light-3 text-center line-clamp-1">
                     @{creator.username}

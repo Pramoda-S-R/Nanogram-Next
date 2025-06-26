@@ -6,11 +6,19 @@ import { useRouter } from "next/navigation";
 import { Binary, CakeSlice } from "lucide-react";
 import { formatDate } from "@/utils";
 
-const PostCreator = ({ creator, onlyImage = false }: { creator: User, onlyImage?: boolean }) => {
+const PostCreator = ({
+  creator,
+  onlyImage = false,
+}: {
+  creator: User;
+  onlyImage?: boolean;
+}) => {
   const router = useRouter();
   return (
     <HoverCard>
-      <HoverCardTrigger href={creator ? `/community/@${creator.username}` : "#"}>
+      <HoverCardTrigger
+        href={creator ? `/community/@${creator.username}` : "#"}
+      >
         <div className="flex items-center gap-2 cursor-pointer">
           <div className="avatar">
             <div className="w-10 rounded-full">
@@ -20,12 +28,12 @@ const PostCreator = ({ creator, onlyImage = false }: { creator: User, onlyImage?
               />
             </div>
           </div>
-          {!onlyImage && <div className="text-start">
-            <h2 className="card-title">
-              {creator.firstName} {creator.lastName}
-            </h2>
-            <p className="text-xs">@{creator.username}</p>
-          </div>}
+          {!onlyImage && (
+            <div className="text-start">
+              <h2 className="card-title">{creator.fullName}</h2>
+              <p className="text-xs">@{creator.username}</p>
+            </div>
+          )}
         </div>
       </HoverCardTrigger>
       <HoverCardContent className="card max-w-120 bg-base-100 shadow-sm px-0 py-0 border-0">
@@ -38,9 +46,7 @@ const PostCreator = ({ creator, onlyImage = false }: { creator: User, onlyImage?
             />
             <div>
               <h2 className="card-title">
-                {creator.firstName
-                  ? creator.firstName + " " + creator.lastName
-                  : "[deleted user]"}
+                {creator.fullName ? creator.fullName : "[deleted user]"}
               </h2>
               <p className="text-xs">
                 {creator.username ? `@${creator.username}` : "[deleted user]"}
