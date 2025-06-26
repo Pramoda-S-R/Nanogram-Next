@@ -12,6 +12,8 @@ import { useUser } from "@clerk/nextjs";
 import { avatars } from "@/constants";
 import useDebounce from "@/hooks/useDebounce";
 import { useIsMobile } from "@/hooks/useIsMobile";
+import { usePathname } from "next/navigation";
+import path from "path";
 
 const CONTACTS = [
   {
@@ -98,6 +100,8 @@ const Contacts = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [allContacts] = useState([...CONTACTS]);
   const [contacts, setContacts] = useState([...CONTACTS]);
+
+  const pathname = usePathname();
   const isMobile = useIsMobile();
 
   const handleCallback = (searchValue: string) => {
@@ -198,6 +202,9 @@ const Contacts = () => {
     );
   };
 
+  if (pathname !== "/messages" && isMobile) {
+    return null;
+  }
   if (!mounted || isMobile) {
     return (
       <div className="flex flex-col w-full h-dvh p-2">

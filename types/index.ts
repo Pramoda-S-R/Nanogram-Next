@@ -165,3 +165,27 @@ export interface Newsletters {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export interface Message {
+  _id: string;
+  sender: {
+    _id: string;
+    username: string;
+    fullName: string;
+    avatarUrl?: string;
+  };
+  receiver: {
+    _id: string;
+    username: string;
+    fullName: string;
+    avatarUrl?: string;
+  };
+  message: string;
+  reactions?: {
+    emoji: string;
+    userId: string;
+  }[];
+  seen: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
