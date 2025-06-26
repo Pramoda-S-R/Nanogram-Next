@@ -62,7 +62,7 @@ const ExplorePosts = () => {
   }, [option]);
 
   return (
-    <div>
+    <div className="mt-4">
       <SearchPosts />
       <div className="flex flex-col w-full mb-10">
         <div className="flex justify-between w-full mb-5">

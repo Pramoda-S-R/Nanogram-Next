@@ -2,7 +2,7 @@
 import { User } from "@/types";
 import { Search } from "lucide-react";
 import Link from "next/link";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import FollowButton from "./FollowButton";
 import useDebounce from "@/hooks/useDebounce";
 import { searchUsers } from "@/app/actions/api";
@@ -12,6 +12,28 @@ const SearchUsers = ({ currentuser }: { currentuser: User }) => {
   const debouncedValue = useDebounce(searchValue, 50);
   const [shouldShowSearchResults, setShouldShowSearchResults] = useState(false);
   const [searchedUsers, setSearchedUsers] = useState<User[]>([]);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    interface KeyboardEventWithKey extends KeyboardEvent {
+      key: string;
+    }
+
+    const handleKeyDown = (e: KeyboardEventWithKey): void => {
+      const isMac: boolean = navigator.platform.toUpperCase().includes("MAC");
+      const isShortcut: boolean =
+        (isMac && e.metaKey && e.key === "k") ||
+        (!isMac && e.ctrlKey && e.key === "k");
+
+      if (isShortcut) {
+        e.preventDefault();
+        inputRef.current?.focus();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   useEffect(() => {
     const getSearchedUsers = async () => {
@@ -37,12 +59,19 @@ const SearchUsers = ({ currentuser }: { currentuser: User }) => {
     <>
       <div className="flex flex-col gap-4 mb-8">
         <h2 className="text-2xl w-full">Search Users</h2>
-        <label htmlFor="search users" className="input ">
-          <Search size={24} />
+        <label
+          htmlFor="search users"
+          className="w-96 input focus:outline-none focus-within:outline-none"
+        >
+          <Search size={24} strokeWidth={1.5} />
           <input
+            type="search"
             placeholder="Search users by name or username"
+            ref={inputRef}
             onChange={(e) => setSearchValue(e.target.value)}
           />
+          <kbd className="kbd kbd-sm">Ctrl</kbd>
+          <kbd className="kbd kbd-sm">K</kbd>
         </label>
       </div>
       {shouldShowSearchResults && (

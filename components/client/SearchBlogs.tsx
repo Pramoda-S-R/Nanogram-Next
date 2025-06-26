@@ -1,4 +1,5 @@
 "use client";
+import { Search } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useRef } from "react";
 
@@ -28,23 +29,8 @@ const SearchBlogs = () => {
   }, []);
   return (
     <div className="w-full flex justify-end gap-2 px-10">
-      <label className="input">
-        <svg
-          className="h-[1em] opacity-50"
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-        >
-          <g
-            strokeLinejoin="round"
-            strokeLinecap="round"
-            strokeWidth="2.5"
-            fill="none"
-            stroke="currentColor"
-          >
-            <circle cx="11" cy="11" r="8"></circle>
-            <path d="m21 21-4.3-4.3"></path>
-          </g>
-        </svg>
+      <label className="input focus:outline-none focus-within:outline-none">
+        <Search width={24} strokeWidth={1.5} />
         <input
           ref={inputRef}
           type="search"
