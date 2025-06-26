@@ -136,7 +136,7 @@ const Sidebar = () => {
       </div>
 
       {mounted && (
-        <div className="divider divider-horizontal divider-start ml-0 group text-base-content"></div>
+        <div className="divider divider-horizontal divider-start mx-0 group text-base-content"></div>
       )}
     </div>
   );

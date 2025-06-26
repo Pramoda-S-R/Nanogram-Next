@@ -112,7 +112,6 @@ const PostForm = ({
         ...data,
         userId: user.id,
       });
-      console.log("New Post Created:", { ...data, userId: user.id });
 
       if (!newPost) {
         throw new Error("Failed to create post");

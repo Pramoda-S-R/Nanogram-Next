@@ -225,7 +225,6 @@ export function CommentItem({
     try {
       const res = await deleteCommentById(comment._id.toString());
       if (res) {
-        console.log("Comment deleted successfully:", comment._id);
         callback(comment._id);
         toast.success(
           "Comment deleted successfully. Changes will reflect in the post shortly."
@@ -323,10 +322,7 @@ const Comments = ({ post }: { post: AggregatePost }) => {
   const isDesktop = useMediaQuery({ minWidth: 768 });
 
   const handleCallback = (newComment: AggregateComment) => {
-    console.log("callbakc called");
     setComments((prevComments) => [newComment, ...prevComments]);
-    console.log("New comment added:", newComment);
-    console.log("Updated comments:", comments);
   };
 
   const handleDeleteCallback = (commentId: ObjectId) => {

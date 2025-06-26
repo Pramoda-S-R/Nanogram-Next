@@ -12,7 +12,6 @@ const AllUsers = async () => {
     user_id: clerkCurrentUser?.id || "",
   });
   const creators = await getNewUsers();
-  console.log("creators: ", creators);
 
   const newCreators = creators?.filter(
     (creator) => creator._id !== currentuser?._id
