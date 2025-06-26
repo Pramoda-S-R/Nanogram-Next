@@ -11,6 +11,7 @@ import clsx from "clsx";
 import { useUser } from "@clerk/nextjs";
 import { avatars } from "@/constants";
 import useDebounce from "@/hooks/useDebounce";
+import { useIsMobile } from "@/hooks/useIsMobile";
 
 const CONTACTS = [
   {
@@ -93,9 +94,11 @@ function SearchContacts({
 
 const Contacts = () => {
   const { isLoaded, user } = useUser();
+  const [mounted, setMounted] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const [allContacts] = useState([...CONTACTS]);
   const [contacts, setContacts] = useState([...CONTACTS]);
+  const isMobile = useIsMobile();
 
   const handleCallback = (searchValue: string) => {
     if (!searchValue.trim()) {
@@ -109,10 +112,14 @@ const Contacts = () => {
     setContacts(filtered);
   };
 
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const ExpandedView = () => {
     if (!isLoaded || !user) {
       return (
-        <div className="flex flex-col w-64 h-dvh p-2">
+        <div className="flex flex-col w-full h-dvh p-2">
           <div className="w-full flex justify-between">
             <h2 className="skeleton w-32"></h2>
             <MessageCirclePlus strokeWidth={1.5} width={20} />
@@ -131,7 +138,7 @@ const Contacts = () => {
       );
     }
     return (
-      <div className="flex flex-col w-64 h-dvh p-2 ">
+      <div className="flex flex-col h-dvh p-2 ">
         <div className="w-full flex justify-between">
           <h2 className="font-semibold">@{user.username}</h2>
           <button>
@@ -139,7 +146,7 @@ const Contacts = () => {
           </button>
         </div>
         <div className="divider my-0"></div>
-        <SearchContacts callback={handleCallback} className="w-60" />
+        <SearchContacts callback={handleCallback} className="w-full" />
         <div className="flex flex-col gap-2 mt-0.5 overflow-y-auto">
           {contacts.map((contact, idx) => (
             <div className="flex gap-2" key={idx}>
@@ -191,9 +198,23 @@ const Contacts = () => {
     );
   };
 
+  if (!mounted || isMobile) {
+    return (
+      <div className="flex flex-col w-full h-dvh p-2">
+        <ExpandedView />
+      </div>
+    );
+  }
+
   return (
     <div className="flex">
-      {collapsed ? <CollapsedView /> : <ExpandedView />}
+      {collapsed ? (
+        <CollapsedView />
+      ) : (
+        <div className="w-64">
+          <ExpandedView />
+        </div>
+      )}
       <div className="divider divider-start divider-horizontal mx-0 group">
         <button
           type="button"

@@ -132,46 +132,50 @@ const Sidebar = () => {
     return <>{mounted && renderBottomNav()}</>;
   }
 
+  if (!mounted) {
+    return null; // Prevent rendering until mounted
+  }
+
   // Desktop view
-  return (
-    <div className="sticky top-0 flex h-dvh bg-base-100">
-      <div className="flex flex-col justify-between p-1 pb-5 w-full">
-        {/* Navigation Section */}
-        <nav className="flex flex-col gap-5 px-1 pt-3">
-          {linkItems.map(({ href, label, icon }) => (
-            <Link
-              key={href}
-              href={href}
-              aria-label={label}
-              aria-current={isActive(href) ? "page" : undefined}
-              className={`group transition-colors duration-150 flex tooltip tooltip-right items-center justify-center gap-1 text-md font-semibold ${
-                isActive(href)
-                  ? "text-base-content"
-                  : "text-base-content/50 hover:text-info"
-              }`}
-              data-tip={label}
-            >
-              {icon}
-            </Link>
-          ))}
-        </nav>
+  if (mounted) {
+    return (
+      <div className="sticky top-0 flex h-dvh bg-base-100">
+        <div className="flex flex-col justify-between p-1 pb-5 w-full">
+          {/* Navigation Section */}
+          <nav className="flex flex-col gap-5 px-1 pt-3">
+            {linkItems.map(({ href, label, icon }) => (
+              <Link
+                key={href}
+                href={href}
+                aria-label={label}
+                aria-current={isActive(href) ? "page" : undefined}
+                className={`group transition-colors duration-150 flex tooltip tooltip-right items-center justify-center gap-1 text-md font-semibold ${
+                  isActive(href)
+                    ? "text-base-content"
+                    : "text-base-content/50 hover:text-info"
+                }`}
+                data-tip={label}
+              >
+                {icon}
+              </Link>
+            ))}
+          </nav>
 
-        {/* Additional Content Section */}
-        <div className="flex flex-col items-center gap-2 mt-5">
-          {mounted && (
-            <>
-              <ThemeSwitch />
-              <ProfileDrawer />
-            </>
-          )}
+          {/* Additional Content Section */}
+          <div className="flex flex-col items-center gap-2 mt-5">
+            {mounted && (
+              <>
+                <ThemeSwitch />
+                <ProfileDrawer />
+              </>
+            )}
+          </div>
         </div>
-      </div>
 
-      {mounted && (
         <div className="divider divider-horizontal divider-start mx-0 group text-base-content"></div>
-      )}
-    </div>
-  );
+      </div>
+    );
+  }
 };
 
 export default Sidebar;
