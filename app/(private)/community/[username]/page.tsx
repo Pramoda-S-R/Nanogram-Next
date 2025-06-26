@@ -27,7 +27,7 @@ const Profile = async ({
 
   if (!user) {
     return (
-      <div className="w-full h-screen flex items-center justify-center">
+      <div className="w-full h-dvh flex items-center justify-center">
         <p className="text-light-4">User not found</p>
       </div>
     );

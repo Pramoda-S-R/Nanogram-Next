@@ -16,7 +16,7 @@ const ErrorPage = ({ error, reset }: ErrorPageProps) => {
   }, [error]);
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen gap-6 bg-base-100 text-base-content px-6 text-center">
+    <div className="flex flex-col items-center justify-center h-dvh gap-6 bg-base-100 text-base-content px-6 text-center">
       {/* Logo and Branding */}
       <div className="flex items-center gap-4">
         <Image
@@ -26,14 +26,17 @@ const ErrorPage = ({ error, reset }: ErrorPageProps) => {
           height={80}
           className="rounded-full"
         />
-        <h1 className="font-blanka text-primary font-bold text-4xl">Nanogram</h1>
+        <h1 className="font-blanka text-primary font-bold text-4xl">
+          Nanogram
+        </h1>
       </div>
 
       {/* Error Message */}
       <div>
         <h2 className="text-3xl font-bold mb-2">Something went wrong</h2>
         <p className="text-base text-base-content/70 max-w-md mx-auto">
-          An unexpected error occurred while loading this page. Please try again, or go back home.
+          An unexpected error occurred while loading this page. Please try
+          again, or go back home.
         </p>
       </div>
 

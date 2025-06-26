@@ -6,7 +6,7 @@ import React from "react";
 const NotFound = () => {
   const router = useRouter();
   return (
-    <div className="flex flex-col items-center justify-center h-screen gap-6 bg-base-100 text-base-content  ">
+    <div className="flex flex-col items-center justify-center h-dvh gap-6 bg-base-100 text-base-content  ">
       <div className="flex items-center gap-5">
         <Image
           src={"/assets/images/nanogram_logo-bg-primary.svg"}
@@ -20,9 +20,7 @@ const NotFound = () => {
         </h1>
       </div>
       <div className="text-center">
-        <h2 className="text-3xl font-bold">
-          404 - Page Not Found
-        </h2>
+        <h2 className="text-3xl font-bold">404 - Page Not Found</h2>
         <p className="text-lg font-normal text-base-content/70">
           The page you are looking for might have been removed, had its name
           changed or is temporarily unavailable.

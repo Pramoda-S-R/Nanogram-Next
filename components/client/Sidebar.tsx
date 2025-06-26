@@ -39,22 +39,54 @@ const Sidebar = () => {
         />
       ),
     },
-    { href: "/community", label: "FYP", icon: <Home height={24} strokeWidth={1.5} /> },
-    { href: "/explore", label: "Explore", icon: <Compass height={24} strokeWidth={1.5} /> },
-    { href: "/all-users", label: "People", icon: <Users height={24} strokeWidth={1.5} /> },
-    { href: "/saved", label: "Saved", icon: <Album height={24} strokeWidth={1.5} /> },
+    {
+      href: "/community",
+      label: "FYP",
+      icon: <Home height={24} strokeWidth={1.5} />,
+    },
+    {
+      href: "/explore",
+      label: "Explore",
+      icon: <Compass height={24} strokeWidth={1.5} />,
+    },
+    {
+      href: "/all-users",
+      label: "People",
+      icon: <Users height={24} strokeWidth={1.5} />,
+    },
+    {
+      href: "/saved",
+      label: "Saved",
+      icon: <Album height={24} strokeWidth={1.5} />,
+    },
     {
       href: "/messages",
       label: "Messages",
       icon: <MessageCircle height={24} />,
     },
-    { href: "/create-post", label: "Create", icon: <PlusSquare height={24} strokeWidth={1.5} /> },
+    {
+      href: "/create-post",
+      label: "Create",
+      icon: <PlusSquare height={24} strokeWidth={1.5} />,
+    },
   ];
 
   const islandItems = [
-    { href: "/community", label: "FYP", icon: <Home height={24} strokeWidth={1.5} /> },
-    { href: "/explore", label: "Explore", icon: <Compass height={24} strokeWidth={1.5} /> },
-    { href: "/create-post", label: "Create", icon: <PlusSquare height={24} strokeWidth={1.5} /> },
+    {
+      href: "/community",
+      label: "FYP",
+      icon: <Home height={24} strokeWidth={1.5} />,
+    },
+    {
+      href: "/explore",
+      label: "Explore",
+      icon: <Compass height={24} strokeWidth={1.5} />,
+    },
+    {
+      href: "/create-post",
+      label: "Create",
+      icon: <PlusSquare height={24} strokeWidth={1.5} />,
+    },
     {
       href: "/messages",
       label: "Messages",
@@ -102,7 +134,7 @@ const Sidebar = () => {
 
   // Desktop view
   return (
-    <div className="sticky top-0 flex h-screen bg-base-100">
+    <div className="sticky top-0 flex h-dvh bg-base-100">
       <div className="flex flex-col justify-between p-1 pb-5 w-full">
         {/* Navigation Section */}
         <nav className="flex flex-col gap-5 px-1 pt-3">

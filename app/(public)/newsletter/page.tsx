@@ -14,13 +14,13 @@ const Newsletter = async () => {
 
   if (!newsletters) {
     return (
-      <div className="w-full h-screen flex items-center justify-center">
+      <div className="w-full h-dvh flex items-center justify-center">
         <h2 className="text-2xl">No newsletters available at the moment.</h2>
       </div>
     );
   }
   return (
-    <div className="w-full min-h-screen bg-base-100">
+    <div className="w-full min-h-dvh bg-base-100">
       <div className="w-full flex justify-center font-serif items-center mt-4">
         <h1 className="text-7xl text-center">NANO THREADS</h1>
       </div>
@@ -54,11 +54,8 @@ const Newsletter = async () => {
             <div className="card-body">
               <h2 className="card-title">{newsletter.title}</h2>
               <p className="text-xs text-base-content/50">
-              {formatDate(
-                newsletter.publishedAt.toString(),
-                "MMMM DD, YYYY"
-              )}
-            </p>
+                {formatDate(newsletter.publishedAt.toString(), "MMMM DD, YYYY")}
+              </p>
               <p className="">{newsletter.description}</p>
               <div className="card-actions justify-end">
                 <Link
