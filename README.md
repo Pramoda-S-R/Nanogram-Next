@@ -35,7 +35,8 @@
 - [x] test very email, delete email, (profile update, remove social connection, delete account)
 - [ ] link api when user details are updated. T_T
 - [x] start work on the community group
-- [ ] community ui
+- [x] community ui
+- [ ] cleanup community UI
 - [ ] add like share comment save feature
 - [ ] add karma feature
 - [ ] add bio section in manage account
