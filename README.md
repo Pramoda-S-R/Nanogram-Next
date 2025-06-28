@@ -37,6 +37,7 @@
 - [x] start work on the community group
 - [x] community ui
 - [ ] cleanup community UI
+- [ ] hook up ably to the backend
 - [ ] add like share comment save feature
 - [ ] add karma feature
 - [ ] add bio section in manage account
