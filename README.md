@@ -38,6 +38,7 @@
 - [x] community ui
 - [ ] cleanup community UI
 - [ ] hook up ably to the backend
+- [ ] find a vector db
 - [ ] add like share comment save feature
 - [ ] add karma feature
 - [ ] add bio section in manage account
