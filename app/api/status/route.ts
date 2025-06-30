@@ -1,4 +1,6 @@
 import { parseStatus } from "@/bot/parseStatus";
+import { withAuth } from "@/lib/apiauth";
+import { NextResponse } from "next/server";
 import Parser from "rss-parser";
 
 const parser = new Parser();
@@ -15,7 +17,7 @@ const FEEDS = {
 };
 
 // Route handler (GET only)
-export async function GET() {
+export const GET = withAuth(async () => {
   try {
     const statuses = await Promise.all(
       Object.entries(FEEDS).map(async ([name, url]) => {
@@ -37,11 +39,11 @@ export async function GET() {
       })
     );
 
-    return Response.json({ statuses }, { status: 200 });
+    return NextResponse.json({ statuses }, { status: 200 });
   } catch (err) {
-    return Response.json(
+    return NextResponse.json(
       { error: "Failed to fetch feeds", details: String(err) },
       { status: 500 }
     );
   }
-}
+});

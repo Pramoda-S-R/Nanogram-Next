@@ -6,7 +6,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { UTApi } from "uploadthing/server";
 
 const database: string | undefined = process.env.DATABASE;
-const apiKey: string | undefined = process.env.NEXT_PUBLIC_API_KEY;
 
 export const GET = withAuth(async (req: NextRequest) => {
   const { searchParams } = new URL(req.url);

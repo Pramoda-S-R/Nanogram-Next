@@ -16,7 +16,7 @@ import {
 import { ObjectId } from "mongodb";
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
-const apiKey: string | undefined = process.env.NEXT_PUBLIC_API_KEY;
+const apiKey: string | undefined = process.env.ADMIN_KEY;
 
 // ===================
 // User Functions
