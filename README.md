@@ -56,6 +56,7 @@
 - [x] community database rework
 - [x] relationships using aggregate
 - [ ] add ai mascot
+- [ ] give context to ai
 - [ ] admin dashboard
 - [ ] check if admin by comparing a admin database
 - [ ] censor board
