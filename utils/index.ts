@@ -1,4 +1,5 @@
 import { ObjectId } from "mongodb";
+import { v5 as uuidv5 } from "uuid";
 import type { AggregatePost, Comment, Point, Post, User } from "../types";
 
 const MIN_RADIUS = 7.5;
@@ -254,4 +255,13 @@ export function hasLiked(
 export function hasSaved(post: Post | AggregatePost, user: User): boolean {
   if (!post.savedBy || !user._id) return false;
   return post.savedBy.some((save) => save.toString() === user._id.toString());
+}
+
+export function mongoToUUID(id: string): string {
+  const QDRANT_NAMESPACE = "e5e5b2ec-3d41-4e52-b15f-44f0e0f39d68";
+
+  if (typeof id === "string") {
+    return uuidv5(id, QDRANT_NAMESPACE);
+  }
+  return "";
 }
