@@ -13,6 +13,7 @@ import {
   Testimonial,
   User,
 } from "@/types";
+import { ResourceApiResponse } from "cloudinary";
 import { ObjectId } from "mongodb";
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
@@ -1044,6 +1045,45 @@ export async function getAllNewsletters(): Promise<Newsletters[]> {
   } catch (error) {
     console.error("Error fetching newsletters:", error);
     return [];
+  }
+}
+
+// ====================
+// Gallery Functions
+// ====================
+export async function getGalleryResources({
+  cursor,
+  maxResults,
+}: {
+  cursor?: string;
+  maxResults?: number;
+}): Promise<ResourceApiResponse> {
+  try {
+    const response = await fetch(
+      `${BASE_URL}/api/gallery?${
+        cursor && "cursor=" + cursor
+      }&maxResults=${maxResults}`,
+      {
+        method: "GET",
+        headers: {
+          "x-api-key": apiKey || "",
+        },
+        next: {
+          revalidate: 60, // 1 minute
+        },
+      }
+    );
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+    if (data.error) {
+      throw new Error(data.error);
+    }
+    return data as ResourceApiResponse;
+  } catch (error) {
+    console.error("Error fetching gallery resources:", error);
+    return {} as ResourceApiResponse;
   }
 }
 

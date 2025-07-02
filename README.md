@@ -55,8 +55,10 @@
 - [x] make proxy secure/ ditch proxy for server actions "use server"
 - [x] community database rework
 - [x] relationships using aggregate
-- [ ] add ai mascot
+- [x] add ai mascot
 - [ ] give context to ai
+- [x] gallery route
+- [ ] add UI to upload images to gallery
 - [ ] admin dashboard
 - [ ] check if admin by comparing a admin database
 - [ ] censor board
@@ -110,6 +112,9 @@
 - Newsletter and Blog UI updated
 - Comment apis done
 - Comments UI done
+- Messages UI is done
+- Ai mascot is here
+- Gallery tab is done
 
 ## Challenges
 

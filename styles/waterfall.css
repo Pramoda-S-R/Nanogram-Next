@@ -1,0 +1,22 @@
+/* Waterfall */
+.my-masonry-grid {
+  display: flex;
+  margin-left: -16px; /* Adjust for gap */
+  width: auto;
+}
+
+.my-masonry-grid_column {
+  padding-left: 8px; /* Adjust for gap */
+  background-clip: padding-box;
+}
+
+.my-masonry-grid_column > .waterfall-item {
+  margin-bottom: 8px;
+}
+
+.waterfall-item img {
+  width: 100%;
+  display: block;
+  border-radius: 2px; /* Optional */
+  object-fit: cover;
+}
