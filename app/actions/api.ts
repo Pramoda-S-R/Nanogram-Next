@@ -1,6 +1,6 @@
 // app/actions/api.ts
 "use server";
-import { searchBlogs } from "@/bot/vectorSearch";
+import { searchBlogs, searchPosts, similarPosts } from "@/bot/vectorSearch";
 import {
   AggregateComment,
   AggregatePost,
@@ -545,6 +545,73 @@ export async function getPostsInfiniteScroll({
     return data.documents as AggregatePost[];
   } catch (error) {
     console.error("Error fetching posts:", error);
+    return [];
+  }
+}
+// Get posts by tags
+export async function getPostsByTags({
+  tags,
+  limit = 10,
+}: {
+  tags: string[];
+  limit?: number;
+}): Promise<AggregatePost[]> {
+  try {
+    if (tags.length === 0) {
+      return [];
+    }
+    const params = tags.map((tag) => `tags=${tag}`).join("&");
+    const response = await fetch(
+      `${BASE_URL}/api/posts?${params}&sort=createdAt&order=-1&limit=${limit}`,
+      {
+        method: "GET",
+        headers: {
+          "x-api-key": apiKey || "",
+        },
+        next: {
+          revalidate: 60, // Revalidate every 60 seconds
+        },
+      }
+    );
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+    return data.documents as AggregatePost[];
+  } catch (error) {
+    console.error("Error fetching posts by tags:", error);
+    return [];
+  }
+}
+// Qdrant proxy
+export async function getPostsFromQdrant(
+  query: string,
+  limit = 3
+): Promise<any[]> {
+  try {
+    const response = await searchPosts(query, limit);
+    if (!response || response.length === 0) {
+      return [];
+    }
+    return response;
+  } catch (error) {
+    console.error("Error fetching posts from Qdrant:", error);
+    return [];
+  }
+}
+// Qdrant proxy for similar posts
+export async function getSimilarPosts(
+  postId: string,
+  limit = 3
+): Promise<any[]> {
+  try {
+    const response = await similarPosts(postId, limit);
+    if (!response || response.length === 0) {
+      return [];
+    }
+    return response;
+  } catch (error) {
+    console.error("Error fetching similar posts from Qdrant:", error);
     return [];
   }
 }

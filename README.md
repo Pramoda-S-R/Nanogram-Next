@@ -118,6 +118,7 @@
 - Added vector search for posts
 - Fixed newsletters page
 - Vector search blogs
+- Vector and tag search for posts
 
 ## Challenges
 

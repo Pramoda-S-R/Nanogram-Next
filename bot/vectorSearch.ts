@@ -64,7 +64,6 @@ export const onPost = async (post: any, update?: boolean) => {
         points: [mongoToUUID(post._id)],
       });
     }
-    const content = post.caption;
     let imageCaption = "";
     if (post.imageUrl) {
       imageCaption = (await generateImageCaption(post.imageUrl)) || "";
@@ -112,6 +111,44 @@ export const searchPosts = async (query: string, limit = 3) => {
   } catch (error) {
     console.error("Error searching posts:", error);
     throw new Error("Failed to search posts");
+  }
+};
+
+export const similarPosts = async (postId: string, limit = 3) => {
+  try {
+    if (!postId) {
+      throw new Error("Post ID is required");
+    }
+    const searchResults = await qdrantClient.query("posts", {
+      query: {
+        recommend: {
+          positive: [mongoToUUID(postId)], // your reference item ID(s)
+          strategy: "average_vector", // or "best_score"
+        },
+      },
+      limit,
+      with_payload: true,
+      with_vector: false,
+    });
+
+    return searchResults.points;
+  } catch (error) {
+    console.error("Error finding similar posts:", error);
+    throw new Error("Failed to find similar posts");
+  }
+};
+
+export const deletePostVectors = async (postId: string) => {
+  try {
+    if (!postId) {
+      throw new Error("Post ID is required");
+    }
+    await qdrantClient.delete("posts", {
+      points: [mongoToUUID(postId)],
+    });
+  } catch (error) {
+    console.error("Error deleting post:", error);
+    throw new Error("Failed to delete post");
   }
 };
 

@@ -37,7 +37,7 @@ const SearchBlogs = () => {
   }, []);
 
   useEffect(() => {
-    const getSearchedUsers = async () => {
+    const getSearchedBlogs = async () => {
       if (debouncedValue.length === 0) {
         setSearchedBlogs([]);
         setShouldShowSearchResults(false);
@@ -60,7 +60,7 @@ const SearchBlogs = () => {
     };
 
     if (!loading) {
-      getSearchedUsers();
+      getSearchedBlogs();
     }
   }, [debouncedValue]);
 

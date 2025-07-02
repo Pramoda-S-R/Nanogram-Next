@@ -27,6 +27,15 @@ const PostDetails = ({ post, user }: { post: AggregatePost; user: User }) => {
                 Posted on {post.source}, {timeAgo(post.createdAt.toString())}
               </p>
               <p className="text-sm">{post.caption}</p>
+              <ul className="flex flex-wrap gap-1 mt-1">
+                {post.tags.length === 0
+                  ? null
+                  : post.tags.map((tag) => (
+                      <li key={tag} className="text-primary font-light">
+                        #{tag}
+                      </li>
+                    ))}
+              </ul>
             </div>
             <div className="">
               <PostStats post={post} user={user} align="between" />
@@ -44,6 +53,15 @@ const PostDetails = ({ post, user }: { post: AggregatePost; user: User }) => {
               Posted on {post.source}, {timeAgo(post.createdAt.toString())}
             </p>
             <p className="text-md py-10 ml-5">{post.caption}</p>
+            <ul className="flex flex-wrap gap-1 mt-1">
+              {post.tags.length === 0
+                ? null
+                : post.tags.map((tag) => (
+                    <li key={tag} className="text-primary font-light">
+                      #{tag}
+                    </li>
+                  ))}
+            </ul>
           </div>
           <div className="">
             <PostStats post={post} user={user} align="between" />

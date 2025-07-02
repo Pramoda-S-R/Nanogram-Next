@@ -3,13 +3,15 @@ import { ObjectId } from "mongodb";
 import { NextRequest, NextResponse } from "next/server";
 import cloudinary from "@/lib/cloudinary";
 import { withAuth } from "@/lib/apiauth";
-import { User } from "@/types";
+import { Post, User } from "@/types";
+import { deletePostVectors, onPost } from "@/bot/vectorSearch";
 
 const database: string | undefined = process.env.DATABASE;
 
 export const GET = withAuth(async (req: NextRequest) => {
   const { searchParams } = new URL(req.url);
   const postId = searchParams.getAll("id");
+  const tags = searchParams.getAll("tags");
   const sort = searchParams.get("sort") || "createdAt";
   const order = parseInt(searchParams.get("order") || "1"); // 1 for ascending, -1 for descending
   const limit = parseInt(searchParams.get("limit") || "0");
@@ -21,6 +23,14 @@ export const GET = withAuth(async (req: NextRequest) => {
       $in: postId.map((id) => {
         return /^[a-f\d]{24}$/i.test(id) ? new ObjectId(id) : id; // fallback to string
       }),
+    };
+  }
+  if (tags.length > 0) {
+    query.tags = {
+      $elemMatch: {
+        $regex: tags.map(tag => `(${tag})`).join("|"),
+        $options: "i"
+      }
     };
   }
   try {
@@ -158,6 +168,15 @@ export const POST = withAuth(async (req: NextRequest) => {
     const collection = client.db(database).collection("posts");
     const response = await collection.insertOne(post);
 
+    // Generate vectors for the post
+    onPost({
+      _id: response.insertedId.toString(),
+      caption,
+      imageUrl,
+    }).catch((error) => {
+      console.error("Error generating vectors for post:", error);
+    });
+
     // Update the creator's posts array
     const userCollection = client.db(database).collection("user");
     await userCollection.updateOne(
@@ -191,10 +210,10 @@ export const PUT = withAuth(async (req: NextRequest) => {
   try {
     const dev = req.headers.get("x-dev-userid") as string;
     const tier = req.headers.get("x-dev-tier") as string;
-    const source = req.headers.get("x-dev-appname") as string;
+    const source = req.headers.get("x-dev-appname");
 
     const client = await clientPromise;
-    const collection = client.db(database).collection("posts");
+    const collection = client.db(database).collection<Post>("posts");
 
     const formData = await req.formData();
     const postId = formData.get("id") as string;
@@ -209,7 +228,7 @@ export const PUT = withAuth(async (req: NextRequest) => {
       return NextResponse.json({ error: "Post not found." }, { status: 404 });
     }
     // Ensure the developer is authorized to update this post
-    if (tier === "free" && post.creator !== dev) {
+    if (tier === "free" && post.creator.toString() !== dev) {
       return NextResponse.json(
         { error: "You are not authorized to update this post." },
         { status: 403 }
@@ -217,12 +236,12 @@ export const PUT = withAuth(async (req: NextRequest) => {
     }
     const oldImageId = post.imageId; // Store the old image ID for deletion if a new image is uploaded
 
-    const caption = formData.get("caption") as string;
+    const caption = formData.get("caption") || undefined;
     const tags = formData.getAll("tags") as string[];
     const image = formData.get("image") as File;
 
-    let imageUrl = null;
-    let imageId = null;
+    let imageUrl = undefined;
+    let imageId = undefined;
 
     if (image && image instanceof File) {
       const imageBuffer = Buffer.from(await image.arrayBuffer());
@@ -250,9 +269,9 @@ export const PUT = withAuth(async (req: NextRequest) => {
     }
 
     const update: any = {
-      caption,
-      tags,
-      source,
+      caption: caption || post.caption, // Use the new caption if provided, otherwise keep the old one
+      tags: tags.length > 0 ? tags : post.tags, // Use the new tags if provided, otherwise keep the old ones
+      source: source || post.source, // Use the new source if provided, otherwise keep the old one
       updatedAt: new Date(),
     };
 
@@ -265,6 +284,18 @@ export const PUT = withAuth(async (req: NextRequest) => {
       { _id: new ObjectId(postId) },
       { $set: update }
     );
+
+    // If the post was updated, generate new vectors
+    onPost(
+      {
+        _id: postId,
+        caption: caption || post.caption, // Use the new caption if provided, otherwise keep the old one
+        imageUrl: imageUrl || post.imageUrl, // Use the new imageUrl if provided, otherwise keep the old one
+      },
+      true
+    ).catch((error) => {
+      console.error("Error generating vectors for updated post:", error);
+    });
 
     if (response.modifiedCount === 0) {
       return NextResponse.json(
@@ -315,6 +346,9 @@ export const DELETE = withAuth(async (req: NextRequest) => {
     }
     // Delete the post
     const response = await collection.deleteOne({ _id: new ObjectId(postId) });
+
+    // Delete the post from Qdrant
+    await deletePostVectors(postId);
 
     // Remove the post from the creator's posts array
     const userCollection = client.db(database).collection<User>("user");

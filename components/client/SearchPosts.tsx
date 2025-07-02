@@ -1,8 +1,17 @@
 "use client";
+import { getPostsByTags, getPostsFromQdrant } from "@/app/actions/api";
+import useDebounce from "@/hooks/useDebounce";
 import { Search } from "lucide-react";
-import React, { useEffect, useRef } from "react";
+import Link from "next/link";
+import React, { useEffect, useRef, useState } from "react";
 
 const SearchPosts = () => {
+  const [searchValue, setSearchValue] = useState("");
+  const debouncedValue = useDebounce(searchValue, 500);
+  const [loading, setLoading] = useState(false);
+  const [tagSearch, setTagSearch] = useState(false)
+  const [shouldShowSearchResults, setShouldShowSearchResults] = useState(false);
+  const [searchedPosts, setSearchedPosts] = useState<any[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -25,18 +34,112 @@ const SearchPosts = () => {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
+
+  useEffect(() => {
+    const getSearchedPosts = async () => {
+      if (debouncedValue.length === 0) {
+        setSearchedPosts([]);
+        setShouldShowSearchResults(false);
+        return;
+      }
+
+      setLoading(true);
+      if (debouncedValue.startsWith("#")) {
+        // If the search starts with a hashtag, we can treat it as a tag search
+        setTagSearch(true);
+        try {
+          const posts = await getPostsByTags({
+            tags: [debouncedValue.slice(1)], // Remove the '#' from the tag
+            limit: 3,
+          });
+          setSearchedPosts(posts);
+          setShouldShowSearchResults(true);
+        } catch (error) {
+          console.error("Error fetching searched posts by tag:", error);
+        } finally {
+          setLoading(false);
+          return;
+        }
+      }
+      try {
+        setTagSearch(false);
+        const posts = await getPostsFromQdrant(debouncedValue, 3);
+        setSearchedPosts(posts);
+        setShouldShowSearchResults(true);
+      } catch (error) {
+        console.error("Error fetching searched users:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (!loading) {
+      getSearchedPosts();
+    }
+  }, [debouncedValue]);
+
   return (
-    <label className="input focus:outline-none focus-within:outline-none">
-      <Search width={24} strokeWidth={1.5} />
-      <input
-        type="search"
-        className="grow"
-        placeholder="Search"
-        ref={inputRef}
-      />
-      <kbd className="kbd kbd-sm">Ctrl</kbd>
-      <kbd className="kbd kbd-sm">K</kbd>
-    </label>
+    <div>
+      <label className="input focus:outline-none focus-within:outline-none mb-4">
+        <Search width={24} strokeWidth={1.5} />
+        <input
+          type="search"
+          className="grow"
+          placeholder="Search"
+          ref={inputRef}
+          onChange={(e) => setSearchValue(e.target.value)}
+        />
+        <kbd className="kbd kbd-sm">Ctrl</kbd>
+        <kbd className="kbd kbd-sm">K</kbd>
+      </label>
+      {shouldShowSearchResults && debouncedValue.length > 0 ? (
+        <>
+          <h3 className="mt-4 text-xl">Search Results</h3>
+          {loading && (
+            <div className="w-full flex justify-center m-4">
+              <span className="loading loading-spinner loading-xl"></span>
+            </div>
+          )}
+          <div className="w-full flex gap-2 py-4">
+            {searchedPosts.length > 0 ? tagSearch ? (searchedPosts.map((post, idx)=> (
+              <Link
+                href={`/posts/${post._id}`}
+                key={idx}
+                className="md:w-96 md:h-96 w-full bg-base-200 rounded-lg overflow-clip shadow-xl"
+              >
+                <div className="relative">
+                  <p className="absolute w-full h-full p-4 bg-linear-to-b from-black to-black/10">
+                    {post.caption}
+                  </p>
+                  {post.imageUrl && (
+                    <img src={post.imageUrl} alt="Post Image" />
+                  )}
+                </div>
+              </Link>
+            ))) : (
+              searchedPosts.map((post, idx) => (
+                <Link
+                  href={`/posts/${post.payload._id}`}
+                  key={idx}
+                  className="md:w-96 w-full bg-base-200 rounded-lg overflow-clip shadow-xl"
+                >
+                  <div className="relative">
+                    <p className="absolute w-full h-full p-4 bg-linear-to-b from-black to-black/10">
+                      {post.payload.caption}
+                    </p>
+                    {post.payload.imageUrl && (
+                      <img src={post.payload.imageUrl} alt="Post Image" />
+                    )}
+                  </div>
+                </Link>
+              ))
+            ) : (
+              <p className="text-base-content/50">No results found.</p>
+            )}
+          </div>
+        </>
+      ) : null}
+    </div>
   );
 };
 
