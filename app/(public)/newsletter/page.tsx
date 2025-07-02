@@ -39,7 +39,12 @@ const Newsletter = async () => {
             </p>
             <p>{featuredNewsletter.description}</p>
             <div className="card-actions justify-end">
-              <button className="btn btn-primary">Read</button>
+              <Link
+                href={`/newsletter/${featuredNewsletter.route}`}
+                className="btn btn-primary"
+              >
+                Read
+              </Link>
             </div>
           </div>
         </div>

@@ -10,12 +10,16 @@ const database: string | undefined = process.env.DATABASE;
 export const GET = withAuth(async (req: NextRequest) => {
   const { searchParams } = new URL(req.url);
   const id = searchParams.get("id");
+  const route = searchParams.get("route");
   const sort = searchParams.get("sort") || "createdAt";
   const order = parseInt(searchParams.get("order") || "1"); // 1 for ascending, -1 for descending
   const limit = parseInt(searchParams.get("limit") || "0");
   const query: any = {};
   if (id) {
     query._id = new ObjectId(id);
+  }
+  if (route) {
+    query.route = route;
   }
   try {
     const client = await clientPromise;

@@ -13,7 +13,7 @@
 - Airtable (Tabular form data)
 - Mailjet (Newsletters)
 - Google Gemini (embeddings and ai)
-- Weaviate (Vector search?)
+- Qdrant (Vector search?)
 - Cleaner UI/UX with daisy UI
 - Shadcn for amazing UI
 - Form builder and Blog builder
@@ -38,7 +38,7 @@
 - [x] community ui
 - [ ] cleanup community UI
 - [ ] hook up ably to the backend
-- [ ] find a vector db
+- [x] find a vector db
 - [ ] add like share comment save feature
 - [ ] add karma feature
 - [ ] add bio section in manage account
@@ -115,6 +115,8 @@
 - Messages UI is done
 - Ai mascot is here
 - Gallery tab is done
+- Added vector search for posts
+- Fixed nesletters page
 
 ## Challenges
 

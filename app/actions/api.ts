@@ -1047,6 +1047,32 @@ export async function getAllNewsletters(): Promise<Newsletters[]> {
     return [];
   }
 }
+// Get a newsletter by route
+export async function getNewsletterByRoute(
+  route: string
+): Promise<Newsletters | null> {
+  try {
+    const response = await fetch(`${BASE_URL}/api/newsletter?route=${route}`, {
+      method: "GET",
+      headers: {
+        "x-api-key": apiKey || "",
+      },
+      next: {
+        revalidate: 60, // 1 minute
+      },
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+    return data.documents.length > 0
+      ? (data.documents[0] as Newsletters)
+      : null;
+  } catch (error) {
+    console.error("Error fetching newsletter by route:", error);
+    return null;
+  }
+}
 
 // ====================
 // Gallery Functions
