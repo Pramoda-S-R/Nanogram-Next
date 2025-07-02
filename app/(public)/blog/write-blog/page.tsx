@@ -5,6 +5,7 @@ import remarkGfm from "remark-gfm";
 import "../styles/blog.css";
 import matter from "gray-matter";
 import { createBlogPost } from "@/app/actions/api";
+import { toast } from "sonner";
 
 const example = `---
 title: "How to Blog"
@@ -70,6 +71,7 @@ Checkboxes ?
 
 export default function BlogPage() {
   const [md, setMd] = useState(example);
+  const [loading, setLoading] = useState(false);
   const [metadata, setMetadata] = useState<{ [key: string]: any }>({});
   const [reactContent, setReactContent] = useState("");
   const [parseError, setParseError] = useState<string | null>(null); // State to store parsing errors
@@ -108,6 +110,7 @@ export default function BlogPage() {
   }, [md]);
 
   async function uploadBlog() {
+    setLoading(true);
     try {
       const response = await createBlogPost({
         title: metadata.title || "Untitled",
@@ -121,13 +124,15 @@ export default function BlogPage() {
         }), // Convert markdown to File
       });
       if (response.id) {
-        alert("Blog uploaded successfully!");
+        toast.success("Blog uploaded successfully!");
       } else {
         throw new Error("Failed to upload blog");
       }
     } catch (error: any) {
       console.error("Error uploading blog:", error);
-      alert(`Failed to upload blog: ${error.message}`);
+      toast.error(`Failed to upload blog: ${error.message}`);
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -156,7 +161,7 @@ export default function BlogPage() {
         <button
           className="btn btn-primary mt-2"
           onClick={uploadBlog}
-          disabled={!metadata.title || !reactContent}
+          disabled={!metadata.title || !reactContent || loading}
         >
           Upload Blog
         </button>

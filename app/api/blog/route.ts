@@ -1,3 +1,4 @@
+import { deleteBlogVectors, onBlog } from "@/bot/vectorSearch";
 import { withAuth } from "@/lib/apiauth";
 import clientPromise from "@/lib/mongodb";
 import { slugify } from "@/utils";
@@ -34,12 +35,6 @@ export const GET = withAuth(async (req: NextRequest) => {
     }
 
     const documents = await cursor.toArray();
-    if (documents.length === 0) {
-      return NextResponse.json(
-        { error: "No documents found" },
-        { status: 404 }
-      );
-    }
     return NextResponse.json({ documents }, { status: 200 });
   } catch (error: any) {
     return NextResponse.json(
@@ -54,6 +49,7 @@ export const POST = withAuth(async (req: NextRequest) => {
     const formData = await req.formData();
     const title = formData.get("title") as string;
     const desc = formData.get("desc") as string;
+    const cover = formData.get("cover") || undefined;
     const publishedAt = formData.get("publishedAt") as string;
     const tags = formData.get("tags") as string;
     const authors = formData.get("authors") as string;
@@ -69,6 +65,7 @@ export const POST = withAuth(async (req: NextRequest) => {
     const body = {
       title,
       desc,
+      cover,
       publishedAt: new Date(publishedAt),
       tags: JSON.parse(tags),
       authors: JSON.parse(authors),
@@ -80,6 +77,17 @@ export const POST = withAuth(async (req: NextRequest) => {
     };
 
     const result = await collection.insertOne(body);
+
+    onBlog({
+      _id: result.insertedId.toString(),
+      title,
+      desc,
+      cover,
+      route: body.route,
+      fileUrl: response[0].data?.ufsUrl,
+    }).catch((error) => {
+      console.error("Error processing blog for vector search:", error);
+    });
 
     return NextResponse.json(
       { message: "Blog created successfully", id: result.insertedId },
@@ -107,6 +115,7 @@ export const PUT = withAuth(async (req: NextRequest) => {
     const formData = await req.formData();
     const title = formData.get("title") as string;
     const desc = formData.get("desc") as string;
+    const cover = formData.get("cover") || undefined;
     const publishedAt = formData.get("publishedAt") as string;
     const tags = formData.get("tags") as string;
     const authors = formData.get("authors") as string;
@@ -116,6 +125,7 @@ export const PUT = withAuth(async (req: NextRequest) => {
     const update: any = {
       title,
       desc,
+      cover,
       publishedAt: new Date(publishedAt),
       tags: JSON.parse(tags),
       authors: JSON.parse(authors),
@@ -171,9 +181,16 @@ export const DELETE = withAuth(async (req: NextRequest) => {
       return NextResponse.json({ error: "Blog not found" }, { status: 404 });
     }
 
+    // Delete vector search data
+    await deleteBlogVectors(blog._id.toString()).catch((error) => {
+      console.error("Error deleting blog vectors:", error);
+    });
+
+    // Delete the file from UploadThing
     const utapi = new UTApi();
     await utapi.deleteFiles(blog.fileId);
 
+    // Delete the blog document from MongoDB
     const result = await collection.deleteOne({ _id: new ObjectId(id) });
     if (result.deletedCount === 0) {
       return NextResponse.json(

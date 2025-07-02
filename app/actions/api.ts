@@ -1,5 +1,6 @@
 // app/actions/api.ts
 "use server";
+import { searchBlogs } from "@/bot/vectorSearch";
 import {
   AggregateComment,
   AggregatePost,
@@ -973,7 +974,7 @@ export async function createBlogPost({
 // Get all blog posts
 export async function getAllBlogPosts(): Promise<BlogPost[]> {
   try {
-    const response = await fetch(`${BASE_URL}/api/blog`, {
+    const response = await fetch(`${BASE_URL}/api/blog?order=-1`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -1017,6 +1018,22 @@ export async function getBlogPostById(id: string): Promise<BlogPost | null> {
   } catch (error) {
     console.error("Error fetching blog post by ID:", error);
     return null;
+  }
+}
+// Qdrant proxy
+export async function getBlogPostsByQdrant({
+  query,
+  limit = 10,
+}: {
+  query: string;
+  limit?: number;
+}): Promise<any[]> {
+  try {
+    const response = await searchBlogs(query, limit);
+    return response;
+  } catch (error) {
+    console.error("Error fetching blog posts by Qdrant:", error);
+    return [];
   }
 }
 

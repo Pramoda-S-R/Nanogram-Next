@@ -116,7 +116,8 @@
 - Ai mascot is here
 - Gallery tab is done
 - Added vector search for posts
-- Fixed nesletters page
+- Fixed newsletters page
+- Vector search blogs
 
 ## Challenges
 

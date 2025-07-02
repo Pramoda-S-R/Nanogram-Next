@@ -1,3 +1,4 @@
+import { getMD } from "@/app/(public)/blog/[blog_id]/page";
 import { qdrantClient } from "@/lib/qdrant";
 import { mongoToUUID } from "@/utils";
 import { GoogleGenAI } from "@google/genai";
@@ -96,7 +97,7 @@ export const onPost = async (post: any, update?: boolean) => {
   }
 };
 
-export const searchPosts = async (query: string, limit = 10) => {
+export const searchPosts = async (query: string, limit = 3) => {
   try {
     const embeddings = await generateEmbeddings(query);
     if (!embeddings || !embeddings[0]?.values) {
@@ -111,5 +112,104 @@ export const searchPosts = async (query: string, limit = 10) => {
   } catch (error) {
     console.error("Error searching posts:", error);
     throw new Error("Failed to search posts");
+  }
+};
+
+export const summarizeBlog = async (fileUrl: string) => {
+  try {
+    if (!fileUrl) {
+      throw new Error("Blog and fileUrl are required");
+    }
+    const { metadata, markdown } = await getMD(new URL(fileUrl));
+    const content = `Context:${metadata}\n${markdown}\n\nUser: Summarize this blog post in a few sentences.`;
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: content,
+      config: {
+        thinkingConfig: {
+          thinkingBudget: 0, // Disables thinking
+        },
+      },
+    });
+    return response.text;
+  } catch (error) {
+    console.error("Error summarizing blog:", error);
+    throw new Error("Failed to summarize blog");
+  }
+};
+
+export const onBlog = async (blog: any, update?: boolean) => {
+  try {
+    if (!blog || !blog.fileUrl || !blog._id) {
+      throw new Error("Blog, fileUrl and _id are required");
+    }
+    if (update) {
+      // If this is an update, we need to delete the old embeddings first
+      await qdrantClient.delete("blogs", {
+        points: [mongoToUUID(blog._id)],
+      });
+    }
+    const summary = await summarizeBlog(blog.fileUrl);
+    if (!summary) {
+      throw new Error("Failed to summarize the blog");
+    }
+    const embeddings = await generateEmbeddings(summary);
+
+    if (!embeddings || !embeddings[0]?.values) {
+      throw new Error("Failed to generate embeddings for the blog");
+    }
+
+    await qdrantClient.upsert("blogs", {
+      points: [
+        {
+          id: mongoToUUID(blog._id),
+          vector: embeddings[0].values,
+          payload: {
+            _id: blog._id,
+            summary: summary,
+            title: blog.title,
+            desc: blog.desc,
+            cover: blog.cover,
+            route: blog.route,
+            fileUrl: blog.fileUrl,
+          },
+        },
+      ],
+    });
+  } catch (error) {
+    console.error("Error processing blog:", error);
+    throw new Error("Failed to process blog");
+  }
+};
+
+export const searchBlogs = async (query: string, limit = 3) => {
+  try {
+    const embeddings = await generateEmbeddings(query);
+    if (!embeddings || !embeddings[0]?.values) {
+      throw new Error("Failed to generate embeddings for the query");
+    }
+    const response = await qdrantClient.search("blogs", {
+      vector: embeddings[0].values,
+      limit: limit,
+    });
+
+    return response;
+  } catch (error) {
+    console.error("Error searching blogs:", error);
+    throw new Error("Failed to search blogs");
+  }
+};
+
+export const deleteBlogVectors = async (blogId: string) => {
+  try {
+    if (!blogId) {
+      throw new Error("Blog ID is required");
+    }
+    await qdrantClient.delete("blogs", {
+      points: [mongoToUUID(blogId)],
+    });
+  } catch (error) {
+    console.error("Error deleting blog:", error);
+    throw new Error("Failed to delete blog");
   }
 };
