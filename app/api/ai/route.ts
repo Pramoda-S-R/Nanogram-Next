@@ -1,47 +1,34 @@
 import { withAuth } from "@/lib/apiauth";
 import { NextRequest, NextResponse } from "next/server";
 import { assistantAI } from "@/bot/guideBot";
+import { Content } from "@google/genai";
 
 export const POST = withAuth(
   async (req: NextRequest) => {
     try {
       const { chatHistory, query } = await req.json();
+      const history: Content[] = chatHistory || [];
 
-      const aiRes = await assistantAI({ chatHistory, query });
+      if (!chatHistory || !query) {
+        return NextResponse.json(
+          { error: "Chat history and query are required." },
+          { status: 400 }
+        );
+      }
 
-      const encoder = new TextEncoder();
-
-      const stream = new ReadableStream({
-        async start(controller) {
-          try {
-            for await (const chunk of aiRes) {
-              if (chunk.text) {
-                controller.enqueue(encoder.encode(chunk.text));
-              }
-            }
-          } catch (e) {
-            console.error("Streaming error:", e);
-          } finally {
-            controller.close();
-          }
-        },
+      const response = await assistantAI({
+        chatHistory: history,
+        query,
       });
 
-      return new NextResponse(stream, {
-        status: 200,
-        headers: {
-          "Content-Type": "text/event-stream",
-          "Cache-Control": "no-cache",
-          Connection: "keep-alive",
+      return NextResponse.json({ answer: response });
+    } catch (error: any) {
+      return NextResponse.json(
+        {
+          error: "An error occurred while processing your request.",
+          details: error.message,
         },
-      });
-    } catch (err) {
-      return new NextResponse(
-        JSON.stringify({
-          error: "Failed to process request",
-          details: String(err),
-        }),
-        { status: 500, headers: { "Content-Type": "application/json" } }
+        { status: 500 }
       );
     }
   },

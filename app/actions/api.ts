@@ -1,4 +1,4 @@
-// app/actions/fetchData.ts
+// app/actions/api.ts
 "use server";
 import {
   AggregateComment,
@@ -781,6 +781,31 @@ export async function getAluminiMembers(): Promise<Nanogram[]> {
     return [];
   }
 }
+// Get all nanograms
+export async function getAllNanograms(): Promise<Nanogram[]> {
+  try {
+    const response = await fetch(`${BASE_URL}/api/nanogram`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": apiKey || "",
+      },
+      next: {
+        revalidate: 60, // 1 minute
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.documents as Nanogram[];
+  } catch (error) {
+    console.error("Error fetching all nanograms:", error);
+    return [];
+  }
+}
 
 // ==================
 // Event Functions
@@ -1019,5 +1044,43 @@ export async function getAllNewsletters(): Promise<Newsletters[]> {
   } catch (error) {
     console.error("Error fetching newsletters:", error);
     return [];
+  }
+}
+
+// ====================
+// AI Functions
+// ====================
+export async function askNano({
+  chatHistory,
+  query,
+}: {
+  chatHistory: any[];
+  query: string;
+}): Promise<string> {
+  try {
+    const response = await fetch(`${BASE_URL}/api/ai`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": apiKey || "",
+      },
+      body: JSON.stringify({
+        chatHistory,
+        query,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    if (data.error) {
+      throw new Error(data.error);
+    }
+    return data.answer || "No response from Nano.";
+  } catch (error) {
+    console.error("Error asking Nano:", error);
+    return "Nano is currently unavailable. Please try again later.";
   }
 }
