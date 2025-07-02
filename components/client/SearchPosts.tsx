@@ -9,7 +9,7 @@ const SearchPosts = () => {
   const [searchValue, setSearchValue] = useState("");
   const debouncedValue = useDebounce(searchValue, 500);
   const [loading, setLoading] = useState(false);
-  const [tagSearch, setTagSearch] = useState(false)
+  const [tagSearch, setTagSearch] = useState(false);
   const [shouldShowSearchResults, setShouldShowSearchResults] = useState(false);
   const [searchedPosts, setSearchedPosts] = useState<any[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -80,7 +80,7 @@ const SearchPosts = () => {
 
   return (
     <div>
-      <label className="input focus:outline-none focus-within:outline-none mb-4">
+      <label className="input focus:outline-none focus-within:outline-none mb-4 md:m-0 ml-2">
         <Search width={24} strokeWidth={1.5} />
         <input
           type="search"
@@ -100,39 +100,43 @@ const SearchPosts = () => {
               <span className="loading loading-spinner loading-xl"></span>
             </div>
           )}
-          <div className="w-full flex gap-2 py-4">
-            {searchedPosts.length > 0 ? tagSearch ? (searchedPosts.map((post, idx)=> (
-              <Link
-                href={`/posts/${post._id}`}
-                key={idx}
-                className="md:w-96 md:h-96 w-full bg-base-200 rounded-lg overflow-clip shadow-xl"
-              >
-                <div className="relative">
-                  <p className="absolute w-full h-full p-4 bg-linear-to-b from-black to-black/10">
-                    {post.caption}
-                  </p>
-                  {post.imageUrl && (
-                    <img src={post.imageUrl} alt="Post Image" />
-                  )}
-                </div>
-              </Link>
-            ))) : (
-              searchedPosts.map((post, idx) => (
-                <Link
-                  href={`/posts/${post.payload._id}`}
-                  key={idx}
-                  className="md:w-96 w-full bg-base-200 rounded-lg overflow-clip shadow-xl"
-                >
-                  <div className="relative">
-                    <p className="absolute w-full h-full p-4 bg-linear-to-b from-black to-black/10">
-                      {post.payload.caption}
-                    </p>
-                    {post.payload.imageUrl && (
-                      <img src={post.payload.imageUrl} alt="Post Image" />
-                    )}
-                  </div>
-                </Link>
-              ))
+          <div className="w-full flex flex-wrap md:justify-start justify-center gap-2 py-4">
+            {searchedPosts.length > 0 ? (
+              tagSearch ? (
+                searchedPosts.map((post, idx) => (
+                  <Link
+                    href={`/posts/${post._id}`}
+                    key={idx}
+                    className="md:w-64 md:h-64 w-2/3 bg-base-200 rounded-lg overflow-clip shadow-xl"
+                  >
+                    <div className="relative">
+                      <p className="absolute w-full h-full p-4 bg-linear-to-b from-black to-black/10">
+                        {post.caption}
+                      </p>
+                      {post.imageUrl && (
+                        <img src={post.imageUrl} alt="Post Image" />
+                      )}
+                    </div>
+                  </Link>
+                ))
+              ) : (
+                searchedPosts.map((post, idx) => (
+                  <Link
+                    href={`/posts/${post.payload._id}`}
+                    key={idx}
+                    className="md:w-64 md:h-64 w-2/3 bg-base-200 rounded-lg overflow-clip shadow-xl"
+                  >
+                    <div className="relative">
+                      <p className="absolute w-full h-full p-4 bg-linear-to-b from-black to-black/10">
+                        {post.payload.caption}
+                      </p>
+                      {post.payload.imageUrl && (
+                        <img src={post.payload.imageUrl} alt="Post Image" />
+                      )}
+                    </div>
+                  </Link>
+                ))
+              )
             ) : (
               <p className="text-base-content/50">No results found.</p>
             )}
