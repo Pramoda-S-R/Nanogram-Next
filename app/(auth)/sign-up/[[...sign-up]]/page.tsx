@@ -124,7 +124,14 @@ export default function SignUp() {
   if (!isLoaded) return null;
 
   return (
-    <div className="w-100 mx-auto text-center">
+    <div className="min-w-80 max-w-120 mx-auto text-center bg-base-200 p-10 rounded-lg">
+      <div className="flex justify-center mb-4">
+        <img
+          src="/assets/images/nanogram_logo-bg-primary.svg"
+          alt="logo"
+          className="w-12 h-12 rounded-full"
+        />
+      </div>
       <h2 className="text-2xl font-bold mb-4">Create your account</h2>
 
       {!pendingVerification ? (
@@ -132,7 +139,7 @@ export default function SignUp() {
           <p className="text-base-content/70">
             Welcome! Please fill in the details to get started.
           </p>
-          <div className="mt-5 text-center flex justify-between">
+          <div className="mt-5 max-w-100 text-center flex flex-wrap md:justify-between justify-center gap-2">
             {/* Google */}
             <button
               className="btn bg-white text-black border-[#e5e5e5]"
@@ -296,7 +303,10 @@ export default function SignUp() {
 
       {error && <p className="text-error">{error}</p>}
 
-      <button className="btn btn-link text-info mt-5" onClick={switchToSignIn}>
+      <button
+        className="btn btn-link text-info text-xs mt-5"
+        onClick={switchToSignIn}
+      >
         Already have an account? Sign In
       </button>
     </div>

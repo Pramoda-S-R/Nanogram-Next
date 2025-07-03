@@ -73,7 +73,7 @@ export function Logo({ imgBg = "primary" }: { imgBg?: string }) {
         height={32}
         priority
       />
-      <h1 className="font-blanka text-2xl mb-2">NANOGRAM</h1>
+      <h1 className="font-blanka text-2xl mb-2 sm:flex hidden">NANOGRAM</h1>
     </Link>
   );
 }

@@ -58,7 +58,7 @@ export default function Onboarding() {
     if (isLoaded && user) {
       const checkUserExists = async () => {
         const userExists = await userExistsById(user.id);
-        setExists(false);
+        setExists(userExists);
       };
       checkUserExists();
       reset({
@@ -122,7 +122,7 @@ export default function Onboarding() {
   };
 
   return (
-    <section className="max-w-lg mx-auto text-center p-4">
+    <section className="max-w-lg min-h-dvh mx-auto text-center p-4 bg-base-200">
       {!isLoaded ? (
         <>
           <h2 className="text-2xl font-bold mb-4">Loading...</h2>

@@ -106,12 +106,19 @@ export default function CustomSignIn() {
   if (!isLoaded) return null;
 
   return (
-    <div className="w-100 mx-auto text-center">
+    <div className="min-w-80 max-w-120 mx-auto text-center bg-base-200 p-10 rounded-lg">
+      <div className="flex justify-center mb-4">
+        <img
+          src="/assets/images/nanogram_logo-bg-primary.svg"
+          alt="logo"
+          className="w-12 h-12 rounded-full"
+        />
+      </div>
       <h2 className="text-2xl font-bold mb-4">Sign in to Nanogram</h2>
       <p className="text-base-content/70">
         Welcome back! Please sign in to continue
       </p>
-      <div className="mt-5 text-center flex justify-between">
+      <div className="mt-5 max-w-100 text-center flex flex-wrap md:justify-between justify-center gap-2">
         {/* Google */}
         <button
           className="btn bg-white text-black border-[#e5e5e5]"
@@ -239,13 +246,16 @@ export default function CustomSignIn() {
       </form>
 
       {/* Forgot Password Button */}
-      <div className="flex justify-between mt-4">
-        <button className="btn btn-link text-info p-0" onClick={switchToSignUp}>
+      <div className="flex flex-wrap justify-center md:justify-between mt-4">
+        <button
+          className="btn btn-link text-info p-0 text-xs mx-1"
+          onClick={switchToSignUp}
+        >
           Don't have an account? Sign Up
         </button>
         <button
           type="button"
-          className="btn btn-link text-info p-0"
+          className="btn btn-link text-info p-0 text-xs mx-1"
           onClick={resetPassword}
         >
           Forgot Password?
