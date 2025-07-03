@@ -23,10 +23,10 @@ export interface BlogSchema {
   desc: string;
   publishedAt: Date;
   authors: string[];
+  authorId: string;
   tags: string[];
   cover?: string;
   file?: File;
-  key?: string;
 }
 
 export interface AggregatePost {
@@ -145,6 +145,7 @@ export interface BlogPost {
   desc: string;
   publishedAt: Date;
   authors: string[];
+  authorId: ObjectId;
   tags: string[];
   cover?: string;
   route?: string;
@@ -162,6 +163,19 @@ export interface Newsletters {
   publishedAt: Date;
   fileUrl: string;
   fileId: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface Report {
+  _id: ObjectId;
+  reporter: ObjectId;
+  reportedUser: ObjectId;
+  reportedMedia: "post" | "comment" | "blog";
+  mediaId: ObjectId;
+  reason: string;
+  details?: string;
+  status: "pending" | "resolved" | "rejected";
   createdAt: Date;
   updatedAt: Date;
 }

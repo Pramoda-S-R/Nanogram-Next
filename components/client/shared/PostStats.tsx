@@ -79,7 +79,7 @@ const PostStats = ({
           </div>
         )}
         {showComments && (
-          <Comments post={post} />
+          <Comments post={post} currentUser={user} />
         )}
         {showShare && <ShareIcon strokeWidth={1.5} size={20} />}
         {showSave && (

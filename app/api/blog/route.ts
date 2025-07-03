@@ -49,10 +49,10 @@ export const POST = withAuth(async (req: NextRequest) => {
     const formData = await req.formData();
     const title = formData.get("title") as string;
     const desc = formData.get("desc") as string;
-    const cover = formData.get("cover") || undefined;
     const publishedAt = formData.get("publishedAt") as string;
-    const tags = formData.get("tags") as string;
     const authors = formData.get("authors") as string;
+    const tags = formData.get("tags") as string;
+    const cover = formData.get("cover") || undefined;
     const file = formData.get("file") as File;
 
     const client = await clientPromise;

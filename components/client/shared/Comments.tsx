@@ -53,6 +53,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ObjectId } from "mongodb";
 import { useInView } from "react-intersection-observer";
+import ReportMedia from "./ReportMedia";
 
 const commentSchema = z.object({
   content: z
@@ -173,31 +174,15 @@ export function CommentInput({
 
 export function CommentItem({
   comment,
+  currentUser,
   callback,
 }: {
   comment: AggregateComment;
+  currentUser: User;
   callback: (commentId: ObjectId) => void;
 }) {
-  const { isLoaded, user } = useUser();
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [liked, setLiked] = useState(false);
   const [likedCount, setLikedCount] = useState(comment.likes.length);
-
-  useEffect(() => {
-    const fetchCurrentUser = async () => {
-      if (isLoaded && user) {
-        const cUser = await getCurrentUser({ user_id: user.id });
-        if (cUser) {
-          setCurrentUser(cUser);
-          // Check if the current user has liked this comment
-          setLiked(comment.likes.includes(cUser._id));
-        } else {
-          console.error("Current user not found");
-        }
-      }
-    };
-    fetchCurrentUser();
-  }, [isLoaded, user]);
 
   const toggleLike = async () => {
     // Optimistically update the UI
@@ -237,18 +222,6 @@ export function CommentItem({
     }
   };
 
-  if (!isLoaded || !user) {
-    return (
-      <div className="flex items-center gap-2">
-        <div className="size-10 rounded-full skeleton" />
-        <div className="text-xs">
-          <p className="skeleton w-20 h-4 mb-0.5" />
-          <p className="skeleton w-40 h-4" />
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="flex items-center justify-between gap-2">
       <div className="flex gap-2">
@@ -261,21 +234,15 @@ export function CommentItem({
         </div>
       </div>
       <div className="flex h-full items-start gap-2">
-        {comment.commenter.userId !== user.id && (
-          <button
-            onClick={() => {
-              // Handle report logic here
-              console.log("Comment reported:", comment._id);
-            }}
-          >
-            <TriangleAlert
-              strokeWidth={1.5}
-              width={12}
-              className="text-error"
-            />
-          </button>
+        {comment.commenter._id !== currentUser._id && (
+          <ReportMedia
+            media="Comment"
+            mediaId={comment._id}
+            currentUser={currentUser}
+            userId={comment.commenter._id}
+          />
         )}
-        {user.id === comment.commenter.userId && (
+        {currentUser._id === comment.commenter._id && (
           <AlertDialog>
             <AlertDialogTrigger className="flex h-full items-start text-error">
               <Trash2 strokeWidth={1.5} width={12} />
@@ -314,7 +281,13 @@ export function CommentItem({
   );
 }
 
-const Comments = ({ post }: { post: AggregatePost }) => {
+const Comments = ({
+  post,
+  currentUser,
+}: {
+  post: AggregatePost;
+  currentUser: User;
+}) => {
   const [comments, setComments] = useState<AggregateComment[]>([]);
   const [page, setPage] = useState(0);
   const [hasNextPage, setHasNextPage] = useState(true);
@@ -418,6 +391,7 @@ const Comments = ({ post }: { post: AggregatePost }) => {
             {comments.map((comment) => (
               <CommentItem
                 key={comment._id.toString()}
+                currentUser={currentUser}
                 comment={comment}
                 callback={handleDeleteCallback}
               />
@@ -450,6 +424,7 @@ const Comments = ({ post }: { post: AggregatePost }) => {
             {comments.map((comment) => (
               <CommentItem
                 key={comment._id.toString()}
+                currentUser={currentUser}
                 comment={comment}
                 callback={handleDeleteCallback}
               />

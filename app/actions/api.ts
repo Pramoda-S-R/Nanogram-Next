@@ -1023,6 +1023,7 @@ export async function createBlogPost({
   desc,
   publishedAt,
   authors,
+  authorId,
   tags,
   cover,
   file,
@@ -1033,6 +1034,7 @@ export async function createBlogPost({
     formData.append("desc", desc);
     formData.append("publishedAt", publishedAt.toISOString());
     formData.append("authors", JSON.stringify(authors));
+    formData.append("authorId", authorId);
     formData.append("tags", JSON.stringify(tags));
     if (cover) {
       formData.append("cover", cover);
@@ -1177,6 +1179,78 @@ export async function getNewsletterByRoute(
   } catch (error) {
     console.error("Error fetching newsletter by route:", error);
     return null;
+  }
+}
+
+// ====================
+// Report Functions
+// ====================
+// Get anonymous user
+export async function getAnonymousUser(): Promise<User | null> {
+  try {
+    const response = await fetch(`${BASE_URL}/api/user?id=686658c02a2faecbc084642b`, {
+      method: "GET",
+      headers: {
+        "x-api-key": apiKey || "",
+      },
+      next: {
+        revalidate: 60, // 1 minute
+      },
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+    return data.documents.length > 0 ? data.documents[0] : null;
+  } catch (error) {
+    console.error("Error fetching anonymous user:", error);
+    return null;
+  }
+}
+// Report media function
+export async function reportMedia({
+  reporter,
+  reportedUser,
+  reportedMedia,
+  mediaId,
+  reason,
+  details,
+  status,
+}: {
+  reporter: string;
+  reportedUser: string;
+  reportedMedia: string;
+  mediaId: string;
+  reason: string;
+  details: string;
+  status: string;
+}) {
+  try {
+    const formData = new FormData();
+    formData.append("reporter", reporter);
+    formData.append("reportedUser", reportedUser);
+    formData.append("reportedMedia", reportedMedia);
+    formData.append("mediaId", mediaId);
+    formData.append("reason", reason);
+    formData.append("details", details);
+    formData.append("status", status);
+
+    const response = await fetch(`${BASE_URL}/api/report`, {
+      method: "POST",
+      headers: {
+        "x-api-key": apiKey || "",
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return true;
+  } catch (error) {
+    console.error("Error reporting media:", error);
+    return false;
   }
 }
 

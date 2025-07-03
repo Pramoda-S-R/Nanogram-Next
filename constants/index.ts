@@ -31,3 +31,12 @@ export const avatars = [
   "https://res.cloudinary.com/dvqz16kco/image/upload/v1750317238/undraw_profile-pic_fatv_m7yi5r.png",
   "https://res.cloudinary.com/dvqz16kco/image/upload/v1750317239/undraw_avatar-traveler_ljy2_kiktr4.png",
 ];
+
+export const reportOptions = [
+  "This media has inappropriate content",
+  "This media is spam",
+  "This media is offensive",
+  "This media is misleading",
+  "This media violates community guidelines",
+  "Other (please specify)",
+];

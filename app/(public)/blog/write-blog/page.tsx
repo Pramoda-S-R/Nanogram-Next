@@ -4,8 +4,10 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import "../styles/blog.css";
 import matter from "gray-matter";
-import { createBlogPost } from "@/app/actions/api";
+import { createBlogPost, getCurrentUser } from "@/app/actions/api";
 import { toast } from "sonner";
+import { useUser } from "@clerk/nextjs";
+import { User } from "@/types";
 
 const example = `---
 title: "How to Blog"
@@ -70,11 +72,26 @@ Checkboxes ?
 `;
 
 export default function BlogPage() {
+  const { isLoaded, user } = useUser();
+  const [currentUser, setCurrentUser] = useState<User | undefined>(undefined);
   const [md, setMd] = useState(example);
   const [loading, setLoading] = useState(false);
   const [metadata, setMetadata] = useState<{ [key: string]: any }>({});
   const [reactContent, setReactContent] = useState("");
   const [parseError, setParseError] = useState<string | null>(null); // State to store parsing errors
+
+  useEffect(() => {
+    async function fetchCUser() {
+      if (isLoaded && user) {
+        const cUser = await getCurrentUser({ user_id: user.id });
+        if (cUser) {
+          setCurrentUser(cUser);
+        } else {
+          toast.error("Failed to fetch current user data.");
+        }
+      }
+    }
+  }, [isLoaded, user]);
 
   useEffect(() => {
     setParseError(null); // Clear previous errors on new input
@@ -117,6 +134,7 @@ export default function BlogPage() {
         desc: metadata.desc || "No description provided",
         publishedAt: new Date(metadata.date) || new Date(),
         authors: metadata.authors || ["Anonymous"],
+        authorId: currentUser?._id.toString() || "",
         tags: metadata.tags || [],
         cover: metadata.cover || "",
         file: new File([md], `${metadata.title || "untitled"}.md`, {
@@ -134,6 +152,23 @@ export default function BlogPage() {
     } finally {
       setLoading(false);
     }
+  }
+
+  if (!isLoaded || !user) {
+    <section>
+      <div className="w-full flex flex-col md:sticky md:top-0 md:w-2/3 md:h-dvh h-[95dvh] p-4 bg-base-200">
+        <div className="skeleton textarea textarea-primary textarea-xs w-full h-full"></div>
+        <div className="skeleton btn btn-primary mt-2">Loading...</div>
+      </div>
+    </section>;
+  }
+
+  if (!currentUser) {
+    return (
+      <section className="w-full flex justify-center items-center h-screen">
+        <span className="loading loading-spinner"></span>
+      </section>
+    );
   }
 
   return (

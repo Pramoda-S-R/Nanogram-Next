@@ -14,6 +14,7 @@ import { deletePostById } from "@/app/actions/api";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { set } from "zod";
+import ReportMedia from "./ReportMedia";
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
@@ -114,10 +115,13 @@ const PostActions = ({
             </>
           )}
           {user._id !== post.creator._id && (
-            <button className="btn btn-error justify-start">
-              <TriangleAlert strokeWidth={1.5} />
-              Report Post
-            </button>
+            <ReportMedia
+              media="Post"
+              mediaId={post._id}
+              currentUser={user}
+              userId={post.creator._id}
+              closeCallback={() => setOpen(false)}
+            />
           )}
         </div>
       </PopoverContent>

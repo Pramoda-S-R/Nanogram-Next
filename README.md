@@ -44,7 +44,7 @@
 - [ ] add bio section in manage account
 - [ ] add intersection observer to comments and make it infini scroll
 - [x] fix all users screen
-- [ ] add report post and comment feature (combination ui perhaps?)
+- [x] add report post and comment feature (combination ui perhaps?)
 - [x] connect uploadthing and establish blogs and newsletters
 - [x] add 2fa check for POST, PUT, DELETE functions for devs
 - [ ] subscribe to newsletter
@@ -119,6 +119,7 @@
 - Fixed newsletters page
 - Vector search blogs
 - Vector and tag search for posts
+- report post, comment and blog feature added
 
 ## Challenges
 
