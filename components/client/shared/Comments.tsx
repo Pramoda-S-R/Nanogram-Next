@@ -52,6 +52,7 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ObjectId } from "mongodb";
+import { useInView } from "react-intersection-observer";
 
 const commentSchema = z.object({
   content: z
@@ -315,8 +316,11 @@ export function CommentItem({
 
 const Comments = ({ post }: { post: AggregatePost }) => {
   const [comments, setComments] = useState<AggregateComment[]>([]);
+  const [page, setPage] = useState(0);
+  const [hasNextPage, setHasNextPage] = useState(true);
   const [loading, setLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
+  const { ref, inView } = useInView();
 
   // This hook must be called outside useEffect
   const isDesktop = useMediaQuery({ minWidth: 768 });
@@ -338,11 +342,24 @@ const Comments = ({ post }: { post: AggregatePost }) => {
   useEffect(() => {
     const fetchComments = async () => {
       try {
+        const limit = 10;
         const resComments = await getCommentsByPostId({
           postId: post._id.toString(),
+          limit: limit,
+          skip: page * limit,
         });
+
         if (resComments) {
-          setComments(resComments);
+          setComments((prev) => {
+            const newCommentIds = new Set(prev.map((c) => c._id.toString()));
+            const filtered = resComments.filter(
+              (c) => !newCommentIds.has(c._id.toString())
+            );
+            return [...prev, ...filtered];
+          });
+
+          // Only update hasNextPage if we got fewer than `limit` results
+          setHasNextPage(resComments.length === limit);
         }
       } catch (error) {
         console.error("Failed to fetch comments:", error);
@@ -350,8 +367,15 @@ const Comments = ({ post }: { post: AggregatePost }) => {
         setLoading(false);
       }
     };
+
     fetchComments();
-  }, [post._id]);
+  }, [post._id, page]);
+
+  useEffect(() => {
+    if (inView && hasNextPage && !loading) {
+      setPage((prev) => prev + 1);
+    }
+  }, [inView, hasNextPage, loading]);
 
   if (!mounted) {
     return (
@@ -398,6 +422,7 @@ const Comments = ({ post }: { post: AggregatePost }) => {
                 callback={handleDeleteCallback}
               />
             ))}
+            <div ref={ref}></div>
           </div>
           <CommentInput post={post} callback={handleCallback} />
           <DialogFooter />
@@ -429,6 +454,7 @@ const Comments = ({ post }: { post: AggregatePost }) => {
                 callback={handleDeleteCallback}
               />
             ))}
+            <div ref={ref}></div>
           </div>
           <CommentInput post={post} callback={handleCallback} />
           <DrawerFooter />

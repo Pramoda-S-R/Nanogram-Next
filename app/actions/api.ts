@@ -389,6 +389,22 @@ export async function updatePost({
 // Delete a post by ID
 export async function deletePostById(postId: string): Promise<boolean> {
   try {
+    const commentDeleteResponse = await fetch(
+      `${BASE_URL}/api/posts/comment?postId=${postId}`,
+      {
+        method: "DELETE",
+        headers: {
+          "x-api-key": apiKey || "",
+        },
+      }
+    );
+
+    if (!commentDeleteResponse.ok) {
+      throw new Error(
+        `Failed to delete comments for post ${postId}: ${commentDeleteResponse.statusText}`
+      );
+    }
+
     const response = await fetch(`${BASE_URL}/api/posts?id=${postId}`, {
       method: "DELETE",
       headers: {
@@ -656,12 +672,18 @@ export async function createComment({
 // Get comments for a post
 export async function getCommentsByPostId({
   postId,
+  limit = 10,
+  skip,
 }: {
   postId: string;
+  limit?: number;
+  skip?: number;
 }): Promise<AggregateComment[]> {
   try {
     const response = await fetch(
-      `${BASE_URL}/api/posts/comment?postId=${postId}&order=-1&sort=updatedAt`,
+      `${BASE_URL}/api/posts/comment?postId=${postId}&order=-1&sort=updatedAt&limit=${limit}${
+        skip ? `&skip=${skip}` : ""
+      }`,
       {
         method: "GET",
         headers: {

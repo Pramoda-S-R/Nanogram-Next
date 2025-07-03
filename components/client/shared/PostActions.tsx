@@ -13,6 +13,7 @@ import { AggregatePost, User } from "@/types";
 import { deletePostById } from "@/app/actions/api";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { set } from "zod";
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
@@ -26,6 +27,7 @@ const PostActions = ({
   showViewButton?: boolean;
 }) => {
   const router = useRouter();
+  const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -34,10 +36,12 @@ const PostActions = ({
       await navigator.clipboard.writeText(textToCopy);
       setCopied(true);
       setTimeout(() => setCopied(false), 3000); // reset after 3s
+      setOpen(false);
     } catch (err) {
       console.error("Failed to copy: ", err);
     }
   };
+
   const deleteThisPost = async () => {
     setLoading(true);
     try {
@@ -56,10 +60,13 @@ const PostActions = ({
       });
     } finally {
       setLoading(false);
+      setOpen(false);
+      router.push("/community");
+      router.refresh();
     }
   };
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger>
         <Ellipsis />
       </PopoverTrigger>

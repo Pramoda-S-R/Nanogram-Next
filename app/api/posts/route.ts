@@ -28,9 +28,9 @@ export const GET = withAuth(async (req: NextRequest) => {
   if (tags.length > 0) {
     query.tags = {
       $elemMatch: {
-        $regex: tags.map(tag => `(${tag})`).join("|"),
-        $options: "i"
-      }
+        $regex: tags.map((tag) => `(${tag})`).join("|"),
+        $options: "i",
+      },
     };
   }
   try {
@@ -353,9 +353,25 @@ export const DELETE = withAuth(async (req: NextRequest) => {
     // Remove the post from the creator's posts array
     const userCollection = client.db(database).collection<User>("user");
     await userCollection.updateOne(
-      { _id: post.creator },
+      { posts: new ObjectId(postId) },
       {
         $pull: { posts: new ObjectId(postId) },
+      }
+    );
+
+    // Remove the post from the savedBy array of users
+    await userCollection.updateMany(
+      { savedPosts: new ObjectId(postId) },
+      {
+        $pull: { savedPosts: new ObjectId(postId) },
+      }
+    );
+
+    // Remove the post from the likes array of users
+    await userCollection.updateMany(
+      { likedPosts: new ObjectId(postId) },
+      {
+        $pull: { likedPosts: new ObjectId(postId) },
       }
     );
 

@@ -2,7 +2,7 @@ import clientPromise from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
 import { NextRequest, NextResponse } from "next/server";
 import { withAuth } from "@/lib/apiauth";
-import { Comment, Post } from "@/types";
+import { Comment, Post, User } from "@/types";
 
 const database: string | undefined = process.env.DATABASE;
 
@@ -181,6 +181,14 @@ export const POST = withAuth(async (req: NextRequest) => {
         { $push: { comments: result.insertedId } }
       );
 
+    // Update the user with the new comment
+    await db
+      .collection<User>("user")
+      .updateOne(
+        { _id: commenter },
+        { $push: { comments: result.insertedId } }
+      );
+
     return NextResponse.json(
       { message: "Comment added successfully.", commentId: result.insertedId },
       { status: 201 }
@@ -272,20 +280,12 @@ export const DELETE = withAuth(async (req: NextRequest) => {
   try {
     const dev = req.headers.get("x-dev-userid") as string;
     const tier = req.headers.get("x-dev-tier") as string;
-    const id = req.nextUrl.searchParams.get("id");
-    if (!id) {
-      return NextResponse.json(
-        { error: "Comment ID is required." },
-        { status: 400 }
-      );
-    }
+    const commentIdParam = req.nextUrl.searchParams.get("id");
+    const postIdParam = req.nextUrl.searchParams.get("postId");
 
-    let commentId: ObjectId;
-    try {
-      commentId = new ObjectId(id);
-    } catch (error) {
+    if (!commentIdParam && !postIdParam) {
       return NextResponse.json(
-        { error: "Invalid Comment ID format." },
+        { error: "Either Comment ID or Post ID is required." },
         { status: 400 }
       );
     }
@@ -293,41 +293,132 @@ export const DELETE = withAuth(async (req: NextRequest) => {
     const client = await clientPromise;
     const db = client.db(database);
 
-    // Check if the comment exists
-    const comment = await db
-      .collection<Comment>("comments")
-      .findOne({ _id: commentId });
-    if (!comment) {
+    if (commentIdParam) {
+      // Delete single comment logic
+      let commentId: ObjectId;
+      try {
+        commentId = new ObjectId(commentIdParam);
+      } catch (error) {
+        return NextResponse.json(
+          { error: "Invalid Comment ID format." },
+          { status: 400 }
+        );
+      }
+
+      const comment = await db
+        .collection<Comment>("comments")
+        .findOne({ _id: commentId });
+      if (!comment) {
+        return NextResponse.json(
+          { error: "Comment not found." },
+          { status: 404 }
+        );
+      }
+
+      if (tier === "free" && dev !== comment.commenter.toString()) {
+        return NextResponse.json(
+          { error: "Commenter ID does not match developer user ID." },
+          { status: 403 }
+        );
+      }
+
+      // Delete the comment
+      await db.collection<Comment>("comments").deleteOne({ _id: commentId });
+      // Remove the comment ID from the post's comments array
+      await db
+        .collection<Post>("posts")
+        .updateOne({ comments: commentId }, { $pull: { comments: commentId } });
+      // Remove the comment ID from the user's comments array
+      await db
+        .collection<User>("user")
+        .updateOne({ comments: commentId }, { $pull: { comments: commentId } });
+      // Remove the comment ID from the user's likedComments array
+      await db
+        .collection<User>("user")
+        .updateOne(
+          { likedComments: commentId },
+          { $pull: { likedComments: commentId } }
+        );
+
       return NextResponse.json(
-        { error: "Comment not found." },
-        { status: 404 }
+        { message: "Comment deleted successfully." },
+        { status: 200 }
       );
     }
 
-    // Check if the commenter is the same as the developer user ID
-    if (tier === "free" && dev !== comment.commenter.toString()) {
+    if (postIdParam) {
+      if (tier === "free") {
+        return NextResponse.json(
+          {
+            error:
+              "Deleting all comments for a post is not allowed in free tier.",
+          },
+          { status: 403 }
+        );
+      }
+      // Delete all comments associated with a post
+      let postId: ObjectId;
+      try {
+        postId = new ObjectId(postIdParam);
+      } catch (error) {
+        return NextResponse.json(
+          { error: "Invalid Post ID format." },
+          { status: 400 }
+        );
+      }
+
+      // Check if the post exists
+      const post = await db.collection<Post>("posts").findOne({ _id: postId });
+      if (!post) {
+        return NextResponse.json({ error: "Post not found." }, { status: 404 });
+      }
+
+      const commentIds: ObjectId[] = Array.isArray(post.comments)
+        ? post.comments.filter((id): id is ObjectId => id instanceof ObjectId)
+        : [];
+
+      // Check if there are any comments to delete
+      if (commentIds.length > 0) {
+        await db.collection<Comment>("comments").deleteMany({
+          _id: { $in: commentIds },
+        });
+      }
+
+      // Remove all comment IDs from the post's comments array
+      await db
+        .collection<Post>("posts")
+        .updateOne({ _id: postId }, { $set: { comments: [] } });
+
+      // Remove all comment IDs from the user's comments array
+      if (commentIds.length > 0) {
+        await db
+          .collection<User>("user")
+          .updateMany(
+            { comments: { $in: commentIds } },
+            { $pull: { comments: { $in: commentIds as any } } }
+          );
+      }
+
+      // Remove the comment IDs from the user's likedComments array
+      await db
+        .collection<User>("user")
+        .updateMany(
+          { likedComments: { $in: commentIds } },
+          { $pull: { likedComments: { $in: commentIds as any } } }
+        );
+
       return NextResponse.json(
-        { error: "Commenter ID does not match developer user ID." },
-        { status: 403 }
+        { message: "All comments for the post deleted successfully." },
+        { status: 200 }
       );
     }
 
-    // Delete the comment
-    await db.collection<Comment>("comments").deleteOne({ _id: commentId });
-
-    // Remove the comment from the post
-    await db
-      .collection<Post>("posts")
-      .updateOne({ comments: commentId }, { $pull: { comments: commentId } });
-
-    return NextResponse.json(
-      { message: "Comment deleted successfully." },
-      { status: 200 }
-    );
+    // This should never be reached
+    return NextResponse.json({ error: "Unexpected error." }, { status: 500 });
   } catch (error) {
-    console.error("Error deleting comment:", error);
+    console.error("Error deleting comment(s):", error);
     return NextResponse.json(
-      { error: "An error occurred while deleting the comment." },
+      { error: "An error occurred while deleting the comment(s)." },
       { status: 500 }
     );
   }
