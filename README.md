@@ -42,7 +42,7 @@
 - [ ] add like share comment save feature
 - [ ] add karma feature
 - [ ] add bio section in manage account
-- [ ] add intersection observer to comments and make it infini scroll
+- [x] add intersection observer to comments and make it infini scroll
 - [x] fix all users screen
 - [x] add report post and comment feature (combination ui perhaps?)
 - [x] connect uploadthing and establish blogs and newsletters
