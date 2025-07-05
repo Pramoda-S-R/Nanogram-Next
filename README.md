@@ -38,6 +38,7 @@
 - [x] community ui
 - [ ] cleanup community UI
 - [ ] hook up ably to the backend
+- [ ] figure out query schema
 - [x] find a vector db
 - [ ] add like share comment save feature
 - [ ] add karma feature

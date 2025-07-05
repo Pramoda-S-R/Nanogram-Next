@@ -87,10 +87,8 @@ const ProfileDrawer = () => {
   }
 
   if (!user) {
-    return null; // or handle the case where the user is not authenticated
+    return null; 
   }
-
-  // console.log("User:", user.externalAccounts[0].provider);
 
   async function getSession() {
     if (!user) {

@@ -54,6 +54,24 @@ export interface AggregateComment {
   updatedAt: Date;
 }
 
+export interface Messager {
+  _id: ObjectId;
+  username: string;
+  fullName: string;
+  avatarUrl?: string;
+}
+
+export interface SharedPost {
+  _id: ObjectId;
+  creator: Messager;
+  caption: string;
+  imageId: string;
+  imageUrl: string;
+  source: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 // MongoDB Schemas of various collections used in the application
 export interface Nanogram {
   _id: ObjectId;
@@ -110,6 +128,7 @@ export interface User {
   followers?: ObjectId[];
   comments?: ObjectId[];
   likedComments?: ObjectId[];
+  contacts?: ObjectId[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -181,23 +200,13 @@ export interface Report {
 }
 
 export interface Message {
-  _id: string;
-  sender: {
-    _id: string;
-    username: string;
-    fullName: string;
-    avatarUrl?: string;
-  };
-  receiver: {
-    _id: string;
-    username: string;
-    fullName: string;
-    avatarUrl?: string;
-  };
-  message: string;
+  _id: ObjectId;
+  sender: Messager;
+  receiver: Messager;
+  message: string | SharedPost;
   reactions?: {
     emoji: string;
-    userId: string;
+    userId: ObjectId;
   }[];
   seen: boolean;
   createdAt: Date;
