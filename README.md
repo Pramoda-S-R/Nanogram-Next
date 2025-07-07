@@ -39,6 +39,7 @@
 - [ ] cleanup community UI
 - [ ] hook up ably to the backend
 - [ ] figure out query schema
+- [ ] set up ably listner for notifications
 - [x] find a vector db
 - [ ] add like share comment save feature
 - [ ] add karma feature
