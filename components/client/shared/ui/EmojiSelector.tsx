@@ -82,6 +82,7 @@ export function ReactionSelector({
     if (onSelectEmoji) {
       onSelectEmoji(emojiData);
     }
+    setOpen(false);
   };
   return (
     <Popover open={open} onOpenChange={setOpen}>

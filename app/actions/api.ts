@@ -805,6 +805,41 @@ export async function getMessages({
     return [] as Message[];
   }
 }
+// See a message
+export async function markAsSeen({
+  senderId,
+  recipientId,
+  messageId,
+  updateWebSockect,
+}: {
+  senderId: string;
+  recipientId: string;
+  messageId: string;
+  updateWebSockect?: boolean;
+}): Promise<boolean> {
+  try {
+    const response = await fetch(`${BASE_URL}/api/messages/seen`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": apiKey || "",
+      },
+      body: JSON.stringify({
+        senderId,
+        recipientId,
+        messageId,
+        updateWebSockect,
+      }),
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return true;
+  } catch (error) {
+    console.error("Error marking message as seen:", error);
+    return false;
+  }
+}
 // Send a message
 export async function sendMessage({
   sender,

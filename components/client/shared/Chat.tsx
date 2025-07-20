@@ -10,6 +10,7 @@ import {
   getAblyToken,
   getMessages,
   getPostById,
+  markAsSeen,
   reactToMessage,
   removeReaction,
   sendMessage,
@@ -97,10 +98,14 @@ const Chat = ({
 }) => {
   const channelName = `dm-${[currentUser._id, contact._id].sort().join("-")}`;
   const [ablyClient, setAblyClient] = useState<Realtime | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const [message, setMessage] = useState("");
   const [chatHistory, setChatHistory] = useState<Message[]>([]);
-  const [posts, setPosts] = useState<AggregatePost | null>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
 
   useEffect(() => {
     const client = new Realtime({
@@ -148,6 +153,23 @@ const Chat = ({
       console.log("Received message:", message.name);
       if (message.name === "new-message") {
         setChatHistory((prev) => [...prev, message.data as Message]);
+        if ((message.data as Message).receiver._id === currentUser._id)
+          markAsSeen({
+            senderId: contact._id.toString(),
+            recipientId: currentUser._id.toString(),
+            messageId: (message.data as Message)._id.toString(),
+            updateWebSockect: true,
+          });
+      }
+      if (message.name === "seen-message") {
+        const messageId = message.data as string;
+        setChatHistory((prev) =>
+          prev.map((msg) =>
+            msg._id.toString() === messageId
+              ? { ...msg, seen: true, updatedAt: new Date() }
+              : msg
+          )
+        );
       }
       if (message.name === "delete-message") {
         const messageId = message.data as string;
@@ -199,17 +221,15 @@ const Chat = ({
             new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
         );
         setChatHistory(msgs);
+        handleSeeMessages(msgs);
       }
     }
-    async function getPostsFromDB() {
-      const post = await getPostById("6854013c6f72ffe2bbf839b2");
-      if (post) {
-        setPosts(post);
-      }
-    }
-    getPostsFromDB();
     getMessagesFromDB();
   }, [contact]);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [chatHistory]);
 
   async function handleSendMessage(content: string) {
     console.log(content);
@@ -295,6 +315,37 @@ const Chat = ({
       toast.error("Failed to remove reaction", {
         description: (error as Error).message || "An error occurred",
       });
+    }
+  }
+
+  async function handleSeeMessages(messages: Message[]) {
+    console.log("calling this seen function", chatHistory[-1]);
+
+    const unseenMessages = messages.filter(
+      (msg) =>
+        !msg.seen && msg.receiver._id.toString() === currentUser._id.toString()
+    );
+    if (unseenMessages.length === 0) return;
+    try {
+      unseenMessages.forEach(async (msg, idx) => {
+        console.log(
+          "Marking message as seen:",
+          idx,
+          ": ",
+          idx === unseenMessages.length - 1
+        );
+        const res = await markAsSeen({
+          senderId: contact._id.toString(),
+          recipientId: currentUser._id.toString(),
+          messageId: msg._id.toString(),
+          updateWebSockect: idx === unseenMessages.length - 1, // Only update WebSocket for the last message
+        });
+        if (!res) {
+          throw new Error("Failed to mark messages as seen");
+        }
+      });
+    } catch (error) {
+      console.error("Error marking messages as seen:", error);
     }
   }
 
@@ -451,6 +502,7 @@ const Chat = ({
             )}
           </div>
         ))}
+        <div ref={messagesEndRef} />
       </div>
       <label
         htmlFor="send message"
@@ -459,6 +511,7 @@ const Chat = ({
         <EmojiPickerPopover onSelectEmoji={addEmojiToMessage} />
         <TextareaAutosize
           className="grow resize-none text-base overflow-auto focus:outline-none"
+          autoComplete="off"
           maxRows={5}
           minRows={1}
           value={message}
