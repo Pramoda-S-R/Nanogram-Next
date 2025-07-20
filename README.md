@@ -61,15 +61,14 @@
 - [x] add ai mascot
 - [ ] give context to ai
 - [x] gallery route
-- [ ] add UI to upload images to gallery
 - [ ] admin dashboard
+- [ ] add UI to upload images to gallery
 - [ ] check if admin by comparing a admin database
 - [ ] censor board
 - [ ] activity logs
 - [ ] Dev/API page for developers
 - [ ] Docs for the devs
 - [ ] Terms of Service and Privacy policy
-- [ ] dedicated backend (are you mental bruv?)
 - [ ] mobile app and desktop app (I don't get paid enogh for tis)
 - [ ] IP bans (make the game first exquisite young lad)
 

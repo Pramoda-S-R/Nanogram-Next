@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
-import { Ellipsis, SendHorizonal, SmileIcon, Trash2 } from "lucide-react";
+import { Ellipsis, SendHorizonal, Trash2 } from "lucide-react";
 import TextareaAutosize from "react-textarea-autosize";
 import { AggregatePost, Message, User } from "@/types";
 import { formatDate } from "@/utils";
@@ -10,6 +10,8 @@ import {
   getAblyToken,
   getMessages,
   getPostById,
+  reactToMessage,
+  removeReaction,
   sendMessage,
 } from "@/app/actions/api";
 import {
@@ -20,6 +22,9 @@ import {
 } from "./ui/Popover";
 import ReportMedia from "./ReportMedia";
 import Link from "next/link";
+import { EmojiPickerPopover, ReactionSelector } from "./ui/EmojiSelector";
+import { EmojiClickData } from "emoji-picker-react";
+import { toast } from "sonner";
 
 const MessageActions = ({
   currentUser,
@@ -52,10 +57,10 @@ const MessageActions = ({
   }
   return (
     <Popover>
-      <PopoverTrigger>
+      <PopoverTrigger className="hidden group-hover:flex">
         <Ellipsis className="cursor-pointer" strokeWidth={1.5} />
       </PopoverTrigger>
-      <PopoverAnchor className="" />
+      <PopoverAnchor />
       <PopoverContent
         side={mode === "delete" ? "left" : "right"}
         sideOffset={40}
@@ -150,6 +155,17 @@ const Chat = ({
           prev.filter((msg) => msg._id.toString() !== messageId)
         );
       }
+      if (message.name === "update-message") {
+        const updatedMessage = message.data as Message;
+        console.log("updatedMessage: ", updatedMessage);
+        setChatHistory((prev) =>
+          prev.map((msg) =>
+            msg._id.toString() === updatedMessage._id.toString()
+              ? updatedMessage
+              : msg
+          )
+        );
+      }
     };
 
     const onAttached = () => {
@@ -225,6 +241,63 @@ const Chat = ({
     }
   }
 
+  function addEmojiToMessage(emojiObject: EmojiClickData) {
+    setMessage((prev) => {
+      const cursorPosition = inputRef.current?.selectionStart || 0;
+      const newMessage =
+        prev.slice(0, cursorPosition) +
+        emojiObject.emoji +
+        prev.slice(cursorPosition);
+      return newMessage;
+    });
+    inputRef.current?.focus();
+    inputRef.current?.setSelectionRange(
+      (inputRef.current?.selectionStart || 0) + emojiObject.emoji.length,
+      (inputRef.current?.selectionStart || 0) + emojiObject.emoji.length
+    );
+  }
+
+  async function handleReactions(messageId: string, emojiData: EmojiClickData) {
+    try {
+      const res = await reactToMessage({
+        messageId,
+        emoji: emojiData.emoji,
+        userId: currentUser._id.toString(),
+      });
+      if (!res) {
+        throw new Error("Failed to add reaction");
+      }
+    } catch (error) {
+      console.error("Error handling reaction:", error);
+      toast.error("Failed to add reaction", {
+        description: (error as Error).message || "An error occurred",
+      });
+    }
+  }
+
+  async function handleReactionsRemove(message: Message) {
+    // If message has no reactions from current user, do nothing
+    if (!message.reactions) return;
+    const userReaction = message.reactions.find(
+      (reaction) => reaction.userId.toString() === currentUser._id.toString()
+    );
+    if (!userReaction) return;
+    try {
+      const res = await removeReaction({
+        messageId: message._id.toString(),
+        userId: currentUser._id.toString(),
+      });
+      if (!res) {
+        throw new Error("Failed to remove reaction");
+      }
+    } catch (error) {
+      console.error("Error removing reaction:", error);
+      toast.error("Failed to remove reaction", {
+        description: (error as Error).message || "An error occurred",
+      });
+    }
+  }
+
   if (!ablyClient) return null;
 
   return (
@@ -263,86 +336,89 @@ const Chat = ({
               </time>
             </div>
             <div
-              className={`indicator flex ${
+              className={`flex ${
                 msg.sender._id === currentUser._id
                   ? "flex-row-reverse"
                   : "flex-row"
               }`}
             >
-              {Array.isArray(msg.reactions) && msg.reactions.length > 0 && (
-                <span
-                  className={`indicator-item indicator-bottom cursor-pointer flex badge mx-5 px-0.5 ${
-                    msg.sender._id === currentUser._id
-                      ? "indicator-start"
-                      : "indicator-end"
-                  }`}
-                >
-                  {msg.reactions.map((reaction) => {
-                    return reaction.emoji;
-                  })}
-                </span>
-              )}
-              {typeof msg.message !== "string" ? (
-                <div className="card bg-base-200 md:w-72 w-[60vw] shadow-sm">
-                  <div className="card-body">
-                    <div className="flex justify-between">
-                      <div className="flex items-center gap-2 cursor-pointer">
-                        <div className="avatar">
-                          <div className="w-5 rounded-full">
-                            <img
-                              src={
-                                msg.message.creator.avatarUrl ||
-                                "/assets/images/placeholder.png"
-                              }
-                              alt="User Avatar"
-                            />
+              <div className="relative">
+                {typeof msg.message !== "string" ? (
+                  <div className="card bg-base-200 md:w-72 w-[60vw] shadow-sm">
+                    <div className="card-body">
+                      <div className="flex justify-between">
+                        <div className="flex items-center gap-2 cursor-pointer">
+                          <div className="avatar">
+                            <div className="w-5 rounded-full">
+                              <img
+                                src={
+                                  msg.message.creator.avatarUrl ||
+                                  "/assets/images/placeholder.png"
+                                }
+                                alt="User Avatar"
+                              />
+                            </div>
                           </div>
-                        </div>
 
-                        <div className="text-start">
-                          <h2 className="card-title text-sm">
-                            {msg.message.creator.fullName}
-                          </h2>
-                          <p className="text-xs">
-                            @{msg.message.creator.username}
-                          </p>
+                          <div className="text-start">
+                            <h2 className="card-title text-sm">
+                              {msg.message.creator.fullName}
+                            </h2>
+                            <p className="text-xs">
+                              @{msg.message.creator.username}
+                            </p>
+                          </div>
                         </div>
                       </div>
                     </div>
+                    <Link href={`/posts/${msg.message._id.toString()}`}>
+                      {msg.message.imageUrl ? (
+                        <figure>
+                          <img
+                            src={
+                              msg.message.imageUrl ||
+                              "/assets/images/placeholder.png"
+                            }
+                            alt={msg.message._id.toString()}
+                          />
+                        </figure>
+                      ) : (
+                        <div className="px-4 pb-4">
+                          <p className="">
+                            {msg.message.caption || "No caption provided."}
+                          </p>
+                        </div>
+                      )}
+                    </Link>
                   </div>
-                  <Link href={`/posts/${msg.message._id.toString()}`}>
-                    {msg.message.imageUrl ? (
-                      <figure>
-                        <img
-                          src={
-                            msg.message.imageUrl ||
-                            "/assets/images/placeholder.png"
-                          }
-                          alt={msg.message._id.toString()}
-                        />
-                      </figure>
-                    ) : (
-                      <div className="px-4 pb-4">
-                        <p className="">
-                          {msg.message.caption || "No caption provided."}
-                        </p>
-                      </div>
-                    )}
-                  </Link>
-                </div>
-              ) : (
-                <div
-                  className={`chat-bubble min-w-28 md:max-w-md max-w-[18rem] ${
-                    msg.sender._id === currentUser._id
-                      ? "chat-bubble-primary"
-                      : "chat-bubble-info"
-                  }`}
-                >
-                  {msg.message as string}
-                </div>
-              )}
+                ) : (
+                  <div
+                    className={`chat-bubble min-w-28 md:max-w-md max-w-[18rem] ${
+                      msg.sender._id === currentUser._id
+                        ? "chat-bubble-primary"
+                        : "chat-bubble-info"
+                    }`}
+                  >
+                    {msg.message as string}
+                  </div>
+                )}
+                {Array.isArray(msg.reactions) && msg.reactions.length > 0 && (
+                  <span
+                    className={`absolute z-1 -bottom-4 cursor-pointer flex badge badge-ghost mx-5 px-0.5 ${
+                      msg.sender._id === currentUser._id
+                        ? "-left-8"
+                        : "-right-8"
+                    }`}
+                    onClick={() => handleReactionsRemove(msg)}
+                  >
+                    {msg.reactions.map((reaction) => {
+                      return reaction.emoji;
+                    })}
+                  </span>
+                )}
+              </div>
               <div
-                className={`hidden group-hover:flex gap-2 items-center mx-2 ${
+                className={`flex gap-2 items-center mx-2 ${
                   msg.sender._id === currentUser._id
                     ? "flex-row"
                     : "flex-row-reverse"
@@ -356,7 +432,11 @@ const Chat = ({
                     msg.sender._id === currentUser._id ? "delete" : "report"
                   }
                 />
-                <SmileIcon />
+                <ReactionSelector
+                  onSelectEmoji={(emojiData) => {
+                    handleReactions(msg._id.toString(), emojiData);
+                  }}
+                />
               </div>
             </div>
             {idx === chatHistory.length - 1 && (
@@ -374,9 +454,9 @@ const Chat = ({
       </div>
       <label
         htmlFor="send message"
-        className="bg-base-200 flex items-end w-full focus:outline-none focus-within:outline-none px-2 py-3"
+        className="bg-base-200 flex gap-2 items-end w-full focus:outline-none focus-within:outline-none px-2 py-3"
       >
-        <SmileIcon />
+        <EmojiPickerPopover onSelectEmoji={addEmojiToMessage} />
         <TextareaAutosize
           className="grow resize-none text-base overflow-auto focus:outline-none"
           maxRows={5}

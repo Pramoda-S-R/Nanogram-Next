@@ -838,6 +838,65 @@ export async function sendMessage({
     return null;
   }
 }
+// React to a message
+export async function reactToMessage({
+  messageId,
+  emoji,
+  userId,
+}: {
+  messageId: string;
+  emoji: string;
+  userId: string;
+}): Promise<boolean> {
+  try {
+    const response = await fetch(`${BASE_URL}/api/messages/send`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": apiKey || "",
+      },
+      body: JSON.stringify({
+        messageId,
+        emoji,
+        userId,
+      }),
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return true;
+  } catch (error) {
+    console.log("Error reacting to message:", error);
+    return false;
+  }
+}
+// Remove a reaction
+export async function removeReaction({
+  messageId,
+  userId,
+}: {
+  messageId: string;
+  userId: string;
+}): Promise<boolean> {
+  try {
+    const response = await fetch(
+      `${BASE_URL}/api/messages/send?messageId=${messageId}&userId=${userId}`,
+      {
+        method: "DELETE",
+        headers: {
+          "x-api-key": apiKey || "",
+        },
+      }
+    );
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return true;
+  } catch (error) {
+    console.error("Error removing reaction:", error);
+    return false;
+  }
+}
 // Delete a message
 export async function deleteMessage({
   senderId,

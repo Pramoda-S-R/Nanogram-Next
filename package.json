@@ -29,6 +29,7 @@
     "cloudinary": "^2.6.1",
     "clsx": "^2.1.1",
     "embla-carousel-react": "^8.6.0",
+    "emoji-picker-react": "^4.13.2",
     "framer-motion": "^12.15.0",
     "fs": "^0.0.1-security",
     "gray-matter": "^4.0.3",

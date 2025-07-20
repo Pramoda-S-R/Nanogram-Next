@@ -129,7 +129,6 @@ export const PUT = withAuth(
       const updatedMessage = {
         ...message,
         reactions: message.reactions,
-        updatedAt: new Date(),
       };
       await client
         .db(database)
@@ -143,6 +142,71 @@ export const PUT = withAuth(
       await channel.publish("update-message", updatedMessage);
 
       return NextResponse.json({ updatedMessage }, { status: 200 });
+    } catch (error: any) {
+      return NextResponse.json(
+        { error: error.message || "Internal Server Error" },
+        { status: 500 }
+      );
+    }
+  },
+  { adminOnly: true }
+);
+
+export const DELETE = withAuth(
+  async (req: NextRequest) => {
+    try {
+      const searchParams = req.nextUrl.searchParams;
+      const messageId = searchParams.get("messageId");
+      const userId = searchParams.get("userId");
+      if (!messageId || !userId) {
+        return NextResponse.json({ error: "Missing feilds" }, { status: 400 });
+      }
+      let messageObjectId: ObjectId;
+      let userObjectId: ObjectId;
+      try {
+        messageObjectId = new ObjectId(messageId as string);
+        userObjectId = new ObjectId(userId as string);
+      } catch (error) {
+        return NextResponse.json(
+          { error: "Invalid ObjectId format" },
+          { status: 400 }
+        );
+      }
+      const client = await clientPromise;
+      const message = await client
+        .db(database)
+        .collection<Message>("messages")
+        .findOne({ _id: messageObjectId });
+
+      if (!message) {
+        return NextResponse.json(
+          { error: "Message not found" },
+          { status: 404 }
+        );
+      }
+
+      // Remove the emoji reaction from the message corresponding to the user
+      message.reactions = message.reactions?.filter(
+        (reaction) => reaction.userId.toString() !== userObjectId.toString()
+      );
+
+      const updatedMessage = {
+        ...message,
+        reactions: message.reactions,
+      };
+
+      await client
+        .db(database)
+        .collection("messages")
+        .updateOne({ _id: messageObjectId }, { $set: updatedMessage });
+
+      const channelName = `dm-${[message.sender._id, message.receiver._id]
+        .sort()
+        .join("-")}`;
+      const channel = ably.channels.get(channelName);
+      await channel.publish("update-message", updatedMessage);
+
+      return NextResponse.json({ success: true }, { status: 200 });
     } catch (error: any) {
       return NextResponse.json(
         { error: error.message || "Internal Server Error" },
