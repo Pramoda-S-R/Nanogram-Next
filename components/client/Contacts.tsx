@@ -14,6 +14,9 @@ import useDebounce from "@/hooks/useDebounce";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { usePathname } from "next/navigation";
 import path from "path";
+import { getNewUsers } from "@/app/actions/api";
+import { User } from "@/types";
+import Link from "next/link";
 
 const CONTACTS = [
   {
@@ -99,25 +102,31 @@ const Contacts = () => {
   const [mounted, setMounted] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const [allContacts] = useState([...CONTACTS]);
-  const [contacts, setContacts] = useState([...CONTACTS]);
+  const [contacts, setContacts] = useState<User[]>([]);
 
   const pathname = usePathname();
   const isMobile = useIsMobile();
 
   const handleCallback = (searchValue: string) => {
-    if (!searchValue.trim()) {
-      setContacts(allContacts); // Reset to full list on empty input
-      return;
-    }
-
-    const filtered = allContacts.filter((contact) =>
-      contact.fullName.toLowerCase().includes(searchValue.toLowerCase())
-    );
-    setContacts(filtered);
+    // if (!searchValue.trim()) {
+    //   setContacts(allContacts); // Reset to full list on empty input
+    //   return;
+    // }
+    // const filtered = allContacts.filter((contact) =>
+    //   contact.fullName.toLowerCase().includes(searchValue.toLowerCase())
+    // );
+    // setContacts(filtered);
   };
 
   useEffect(() => {
     setMounted(true);
+    async function fetchContacts() {
+      const people = await getNewUsers();
+      if (people) {
+        setContacts(people);
+      }
+    }
+    fetchContacts();
   }, []);
 
   const ExpandedView = () => {
@@ -153,7 +162,11 @@ const Contacts = () => {
         <SearchContacts callback={handleCallback} className="w-full" />
         <div className="flex flex-col gap-2 mt-0.5 overflow-y-auto">
           {contacts.map((contact, idx) => (
-            <div className="flex gap-2" key={idx}>
+            <Link
+              href={`/messages/${contact.username}`}
+              className="flex gap-2"
+              key={idx}
+            >
               <div className="avatar">
                 <div className="w-10 h-10 rounded-full">
                   <img src={contact.avatarUrl} />
@@ -165,7 +178,7 @@ const Contacts = () => {
                   @{contact.username}
                 </p>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       </div>
@@ -214,7 +227,7 @@ const Contacts = () => {
   }
 
   return (
-    <div className="flex">
+    <div className="flex bg-base-200 border-r-2 border-base-content/10 relative group px-1">
       {collapsed ? (
         <CollapsedView />
       ) : (
@@ -222,15 +235,13 @@ const Contacts = () => {
           <ExpandedView />
         </div>
       )}
-      <div className="divider divider-start divider-horizontal mx-0 group">
-        <button
-          type="button"
-          className="group-hover:block hidden mt-2"
-          onClick={() => setCollapsed(!collapsed)}
-        >
-          {collapsed ? <ChevronsRight /> : <ChevronsLeft />}
-        </button>
-      </div>
+      <button
+        type="button"
+        className="btn btn-circle hidden group-hover:flex absolute -right-5 top-1/2 mt-2 z-10"
+        onClick={() => setCollapsed(!collapsed)}
+      >
+        {collapsed ? <ChevronsRight /> : <ChevronsLeft />}
+      </button>
     </div>
   );
 };

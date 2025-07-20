@@ -3,9 +3,9 @@ import { likePost, savePost } from "@/app/actions/api";
 import { Like, Liked, Saved, Save } from "@/components/server/shared/ui/icons";
 import { AggregatePost, User } from "@/types";
 import { hasLiked, hasSaved } from "@/utils";
-import { MessageCircle, ShareIcon } from "lucide-react";
 import React, { useState } from "react";
 import Comments from "./Comments";
+import Share from "./Share";
 
 const PostStats = ({
   post,
@@ -81,7 +81,7 @@ const PostStats = ({
         {showComments && (
           <Comments post={post} currentUser={user} />
         )}
-        {showShare && <ShareIcon strokeWidth={1.5} size={20} />}
+        {showShare && <Share currentUser={user} post={post} />}
         {showSave && (
           <div
             className="text-base-content w-5 h-5"

@@ -44,7 +44,7 @@ const AllUsers = async () => {
               key={creator?._id.toString()}
               className="card bg-base-200 w-56 aspect-square justify-center p-2"
             >
-              <Link href={`/profile/@${creator.username}`}>
+              <Link href={`/community/@${creator.username}`}>
                 <figure>
                   <img
                     src={creator.avatarUrl || "/assets/icons/user.svg"}

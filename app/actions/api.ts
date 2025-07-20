@@ -8,9 +8,12 @@ import {
   BlogSchema,
   Comment,
   Event,
+  Message,
+  Messager,
   Nanogram,
   Newsletters,
   Post,
+  SharedPost,
   Testimonial,
   User,
 } from "@/types";
@@ -18,6 +21,8 @@ import { ResourceApiResponse } from "cloudinary";
 import { ObjectId } from "mongodb";
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+const ANONYMOUS_USER_ID =
+  process.env.ANONYMOUS_USER_ID || "686658c02a2faecbc084642b";
 const apiKey: string | undefined = process.env.ADMIN_KEY;
 
 // ===================
@@ -756,6 +761,114 @@ export async function likeComment({
 }
 
 // ==================
+// Message Functions
+// ==================
+// Get client token for Ably
+export async function getAblyToken(clientId: string): Promise<any> {
+  try {
+    const response = await fetch(`${BASE_URL}/api/ably?client=${clientId}`, {
+      method: "GET",
+      headers: {
+        "x-api-key": apiKey || "",
+      },
+    });
+    return response.json();
+  } catch (error) {
+    console.error("Error fetching Ably token:", error);
+  }
+}
+// Get messages by sender and recipient
+export async function getMessages({
+  senderId,
+  receiverId,
+}: {
+  senderId: string;
+  receiverId: string;
+}): Promise<Message[]> {
+  try {
+    const response = await fetch(
+      `${BASE_URL}/api/messages?senderId=${senderId}&receiverId=${receiverId}`,
+      {
+        method: "GET",
+        headers: {
+          "x-api-key": apiKey || "",
+        },
+      }
+    );
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+    return data.messages as Message[];
+  } catch (error) {
+    console.error("Error fetching messages:", error);
+    return [] as Message[];
+  }
+}
+// Send a message
+export async function sendMessage({
+  sender,
+  recipient,
+  content,
+}: {
+  sender: Messager;
+  recipient: Messager;
+  content: { message: string | SharedPost };
+}): Promise<Message | null> {
+  try {
+    const response = await fetch(`${BASE_URL}/api/messages/send`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": apiKey || "",
+      },
+      body: JSON.stringify({
+        sender,
+        recipient,
+        content,
+      }),
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const { messageSent } = await response.json();
+    return messageSent as Message;
+  } catch (error) {
+    console.error("Error sending message:", error);
+    return null;
+  }
+}
+// Delete a message
+export async function deleteMessage({
+  senderId,
+  recipientId,
+  messageId,
+}: {
+  senderId: string;
+  recipientId: string;
+  messageId: string;
+}): Promise<boolean> {
+  try {
+    const response = await fetch(
+      `${BASE_URL}/api/messages/delete?senderId=${senderId}&recipientId=${recipientId}&messageId=${messageId}`,
+      {
+        method: "DELETE",
+        headers: {
+          "x-api-key": apiKey || "",
+        },
+      }
+    );
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return true;
+  } catch (error) {
+    console.error("Error deleting message:", error);
+    return false;
+  }
+}
+
+// ==================
 // Nanogram Functions
 // ==================
 // Get nanograms for the hero section
@@ -1188,15 +1301,18 @@ export async function getNewsletterByRoute(
 // Get anonymous user
 export async function getAnonymousUser(): Promise<User | null> {
   try {
-    const response = await fetch(`${BASE_URL}/api/user?id=686658c02a2faecbc084642b`, {
-      method: "GET",
-      headers: {
-        "x-api-key": apiKey || "",
-      },
-      next: {
-        revalidate: 60, // 1 minute
-      },
-    });
+    const response = await fetch(
+      `${BASE_URL}/api/user?id=${ANONYMOUS_USER_ID}`,
+      {
+        method: "GET",
+        headers: {
+          "x-api-key": apiKey || "",
+        },
+        next: {
+          revalidate: 60, // 1 minute
+        },
+      }
+    );
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }

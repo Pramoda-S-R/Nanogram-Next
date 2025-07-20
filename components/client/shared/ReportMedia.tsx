@@ -20,7 +20,7 @@ import { toast } from "sonner";
 import { reportMedia } from "@/app/actions/api";
 
 interface ReportMediaProps {
-  media: "Post" | "Comment" | "Blog";
+  media: "Post" | "Comment" | "Blog" | "Message";
   mediaId: string | ObjectId;
   userId: string | ObjectId;
   currentUser: User;
@@ -105,12 +105,12 @@ const ReportMedia = ({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
-        className={media === "Post" ? "btn btn-error justify-start" : ""}
+        className={media === "Post" || media === "Message"  ? "btn btn-error justify-start" : ""}
       >
-        {media === "Post" && (
+        {media === "Post" || media === "Message" && (
           <>
             <TriangleAlert strokeWidth={1.5} />
-            Report Post
+            Report {media}
           </>
         )}
         {media === "Comment" && (

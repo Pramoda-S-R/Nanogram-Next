@@ -17,7 +17,7 @@ const PostDetails = ({ post, user }: { post: AggregatePost; user: User }) => {
               className="object-cover"
             />
           </figure>
-          <div className="md:w-1/2 w-full h-full flex flex-col justify-between aspect-square px-2">
+          <div className="md:w-1/2 w-full h-full flex md:justify-between flex-1 flex-col md:aspect-square px-2">
             <div className="md:overflow-y-auto">
               <div className="sticky top-0 bg-base-200 flex justify-between py-2">
                 <PostCreator creator={post.creator} />
