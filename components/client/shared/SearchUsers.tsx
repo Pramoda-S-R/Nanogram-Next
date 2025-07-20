@@ -85,7 +85,13 @@ const SearchUsers = ({
         </label>
       </div>
       {shouldShowSearchResults && (
-        <ul className={variant === "default" ? "bg-base-200 flex flex-col py-8 px-4 mb-8 w-full" : "flex flex-wrap gap-2"}>
+        <ul
+          className={
+            variant === "default"
+              ? "bg-base-200 flex flex-col py-8 px-4 mb-8 w-full"
+              : "flex flex-col items-start max-h-34 overflow-y-auto gap-2"
+          }
+        >
           {searchedUsers?.map((creator, idx) => (
             <div key={idx}>
               {variant === "default" ? (
@@ -120,16 +126,19 @@ const SearchUsers = ({
                   </div>
                 </li>
               ) : (
-                <button
-                  className="rounded-full overflow-clip"
-                  onClick={() => onClickCallback && onClickCallback(creator)}
-                >
-                  <img
-                    src={creator.avatarUrl}
-                    alt={creator.username}
-                    className="size-10"
-                  />
-                </button>
+                <div className="flex gap-2 items-center justify-center">
+                  <button
+                    className="rounded-full overflow-clip"
+                    onClick={() => onClickCallback && onClickCallback(creator)}
+                  >
+                    <img
+                      src={creator.avatarUrl}
+                      alt={creator.username}
+                      className="size-10"
+                    />
+                  </button>
+                  <p className="text-xs">@{creator.username}</p>
+                </div>
               )}
               {idx !== searchedUsers.length - 1 && variant === "default" && (
                 <div className="divider"></div>

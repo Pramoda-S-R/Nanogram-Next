@@ -44,7 +44,6 @@ import {
   createComment,
   deleteCommentById,
   getCommentsByPostId,
-  getCurrentUser,
   likeComment,
 } from "@/app/actions/api";
 import { toast } from "sonner";
@@ -66,27 +65,14 @@ type CommentData = z.infer<typeof commentSchema>;
 
 export function CommentInput({
   post,
+  currentUser,
   callback,
 }: {
   post: AggregatePost;
+  currentUser: User;
   callback: (newComment: AggregateComment) => void;
 }) {
   const { isLoaded, user } = useUser();
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
-
-  useEffect(() => {
-    const fetchCurrentUser = async () => {
-      if (isLoaded && user) {
-        const cUser = await getCurrentUser({ user_id: user.id });
-        if (cUser) {
-          setCurrentUser(cUser);
-        } else {
-          console.error("Current user not found");
-        }
-      }
-    };
-    fetchCurrentUser();
-  }, [isLoaded, user]);
 
   const {
     register,
@@ -289,6 +275,8 @@ const Comments = ({
   currentUser: User;
 }) => {
   const [comments, setComments] = useState<AggregateComment[]>([]);
+  const [open, setOpen] = useState(false);
+  const [loaded, setLoaded] = useState(false);
   const [page, setPage] = useState(0);
   const [hasNextPage, setHasNextPage] = useState(true);
   const [loading, setLoading] = useState(true);
@@ -313,7 +301,17 @@ const Comments = ({
   }, []);
 
   useEffect(() => {
-    const fetchComments = async () => {
+    if (open && !loaded) {
+      setPage(0);
+      setComments([]);
+      setHasNextPage(true);
+      setLoading(true);
+      setLoaded(true); // Set once loaded
+    }
+  }, [open]);
+
+  useEffect(() => {
+    const loadComments = async () => {
       try {
         const limit = 10;
         const resComments = await getCommentsByPostId({
@@ -323,15 +321,12 @@ const Comments = ({
         });
 
         if (resComments) {
-          setComments((prev) => {
-            const newCommentIds = new Set(prev.map((c) => c._id.toString()));
-            const filtered = resComments.filter(
-              (c) => !newCommentIds.has(c._id.toString())
-            );
-            return [...prev, ...filtered];
-          });
+          const newCommentIds = new Set(comments.map((c) => c._id.toString()));
+          const filtered = resComments.filter(
+            (c) => !newCommentIds.has(c._id.toString())
+          );
 
-          // Only update hasNextPage if we got fewer than `limit` results
+          setComments((prev) => [...prev, ...filtered]);
           setHasNextPage(resComments.length === limit);
         }
       } catch (error) {
@@ -341,14 +336,16 @@ const Comments = ({
       }
     };
 
-    fetchComments();
-  }, [post._id, page]);
+    if (open) {
+      loadComments();
+    }
+  }, [open, page]);
 
   useEffect(() => {
-    if (inView && hasNextPage && !loading) {
+    if (open && inView && hasNextPage && !loading) {
       setPage((prev) => prev + 1);
     }
-  }, [inView, hasNextPage, loading]);
+  }, [inView, open, hasNextPage, loading]);
 
   if (!mounted) {
     return (
@@ -362,7 +359,7 @@ const Comments = ({
   // Now that mounted is true, and we know device type:
   if (isDesktop) {
     return (
-      <Dialog>
+      <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger className="text-base-content flex h-5 gap-1">
           <MessageCircle strokeWidth={1.5} size={20} />
           <p className="mt-0.5 text-xs">{post.comments.length}</p>
@@ -398,14 +395,18 @@ const Comments = ({
             ))}
             <div ref={ref}></div>
           </div>
-          <CommentInput post={post} callback={handleCallback} />
+          <CommentInput
+            post={post}
+            currentUser={currentUser}
+            callback={handleCallback}
+          />
           <DialogFooter />
         </DialogContent>
       </Dialog>
     );
   } else {
     return (
-      <Drawer>
+      <Drawer open={open} onOpenChange={setOpen}>
         <DrawerTrigger className="text-base-content flex h-5 gap-1">
           <MessageCircle strokeWidth={1.5} size={20} />
           <p className="mt-0.5 text-xs">{post.comments.length}</p>
@@ -431,7 +432,11 @@ const Comments = ({
             ))}
             <div ref={ref}></div>
           </div>
-          <CommentInput post={post} callback={handleCallback} />
+          <CommentInput
+            post={post}
+            currentUser={currentUser}
+            callback={handleCallback}
+          />
           <DrawerFooter />
         </DrawerContent>
       </Drawer>

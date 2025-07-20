@@ -36,6 +36,7 @@ const Share = ({
   const [loading, setLoading] = useState(false);
   const [users, setUsers] = useState<User[]>([]);
   const [open, setOpen] = useState(false);
+  const [loaded, setLoaded] = useState(false);
   const [copied, setCopied] = useState(false);
 
   const socials = [
@@ -72,14 +73,22 @@ const Share = ({
   ];
 
   useEffect(() => {
-    async function getContacts() {
-      const contacts = await getUserByUsername({ username: "shiny1um" });
-      if (contacts) {
-        setUsers([contacts]);
+    if (open && !loaded) {
+      async function getContacts() {
+        try {
+          const contacts = await getUserByUsername({ username: "shiny1um" });
+          if (contacts) {
+            setUsers([contacts]);
+            setLoaded(true);
+          }
+        } catch (error) {
+          console.error("Failed to load contacts:", error);
+        }
       }
+
+      getContacts();
     }
-    getContacts();
-  }, []);
+  }, [open, loaded]);
 
   const handleCopy = async (textToCopy: string) => {
     try {
@@ -177,9 +186,10 @@ const Share = ({
             {users.map((user) => (
               <button
                 key={user._id.toString()}
-                className="rounded-full overflow-clip"
+                className="rounded-full overflow-clip tooltip tooltip-bottom"
                 onClick={() => handleShare(user)}
                 disabled={loading}
+                data-tip={`@${user.username}`}
               >
                 <img
                   src={user.avatarUrl}
