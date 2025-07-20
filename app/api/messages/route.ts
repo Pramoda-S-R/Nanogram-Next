@@ -45,6 +45,9 @@ export const GET = withAuth(async (req: NextRequest) => {
     if (limit > 0) {
       cursor.limit(limit);
     }
+    if (skip > 0) {
+      cursor.skip(skip);
+    }
 
     const messages = await cursor.toArray();
 

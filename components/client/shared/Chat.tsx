@@ -26,6 +26,7 @@ import Link from "next/link";
 import { EmojiPickerPopover, ReactionSelector } from "./ui/EmojiSelector";
 import { EmojiClickData } from "emoji-picker-react";
 import { toast } from "sonner";
+import { useInView } from "react-intersection-observer";
 
 const MessageActions = ({
   currentUser,
@@ -100,7 +101,12 @@ const Chat = ({
   const [ablyClient, setAblyClient] = useState<Realtime | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const { ref, inView } = useInView();
   const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(0);
+  const [hasNextPage, setHasNextPage] = useState(false);
   const [chatHistory, setChatHistory] = useState<Message[]>([]);
 
   const scrollToBottom = () => {
@@ -153,6 +159,7 @@ const Chat = ({
       console.log("Received message:", message.name);
       if (message.name === "new-message") {
         setChatHistory((prev) => [...prev, message.data as Message]);
+
         if ((message.data as Message).receiver._id === currentUser._id)
           markAsSeen({
             senderId: contact._id.toString(),
@@ -209,26 +216,61 @@ const Chat = ({
   }, [ablyClient, channelName]);
 
   useEffect(() => {
-    async function getMessagesFromDB() {
+    const fecthPosts = async () => {
+      setLoading(true);
+      const limit = 6;
+
+      const container = scrollContainerRef.current;
+      const prevScrollHeight = container?.scrollHeight || 0;
+
       const msgs = await getMessages({
         senderId: currentUser._id.toString(),
         receiverId: contact._id.toString(),
+        limit,
+        skip: page * limit,
       });
+
       if (msgs) {
-        // sort messages by createdAt
         msgs.sort(
           (a, b) =>
             new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
         );
-        setChatHistory(msgs);
+
+        setChatHistory((prev) => {
+          const newMsgIds = new Set(prev.map((p) => p._id));
+          const filtered = msgs.filter((p) => !newMsgIds.has(p._id));
+          return [...filtered, ...prev];
+        });
+
+        scrollToBottom();
+
+        // After messages update and DOM re-renders
+        setTimeout(() => {
+          if (container) {
+            const newScrollHeight = container.scrollHeight;
+            const scrollOffset = newScrollHeight - prevScrollHeight;
+            container.scrollTop += scrollOffset;
+          }
+        }, 0); // Let the DOM update first
+
         handleSeeMessages(msgs);
       }
-    }
-    getMessagesFromDB();
-  }, [contact]);
+
+      setHasNextPage(msgs.length >= limit);
+      setLoading(false);
+    };
+
+    fecthPosts();
+  }, [page]);
 
   useEffect(() => {
-    scrollToBottom();
+    if (inView && hasNextPage && !loading) {
+      setPage((prev) => prev + 1);
+    }
+  }, [inView, hasNextPage, loading]);
+
+  useEffect(() => {
+    if (!inView) scrollToBottom();
   }, [chatHistory]);
 
   async function handleSendMessage(content: string) {
@@ -367,7 +409,13 @@ const Chat = ({
         </div>
       </div>
       <div className="divider my-0"></div>
-      <div className="flex-1 overflow-y-auto p-2">
+      <div ref={scrollContainerRef} className="flex-1 overflow-y-auto p-2">
+        {hasNextPage && loading && (
+          <div className="flex justify-center items-center h-10">
+            <span className="loading loading-spinner"></span>
+          </div>
+        )}
+        <div ref={ref} />
         {chatHistory.map((msg, idx) => (
           <div
             className={`chat group ${

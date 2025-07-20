@@ -781,13 +781,19 @@ export async function getAblyToken(clientId: string): Promise<any> {
 export async function getMessages({
   senderId,
   receiverId,
+  limit,
+  skip,
 }: {
   senderId: string;
   receiverId: string;
+  limit?: number;
+  skip?: number;
 }): Promise<Message[]> {
   try {
     const response = await fetch(
-      `${BASE_URL}/api/messages?senderId=${senderId}&receiverId=${receiverId}`,
+      `${BASE_URL}/api/messages?senderId=${senderId}&receiverId=${receiverId}${
+        skip ? `&skip=${skip}` : ""
+      }${limit ? `&limit=${limit}` : ""}`,
       {
         method: "GET",
         headers: {
