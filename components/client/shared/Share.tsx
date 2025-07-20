@@ -11,9 +11,18 @@ import {
   DialogTrigger,
 } from "./ui/Dialog";
 import { Check, Link, ShareIcon } from "lucide-react";
-import { AggregatePost, Messager, Post, SharedPost, User } from "@/types";
+import { AggregatePost, Messager, SharedPost, User } from "@/types";
 import { getUserByUsername, sendMessage } from "@/app/actions/api";
 import { toast } from "sonner";
+import {
+  Facebook,
+  Linkedin,
+  Mail,
+  Telegram,
+  Twitter,
+  Whatsapp,
+} from "@/components/server/shared/ui/icons/brands";
+import SearchUsers from "./SearchUsers";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
 
@@ -28,6 +37,39 @@ const Share = ({
   const [users, setUsers] = useState<User[]>([]);
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+
+  const socials = [
+    {
+      name: "WhatsApp",
+      icon: <Whatsapp strokeWidth={1.5} />,
+      url: `https://wa.me/?text=Check%20this%20post%20out:%20${BASE_URL}/posts/${post._id.toString()}`,
+    },
+    {
+      name: "Facebook",
+      icon: <Facebook strokeWidth={1.5} />,
+      url: `https://www.facebook.com/sharer/sharer.php?u=${BASE_URL}/posts/${post._id.toString()}`,
+    },
+    {
+      name: "Twitter",
+      icon: <Twitter strokeWidth={1.5} />,
+      url: `https://twitter.com/intent/tweet?text=Check%20this%20post%20out:%20&url=${BASE_URL}/posts/${post._id.toString()}`,
+    },
+    {
+      name: "LinkedIn",
+      icon: <Linkedin strokeWidth={1.5} />,
+      url: `https://www.linkedin.com/sharing/share-offsite/?url=${BASE_URL}/posts/${post._id.toString()}`,
+    },
+    {
+      name: "Telegram",
+      icon: <Telegram strokeWidth={1.5} />,
+      url: `https://t.me/share/url?url=${BASE_URL}/posts/${post._id.toString()}&text=Check%20this%20post%20out!`,
+    },
+    {
+      name: "Email",
+      icon: <Mail strokeWidth={1.5} />,
+      url: `mailto:?subject=Check%20out%20this%20post&body=${BASE_URL}/posts/${post._id.toString()}`,
+    },
+  ];
 
   useEffect(() => {
     async function getContacts() {
@@ -118,29 +160,50 @@ const Share = ({
           >
             {copied ? <Check strokeWidth={1.5} /> : <Link strokeWidth={1.5} />}
           </button>
-        </div>
-        <div className="flex flex-wrap gap-2 mt-4">
-          {users.map((user) => (
-            <button
-              key={user._id.toString()}
-              className="rounded-full overflow-clip"
-              onClick={() => handleShare(user)}
-              disabled={loading}
+          {socials.map((social) => (
+            <a
+              key={social.name}
+              href={social.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn btn-circle"
             >
-              {loading ? (
-                <span className="loading loading-spinner loading-sm"></span>
-              ) : (
+              {social.icon}
+            </a>
+          ))}
+        </div>
+        <div className="flex flex-col gap-2">
+          <div className="flex flex-wrap gap-2 mb-2">
+            {users.map((user) => (
+              <button
+                key={user._id.toString()}
+                className="rounded-full overflow-clip"
+                onClick={() => handleShare(user)}
+                disabled={loading}
+              >
                 <img
                   src={user.avatarUrl}
                   alt={user.username}
                   className="size-10"
                 />
-              )}
-            </button>
-          ))}
+              </button>
+            ))}
+          </div>
+          <SearchUsers
+            currentuser={currentUser}
+            showTitle={false}
+            variant="small"
+            onClickCallback={handleShare}
+          />
         </div>
         <DialogFooter>
-          <DialogClose className="btn btn-error">Cancel</DialogClose>
+          <DialogClose className="btn btn-error">
+            {loading ? (
+              <span className="loading loading-spinner"></span>
+            ) : (
+              "Cancel"
+            )}
+          </DialogClose>
         </DialogFooter>
       </DialogContent>
     </Dialog>

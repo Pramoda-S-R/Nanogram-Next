@@ -7,7 +7,17 @@ import FollowButton from "./FollowButton";
 import useDebounce from "@/hooks/useDebounce";
 import { searchUsers } from "@/app/actions/api";
 
-const SearchUsers = ({ currentuser }: { currentuser: User }) => {
+const SearchUsers = ({
+  currentuser,
+  showTitle = true,
+  variant = "default",
+  onClickCallback,
+}: {
+  currentuser: User;
+  showTitle?: boolean;
+  variant?: "default" | "small";
+  onClickCallback?: (user: User) => void;
+}) => {
   const [searchValue, setSearchValue] = useState("");
   const debouncedValue = useDebounce(searchValue, 50);
   const [shouldShowSearchResults, setShouldShowSearchResults] = useState(false);
@@ -58,7 +68,7 @@ const SearchUsers = ({ currentuser }: { currentuser: User }) => {
   return (
     <>
       <div className="flex flex-col gap-4 mb-8">
-        <h2 className="text-2xl w-full">Search Users</h2>
+        {showTitle && <h2 className="text-2xl w-full">Search Users</h2>}
         <label
           htmlFor="search users"
           className="w-96 input focus:outline-none focus-within:outline-none"
@@ -75,40 +85,53 @@ const SearchUsers = ({ currentuser }: { currentuser: User }) => {
         </label>
       </div>
       {shouldShowSearchResults && (
-        <ul className="bg-base-200 flex flex-col py-8 px-4 mb-8 w-full">
+        <ul className={variant === "default" ? "bg-base-200 flex flex-col py-8 px-4 mb-8 w-full" : "flex flex-wrap gap-2"}>
           {searchedUsers?.map((creator, idx) => (
             <div key={idx}>
-              <li className="flex justify-between w-full">
-                <Link
-                  href={`/profile/@${creator.username}`}
-                  className="flex item-center gap-4"
-                >
-                  <figure className="flex items-center justify-center">
-                    <img
-                      src={creator.avatarUrl || "/assets/icons/user.svg"}
-                      alt={creator.username || "creator"}
-                      className="size-10 rounded-full"
-                      loading="lazy"
-                    />
-                  </figure>
-                  <div className="flex justify-start flex-col gap-1">
-                    <p className="text-left line-clamp-1">
-                      {creator.firstName} {creator.lastName}
-                    </p>
-                    <p className="text-left line-clamp-1">
-                      @{creator.username}
-                    </p>
+              {variant === "default" ? (
+                <li className="flex justify-between w-full">
+                  <Link
+                    href={`/community/@${creator.username}`}
+                    className="flex item-center gap-4"
+                  >
+                    <figure className="flex items-center justify-center">
+                      <img
+                        src={creator.avatarUrl || "/assets/icons/user.svg"}
+                        alt={creator.username || "creator"}
+                        className="size-10 rounded-full"
+                        loading="lazy"
+                      />
+                    </figure>
+                    <div className="flex justify-start flex-col gap-1">
+                      <p className="text-left line-clamp-1">
+                        {creator.firstName} {creator.lastName}
+                      </p>
+                      <p className="text-left line-clamp-1">
+                        @{creator.username}
+                      </p>
+                    </div>
+                  </Link>
+                  <div
+                    className={`${
+                      creator._id === currentuser._id ? "hidden" : ""
+                    } flex justify-end items-center`}
+                  >
+                    <FollowButton follower={currentuser} followed={creator} />
                   </div>
-                </Link>
-                <div
-                  className={`${
-                    creator._id === currentuser._id ? "hidden" : ""
-                  } flex justify-end items-center`}
+                </li>
+              ) : (
+                <button
+                  className="rounded-full overflow-clip"
+                  onClick={() => onClickCallback && onClickCallback(creator)}
                 >
-                  <FollowButton follower={currentuser} followed={creator} />
-                </div>
-              </li>
-              {idx !== searchedUsers.length - 1 && (
+                  <img
+                    src={creator.avatarUrl}
+                    alt={creator.username}
+                    className="size-10"
+                  />
+                </button>
+              )}
+              {idx !== searchedUsers.length - 1 && variant === "default" && (
                 <div className="divider"></div>
               )}
             </div>

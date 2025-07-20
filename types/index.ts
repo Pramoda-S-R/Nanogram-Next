@@ -128,7 +128,6 @@ export interface User {
   followers?: ObjectId[];
   comments?: ObjectId[];
   likedComments?: ObjectId[];
-  contacts?: ObjectId[];
   createdAt: Date;
   updatedAt: Date;
 }

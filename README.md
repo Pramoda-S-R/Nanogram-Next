@@ -36,13 +36,14 @@
 - [ ] link api when user details are updated. T_T
 - [x] start work on the community group
 - [x] community ui
-- [ ] cleanup community UI
+- [x] cleanup community UI
 - [x] hook up ably to the backend
+- [ ] fix report button (airtable)
 - [ ] figure out query schema
 - [ ] set up ably listner for notifications
 - [ ] add safety checks to message query
 - [x] find a vector db
-- [ ] add like share comment save feature
+- [x] add like share comment save feature
 - [ ] add karma feature
 - [ ] add bio section in manage account
 - [x] add intersection observer to comments and make it infini scroll

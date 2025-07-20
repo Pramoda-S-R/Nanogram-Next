@@ -1,7 +1,6 @@
 import React from "react";
 import { CakeSlice, Coins, FilePenLine } from "lucide-react";
 import { formatDate, objectIdsToStrings } from "@/utils";
-import FollowButton from "@/components/client/shared/FollowButton";
 import { currentUser } from "@clerk/nextjs/server";
 import {
   getCurrentUser,
@@ -13,6 +12,7 @@ import {
   FollowersDialog,
   FollowingDialog,
 } from "@/components/client/shared/Follows";
+import FollowButtonWrapper from "@/components/client/shared/FollowButtonWrapper";
 
 const Profile = async ({
   params,
@@ -102,7 +102,7 @@ const Profile = async ({
           </div>
           {currentuser?._id !== user?._id && (
             <div className="flex ml-auto gap-2 py-2">
-              <FollowButton follower={currentuser} followed={user} />
+              <FollowButtonWrapper follower={currentuser} followed={user} />
               <button
                 className={"btn"}
                 // onClick={() => navigate(`/messages/${user?.$id}`)}

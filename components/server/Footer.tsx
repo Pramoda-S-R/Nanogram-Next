@@ -1,6 +1,6 @@
 import React from "react";
-import { Linkedin, Mail, Instagram, Github } from "lucide-react";
 import Link from "next/link";
+import { Github, Instagram, Linkedin, Mail } from "./shared/ui/icons/brands";
 
 const FooterLink = ({
   to,

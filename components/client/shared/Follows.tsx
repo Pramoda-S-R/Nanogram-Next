@@ -94,7 +94,7 @@ export const Followers = async ({
             className="flex justify-between items-center pb-2"
           >
             <div className="flex gap-2">
-              <Link href={`/profile/@${follower.username}`}>
+              <Link href={`/community/@${follower.username}`}>
                 <img
                   src={follower.avatarUrl || "/assets/icons/user.svg"}
                   alt="user"
@@ -140,7 +140,7 @@ export const Following = async ({
             className="flex justify-between items-center pb-2"
           >
             <div className="flex gap-2">
-              <Link href={`/profile/@${following.username}`}>
+              <Link href={`/community/@${following.username}`}>
                 <img
                   src={following.avatarUrl || "/assets/icons/user.svg"}
                   alt="user"
