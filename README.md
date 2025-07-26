@@ -38,7 +38,7 @@
 - [x] community ui
 - [x] cleanup community UI
 - [x] hook up ably to the backend
-- [ ] fix report button (airtable)
+- [x] fix report button (airtable)
 - [ ] figure out query schema
 - [ ] set up ably listner for notifications
 - [ ] add safety checks to message query

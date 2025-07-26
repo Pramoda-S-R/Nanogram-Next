@@ -1213,7 +1213,7 @@ function UpdateUserDialog({ user }: { user: UserResource }) {
           file: data.file,
         });
         if (!uploadResult) {
-          console.error("Failed to upload profile image:", uploadResult);
+          console.error("Failed to upload profile image:");
           return;
         }
         console.log("Profile image uploaded successfully");

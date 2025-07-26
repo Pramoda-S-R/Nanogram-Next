@@ -1,48 +1,38 @@
-import { withAuth } from "@/lib/apiauth";
-import clientPromise from "@/lib/mongodb";
-import { ObjectId } from "mongodb";
 import { NextRequest, NextResponse } from "next/server";
+import Airtable from "airtable";
+import { withAuth } from "@/lib/apiauth";
 
-const database: string | undefined = process.env.DATABASE;
+const apiKey = process.env.AIRTABLE_API_KEY;
+const baseId = process.env.NANOGRAM_BASE_ID as string;
 
-export const GET = withAuth(
-  async (req: NextRequest) => {
-    try {
-      const { searchParams } = new URL(req.url);
-      const reportIds = searchParams.getAll("id");
-      const media = searchParams.get("media");
-      const sort = searchParams.get("sort") || "createdAt";
-      const order = parseInt(searchParams.get("order") || "-1") || -1;
-      const limit = parseInt(searchParams.get("limit") || "10");
-      const query: any = {};
-      if (reportIds.length > 0) {
-        query._id = { $in: reportIds.map((id) => new ObjectId(id)) };
-      }
-      if (media) {
-        query.reportedMedia = media.toLowerCase();
-      }
+const base = new Airtable({ apiKey: apiKey }).base(baseId);
+const tableName = "Reports";
 
-      const client = await clientPromise;
-      const reports = client.db(database).collection("reports");
-      let cursor = reports.find(query);
-      if (sort) {
-        cursor = cursor.sort({ [sort]: order } as Record<string, 1 | -1>);
-      }
-      if (limit > 0) {
-        cursor = cursor.limit(limit);
-      }
-      const allReports = await cursor.toArray();
+export const GET = withAuth(async (req: NextRequest) => {
+  try {
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get("id");
 
-      return NextResponse.json(allReports, { status: 200 });
-    } catch (error) {
-      return NextResponse.json(
-        { error: "An error occurred while fetching reports." },
-        { status: 500 }
-      );
+    if (id) {
+      const record = await base(tableName).find(id);
+      return NextResponse.json(record);
     }
-  },
-  { adminOnly: true }
-);
+
+    const records = await base(tableName)
+      .select({ pageSize: 10, sort: [{ field: "createdTime", direction: "desc" }] })
+      .all();
+
+    const formatted = records.map((record) => ({
+      id: record.id,
+      fields: record.fields,
+    }));
+
+    return NextResponse.json(formatted);
+  } catch (error: any) {
+    console.error(error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}, { adminOnly: true });
 
 export const POST = withAuth(
   async (req: NextRequest) => {
@@ -69,105 +59,25 @@ export const POST = withAuth(
         );
       }
 
-      let reporter: ObjectId;
-      let reportedUser: ObjectId;
-      let mediaId: ObjectId;
-
-      try {
-        reporter = new ObjectId(reporterId.toString());
-        reportedUser = new ObjectId(reportedUserId.toString());
-        mediaId = new ObjectId(mediaIdstr.toString());
-      } catch (error) {
-        return NextResponse.json(
-          { error: "Invalid ObjectId format." },
-          { status: 400 }
-        );
-      }
-
-      const report = {
-        reporter,
-        reportedUser,
-        reportedMedia: reportedMedia.toLowerCase(),
-        mediaId,
-        reason,
-        details,
-        status,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-
-      const client = await clientPromise;
-      const reports = client.db(database).collection("reports");
-      const result = await reports.insertOne(report);
-
-      if (!result.acknowledged) {
-        return NextResponse.json(
-          { error: "Failed to create report." },
-          { status: 500 }
-        );
-      }
-      return NextResponse.json(
+      const created = await base("Reports").create([
         {
-          message: "Report created successfully.",
-          reportId: result.insertedId,
-        },
-        { status: 201 }
-      );
-    } catch (error) {
-      return NextResponse.json(
-        { error: "An error occurred while processing your request." },
-        { status: 500 }
-      );
-    }
-  },
-  {
-    adminOnly: true,
-  }
-);
-
-export const PUT = withAuth(
-  async (req: NextRequest) => {
-    try {
-      const formData = await req.formData();
-      const id = formData.get("id") as string;
-      const status = formData.get("status") as string;
-
-      if (!id || !status) {
-        return NextResponse.json(
-          { error: "ID and status are required." },
-          { status: 400 }
-        );
-      }
-
-      const client = await clientPromise;
-      const reports = client.db(database).collection("reports");
-      const result = await reports.updateOne(
-        { _id: new ObjectId(id) },
-        {
-          $set: {
-            status,
-            updatedAt: new Date(),
+          fields: {
+            ReporterId: reporterId as string,
+            ReportedUserId: reportedUserId as string,
+            ReportedMedia: reportedMedia as string,
+            MediaId: mediaIdstr as string,
+            Reason: reason as string,
+            Details: details as string,
+            Status: status,
           },
-        }
-      );
-
-      if (result.modifiedCount === 0) {
-        return NextResponse.json(
-          { error: "Report not found or no changes made." },
-          { status: 404 }
-        );
-      }
-
-      return NextResponse.json(
-        { message: "Report updated successfully." },
-        { status: 200 }
-      );
-    } catch (error) {
-      return NextResponse.json(
-        {
-          error: "An error occurred while updating the report.",
-          message: (error as Error).message || "Unknown error",
         },
+      ]);
+
+      return NextResponse.json({ success: true, data: created });
+    } catch (error: any) {
+      console.error(error);
+      return NextResponse.json(
+        { success: false, error: error.message },
         { status: 500 }
       );
     }
@@ -175,37 +85,50 @@ export const PUT = withAuth(
   { adminOnly: true }
 );
 
-export const DELETE = withAuth(
-  async (req: NextRequest) => {
-    try {
-      const formData = await req.formData();
-      const id = formData.get("id") as string;
 
-      if (!id) {
-        return NextResponse.json({ error: "ID is required." }, { status: 400 });
-      }
+export const PUT = withAuth(async (req: NextRequest) => {
+  try {
+    const formData = await req.formData();
+    const id = formData.get("id") as string;
+    const status = formData.get("status") as string;
 
-      const client = await clientPromise;
-      const reports = client.db(database).collection("reports");
-      const result = await reports.deleteOne({ _id: new ObjectId(id) });
-
-      if (result.deletedCount === 0) {
-        return NextResponse.json(
-          { error: "Report not found." },
-          { status: 404 }
-        );
-      }
-
+    if (!id || !status) {
       return NextResponse.json(
-        { message: "Report deleted successfully." },
-        { status: 200 }
-      );
-    } catch (error) {
-      return NextResponse.json(
-        { error: "An error occurred while deleting the report." },
-        { status: 500 }
+        { error: "ID and status are required." },
+        { status: 400 }
       );
     }
-  },
-  { adminOnly: true }
-);
+
+    const updated = await base(tableName).update([
+      {
+        id,
+        fields: {
+          Status: status,
+        },
+      },
+    ]);
+
+    return NextResponse.json({ message: "Report updated", data: updated });
+  } catch (error: any) {
+    console.error(error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}, { adminOnly: true });
+
+export const DELETE = withAuth(async (req: NextRequest) => {
+  try {
+    const formData = await req.formData();
+    const id = formData.get("id") as string;
+
+    if (!id) {
+      return NextResponse.json({ error: "ID is required." }, { status: 400 });
+    }
+
+    const deleted = await base(tableName).destroy([id]);
+
+    return NextResponse.json({ message: "Report deleted", data: deleted });
+  } catch (error: any) {
+    console.error(error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}, { adminOnly: true });

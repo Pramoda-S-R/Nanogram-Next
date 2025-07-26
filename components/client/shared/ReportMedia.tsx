@@ -23,13 +23,14 @@ interface ReportMediaProps {
   media: "Post" | "Comment" | "Blog" | "Message";
   mediaId: string | ObjectId;
   userId: string | ObjectId;
-  currentUser: User;
+  currentUser?: User;
   closeCallback?: () => void;
 }
 
 const ReportMediaSchema = z.object({
   reason: z.string().min(1, "Reason is required"),
   details: z.string().optional(),
+  anonymous: z.boolean().optional(),
 });
 
 type ReportMediaSchemaType = z.infer<typeof ReportMediaSchema>;
@@ -58,8 +59,9 @@ const ReportMedia = ({
   async function onSubmit(data: ReportMediaSchemaType) {
     setLoading(true);
     try {
+      const isAnonymous = data.anonymous || !currentUser;
       const report = {
-        reporter: currentUser._id.toString(),
+        reporter: isAnonymous ? "Anonymous" : currentUser?.userId.toString(),
         reportedUser: userId.toString(),
         reportedMedia: media.toLowerCase(),
         mediaId: mediaId.toString(),
@@ -94,20 +96,16 @@ const ReportMedia = ({
     }
   }
 
-  if (!currentUser) {
-    return (
-      <div className="w-full flex justify-center">
-        <span className="loading loading-spinner"></span>
-      </div>
-    );
-  }
-
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
-        className={media === "Post" || media === "Message"  ? "btn btn-error justify-start" : ""}
+        className={
+          media === "Post" || media === "Message"
+            ? "btn btn-error justify-start"
+            : ""
+        }
       >
-        {media === "Post" || media === "Message" && (
+        {(media === "Post" || media === "Message") && (
           <>
             <TriangleAlert strokeWidth={1.5} />
             Report {media}
@@ -124,10 +122,7 @@ const ReportMedia = ({
         )}
         {media === "Blog" && (
           <>
-            <TriangleAlert
-              strokeWidth={1.5}
-              className="text-error"
-            />
+            <TriangleAlert strokeWidth={1.5} className="text-error" />
           </>
         )}
       </DialogTrigger>
@@ -172,6 +167,19 @@ const ReportMedia = ({
               </p>
             )}
           </fieldset>
+          <label className="label">
+            <input
+              type="checkbox"
+              defaultChecked={!currentUser}
+              className="checkbox"
+              disabled={!currentUser}
+              {...register("anonymous")}
+            />
+            Report Anonymously
+          </label>
+          {errors.details && (
+            <p className="text-error text-sm mt-1">{errors.details.message}</p>
+          )}
           <DialogFooter>
             <button
               type="button"

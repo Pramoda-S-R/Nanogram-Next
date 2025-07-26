@@ -1398,31 +1398,6 @@ export async function getNewsletterByRoute(
 // ====================
 // Report Functions
 // ====================
-// Get anonymous user
-export async function getAnonymousUser(): Promise<User | null> {
-  try {
-    const response = await fetch(
-      `${BASE_URL}/api/user?id=${ANONYMOUS_USER_ID}`,
-      {
-        method: "GET",
-        headers: {
-          "x-api-key": apiKey || "",
-        },
-        next: {
-          revalidate: 60, // 1 minute
-        },
-      }
-    );
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    const data = await response.json();
-    return data.documents.length > 0 ? data.documents[0] : null;
-  } catch (error) {
-    console.error("Error fetching anonymous user:", error);
-    return null;
-  }
-}
 // Report media function
 export async function reportMedia({
   reporter,
