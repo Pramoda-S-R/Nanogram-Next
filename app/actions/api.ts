@@ -1088,16 +1088,19 @@ export async function getAluminiMembers(): Promise<Nanogram[]> {
 // Get all nanograms
 export async function getAllNanograms(): Promise<Nanogram[]> {
   try {
-    const response = await fetch(`${BASE_URL}/api/nanogram`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": apiKey || "",
-      },
-      next: {
-        revalidate: 60, // 1 minute
-      },
-    });
+    const response = await fetch(
+      `${BASE_URL}/api/nanogram?sort=priority&order=1`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": apiKey || "",
+        },
+        next: {
+          revalidate: 60, // 1 minute
+        },
+      }
+    );
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -1108,6 +1111,166 @@ export async function getAllNanograms(): Promise<Nanogram[]> {
   } catch (error) {
     console.error("Error fetching all nanograms:", error);
     return [];
+  }
+}
+// Create a new nanogram
+export async function createNanogram({
+  name,
+  role,
+  content,
+  avatar,
+  linkedin,
+  github,
+  instagram,
+  alumini,
+  core,
+  priority,
+}: {
+  name: string;
+  role: string;
+  content?: string;
+  avatar?: File;
+  linkedin?: string;
+  github?: string;
+  instagram?: string;
+  alumini?: boolean;
+  core?: boolean;
+  priority?: number;
+}): Promise<ObjectId | boolean> {
+  try {
+    const formData = new FormData();
+    formData.append("name", name);
+    formData.append("role", role);
+    if (content) {
+      formData.append("content", content);
+    }
+    if (avatar) {
+      formData.append("avatar", avatar);
+    }
+    if (linkedin) {
+      formData.append("linkedin", linkedin);
+    }
+    if (github) {
+      formData.append("github", github);
+    }
+    if (instagram) {
+      formData.append("instagram", instagram);
+    }
+    if (alumini) {
+      formData.append("alumini", String(alumini));
+    }
+    if (core) {
+      formData.append("core", String(core));
+    }
+    if (priority) {
+      formData.append("priority", String(priority));
+    }
+
+    const response = await fetch(`${BASE_URL}/api/nanogram`, {
+      method: "POST",
+      headers: {
+        "x-api-key": apiKey || "",
+      },
+      body: formData,
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+    return data.id as ObjectId;
+  } catch (error) {
+    console.error("Error creating nanogram:", error);
+    return false;
+  }
+}
+// Update an existing nanogram
+export async function updateNanogram({
+  id,
+  name,
+  role,
+  content,
+  avatar,
+  linkedin,
+  github,
+  instagram,
+  alumini,
+  core,
+  priority,
+}: {
+  id: string;
+  name: string;
+  role: string;
+  content?: string;
+  avatar?: File;
+  linkedin?: string;
+  github?: string;
+  instagram?: string;
+  alumini?: boolean;
+  core?: boolean;
+  priority?: number;
+}): Promise<boolean> {
+  try {
+    const formData = new FormData();
+    formData.append("id", id);
+    formData.append("name", name);
+    formData.append("role", role);
+    if (content) {
+      formData.append("content", content);
+    }
+    if (avatar) {
+      formData.append("avatar", avatar);
+    }
+    if (linkedin) {
+      formData.append("linkedin", linkedin);
+    }
+    if (github) {
+      formData.append("github", github);
+    }
+    if (instagram) {
+      formData.append("instagram", instagram);
+    }
+    if (alumini) {
+      formData.append("alumini", String(alumini));
+    }
+    if (core) {
+      formData.append("core", String(core));
+    }
+    if (priority) {
+      formData.append("priority", String(priority));
+    }
+    const response = await fetch(`${BASE_URL}/api/nanogram`, {
+      method: "PUT",
+      headers: {
+        "x-api-key": apiKey || "",
+      },
+      body: formData,
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return true;
+  } catch (error) {
+    console.error("Error updating nanogram:", error);
+    return false;
+  }
+}
+// Delete a nanogram by ID
+export async function deleteNanogramById(nanogramId: string): Promise<boolean> {
+  try {
+    const response = await fetch(`${BASE_URL}/api/nanogram?id=${nanogramId}`, {
+      method: "DELETE",
+      headers: {
+        "x-api-key": apiKey || "",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return true;
+  } catch (error) {
+    console.error("Error deleting nanogram:", error);
+    return false;
   }
 }
 

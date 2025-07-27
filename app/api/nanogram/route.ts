@@ -1,5 +1,7 @@
 import { withAuth } from "@/lib/apiauth";
+import cloudinary from "@/lib/cloudinary";
 import clientPromise from "@/lib/mongodb";
+import { Nanogram } from "@/types";
 import { ObjectId } from "mongodb";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -53,88 +55,223 @@ export const GET = withAuth(async (req: NextRequest) => {
   }
 });
 
-export const POST = withAuth(async (req: NextRequest) => {
-  try {
-    const client = await clientPromise;
-    const collection = client.db(database).collection("nanogram");
+export const POST = withAuth(
+  async (req: NextRequest) => {
+    try {
+      const formData = await req.formData();
+      const name = formData.get("name")?.toString();
+      const role = formData.get("role")?.toString();
+      const content = formData.get("content")?.toString();
+      const avatar = formData.get("avatar") as File;
+      const linkedin = formData.get("linkedin")?.toString();
+      const github = formData.get("github")?.toString();
+      const instagram = formData.get("instagram")?.toString();
+      const alumini = formData.get("alumini") === "true";
+      const core = formData.get("core") === "true";
+      const priority = parseInt(formData.get("priority")?.toString() || "0");
 
-    const data = await req.json();
-    const result = await collection.insertOne(data);
+      if (!name || !role) {
+        return NextResponse.json(
+          { error: "Name and role are required" },
+          { status: 400 }
+        );
+      }
 
-    return NextResponse.json(
-      { success: true, id: result.insertedId },
-      { status: 201 }
-    );
-  } catch (error) {
-    console.error("Error connecting to MongoDB:", error);
-    return NextResponse.json(
-      { error: "Failed to connect to database" },
-      { status: 500 }
-    );
-  }
-},
-  { adminOnly: true });
+      let avatarUrl: string | undefined;
+      let avatarId: string | undefined;
 
-export const PUT = withAuth(async (req: NextRequest) => {
-  const { searchParams } = new URL(req.url);
-  const id = searchParams.get("id");
-  if (!id) {
-    return NextResponse.json({ error: "ID is required" }, { status: 400 });
-  }
-  try {
-    const client = await clientPromise;
-    const collection = client.db(database).collection("nanogram");
+      if (avatar && avatar instanceof File) {
+        const imageBuffer = Buffer.from(await avatar.arrayBuffer());
 
-    const data = await req.json();
-    const result = await collection.updateOne(
-      { _id: new ObjectId(id) },
-      { $set: data }
-    );
-    if (result.matchedCount === 0) {
+        const uploadResult: any = await new Promise((resolve, reject) => {
+          const stream = cloudinary.uploader.upload_stream(
+            { folder: "nanogram/members" },
+            (error, result) => {
+              if (error) return reject(error);
+              resolve(result);
+            }
+          );
+          stream.end(imageBuffer);
+        });
+
+        const rawUrl = uploadResult.secure_url;
+        avatarUrl = rawUrl.replace("/upload/", "/upload/q_auto,f_auto/");
+        avatarId = uploadResult.public_id;
+      }
+
+      const client = await clientPromise;
+      const collection = client.db(database).collection("nanogram");
+
+      const data: any = {
+        name,
+        role,
+        content,
+        avatarId,
+        avatarUrl,
+        linkedin,
+        github,
+        instagram,
+        alumini,
+        core,
+        priority,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      const result = await collection.insertOne(data);
+
       return NextResponse.json(
-        { error: "Document not found" },
-        { status: 404 }
+        { success: true, id: result.insertedId },
+        { status: 201 }
+      );
+    } catch (error) {
+      console.error("Error connecting to MongoDB:", error);
+      return NextResponse.json(
+        { error: "Failed to connect to database" },
+        { status: 500 }
       );
     }
-    return NextResponse.json({ success: true }, { status: 200 });
-  } catch (error) {
-    console.error("Error connecting to MongoDB:", error);
-    return NextResponse.json(
-      { error: "Failed to connect to database" },
-      { status: 500 }
-    );
-  }
-},
-  { adminOnly: true });
+  },
+  { adminOnly: true }
+);
 
-export const DELETE = withAuth(async (req: NextRequest) => {
-  const { searchParams } = new URL(req.url);
-  const id = searchParams.get("id");
+export const PUT = withAuth(
+  async (req: NextRequest) => {
+    try {
+      const formData = await req.formData();
+      const id = formData.get("id")?.toString();
 
-  if (!id) {
-    return NextResponse.json({ error: "ID is required" }, { status: 400 });
-  }
+      if (!id) {
+        return NextResponse.json({ error: "ID is required" }, { status: 400 });
+      }
 
-  try {
-    const client = await clientPromise;
-    const collection = client.db(database).collection("nanogram");
+      const client = await clientPromise;
+      const nanogram = await client
+        .db(database)
+        .collection<Nanogram>("nanogram")
+        .findOne({ _id: new ObjectId(id) });
+      if (!nanogram) {
+        return NextResponse.json(
+          { error: "Document not found" },
+          { status: 404 }
+        );
+      }
 
-    const result = await collection.deleteOne({ _id: new ObjectId(id) });
+      const name = formData.get("name")?.toString();
+      const role = formData.get("role")?.toString();
+      const content = formData.get("content")?.toString();
+      const avatar = formData.get("avatar") as File;
+      const linkedin = formData.get("linkedin")?.toString();
+      const github = formData.get("github")?.toString();
+      const instagram = formData.get("instagram")?.toString();
+      const alumini = formData.get("alumini") === "true";
+      const core = formData.get("core") === "true";
+      const priority = parseInt(formData.get("priority")?.toString() || "0");
 
-    if (result.deletedCount === 0) {
+      const oldAvatarId = nanogram.avatarId;
+
+      let avatarUrl = undefined;
+      let avatarId = undefined;
+
+      if (avatar && avatar instanceof File) {
+        const avatarBuffer = Buffer.from(await avatar.arrayBuffer());
+
+        // If an avatar is provided, delete the old avatar from Cloudinary
+        if (oldAvatarId) {
+          await cloudinary.uploader.destroy(oldAvatarId);
+        }
+
+        // Upload the avatar to Cloudinary
+        const uploadResult: any = await new Promise((resolve, reject) => {
+          const stream = cloudinary.uploader.upload_stream(
+            { folder: "nanogram/members" },
+            (error, result) => {
+              if (error) return reject(error);
+              resolve(result);
+            }
+          );
+          stream.end(avatarBuffer);
+        });
+
+        const rawUrl = uploadResult.secure_url;
+        avatarUrl = rawUrl.replace("/upload/", "/upload/q_auto,f_auto/");
+        avatarId = uploadResult.public_id;
+      }
+
+      const updateData: any = {
+        name,
+        role,
+        content,
+        linkedin,
+        github,
+        instagram,
+        alumini,
+        core,
+        priority,
+        updatedAt: new Date(),
+      };
+
+      if (avatar) {
+        updateData.avatarId = avatarId;
+        updateData.avatarUrl = avatarUrl;
+      }
+
+      const collection = client.db(database).collection("nanogram");
+
+      const result = await collection.updateOne(
+        { _id: new ObjectId(id) },
+        { $set: updateData }
+      );
+
+      return NextResponse.json({ success: true }, { status: 200 });
+    } catch (error) {
+      console.error("Error connecting to MongoDB:", error);
       return NextResponse.json(
-        { error: "Document not found" },
-        { status: 404 }
+        { error: "Failed to connect to database" },
+        { status: 500 }
       );
     }
+  },
+  { adminOnly: true }
+);
 
-    return NextResponse.json({ success: true }, { status: 200 });
-  } catch (error) {
-    console.error("Error connecting to MongoDB:", error);
-    return NextResponse.json(
-      { error: "Failed to connect to database" },
-      { status: 500 }
-    );
-  }
-},
-  { adminOnly: true });
+export const DELETE = withAuth(
+  async (req: NextRequest) => {
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get("id");
+
+    if (!id) {
+      return NextResponse.json({ error: "ID is required" }, { status: 400 });
+    }
+
+    try {
+      const client = await clientPromise;
+      const collection = client.db(database).collection("nanogram");
+
+      // Find the document to delete
+      const nanogram = await collection.findOne({ _id: new ObjectId(id) });
+      if (!nanogram) {
+        return NextResponse.json(
+          { error: "Document not found" },
+          { status: 404 }
+        );
+      }
+
+      // If the document has an avatar, delete it from Cloudinary
+      if (nanogram.avatarId) {
+        await cloudinary.uploader.destroy(nanogram.avatarId);
+      }
+
+      await collection.deleteOne({ _id: new ObjectId(id) });
+
+      return NextResponse.json({ success: true }, { status: 200 });
+    } catch (error) {
+      console.error("Error connecting to MongoDB:", error);
+      return NextResponse.json(
+        { error: "Failed to connect to database" },
+        { status: 500 }
+      );
+    }
+  },
+  { adminOnly: true }
+);

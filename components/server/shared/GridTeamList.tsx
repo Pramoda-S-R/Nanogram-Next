@@ -1,6 +1,6 @@
 import { Nanogram } from "@/types";
-import { Github, Instagram, Linkedin } from "lucide-react";
 import React from "react";
+import { Github, Instagram, Linkedin } from "./ui/icons/brands";
 
 const GridTeamList = ({ teamMembers }: { teamMembers: Nanogram[] }) => {
   return (
