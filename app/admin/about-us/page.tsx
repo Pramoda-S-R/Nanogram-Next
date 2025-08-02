@@ -15,7 +15,7 @@ import {
   Instagram,
   Linkedin,
 } from "@/components/server/shared/ui/icons/brands";
-import { Award, Check, Type, X } from "lucide-react";
+import { ArrowDown01, Award, Check, Type, X } from "lucide-react";
 import TextareaAutosize from "react-textarea-autosize";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -30,6 +30,17 @@ import {
 import FileUploader from "@/components/client/shared/ui/FileUploader";
 import { toast } from "sonner";
 import { ObjectId } from "mongodb";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/client/shared/ui/AlertDialog";
 
 const NanogramFormSchema = z.object({
   name: z.string().min(2).max(30),
@@ -127,7 +138,8 @@ function NanogramForm({
         const success = await updateNanogram(updatedNanogramData);
         if (success) {
           toast.success("Nanogram member updated successfully!", {
-            description: "Your changes have been saved. Changes may take a few minutes to reflect.",
+            description:
+              "Your changes have been saved. Changes may take a few minutes to reflect.",
           });
           onCallback("update", {
             ...nanogramData,
@@ -344,6 +356,7 @@ function NanogramForm({
                 htmlFor="priority"
                 className="w-full input focus:outline-none focus-within:outline-none"
               >
+                <ArrowDown01 strokeWidth={1.5} />
                 <input
                   type="number"
                   className="grow"
@@ -439,7 +452,7 @@ function PreviewNanogram({ member }: { member: Nanogram }) {
             </div>
           </div>
         </div>
-        {member.content !== "" && (
+        {member.content && member.content !== "" && (
           <>
             <div className="divider"></div>
             <div className="flex flex-col items-center text-center">
@@ -476,16 +489,49 @@ const AdminAboutUs = () => {
     fetchNanograms();
   }, []);
 
-  async function handleDelete(nanogramId: string) {
-    const confirmed = confirm("Are you sure you want to delete this nanogram?");
-    if (confirmed) {
-      const success = await deleteNanogramById(nanogramId);
-      if (success) {
-        setNanograms((prev) =>
-          prev.filter((n) => n._id.toString() !== nanogramId)
-        );
+  function DeleteNanogram({ member }: { member: Nanogram }) {
+    async function handleDelete(nanogramId: string) {
+      try {
+        const success = await deleteNanogramById(nanogramId);
+        if (success) {
+          toast.success("Nanogram deleted successfully");
+          setNanograms((prev) =>
+            prev.filter((n) => n._id.toString() !== nanogramId)
+          );
+        }
+      } catch (error) {
+        toast.error("Error deleting nanogram");
+        console.error("Error deleting nanogram:", error);
       }
     }
+
+    return (
+      <AlertDialog>
+        <AlertDialogTrigger className="btn btn-error">
+          Delete
+        </AlertDialogTrigger>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              You are about to delete this record. This action is permanent and
+              cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="btn btn-soft">
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className="btn btn-error"
+              onClick={() => handleDelete(member._id.toString())}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    );
   }
 
   const handleOnCallback = (
@@ -567,12 +613,7 @@ const AdminAboutUs = () => {
                   />
                 </td>
                 <td>
-                  <button
-                    className="btn btn-error"
-                    onClick={() => handleDelete(member._id.toString())}
-                  >
-                    Delete
-                  </button>
+                  <DeleteNanogram member={member} />
                 </td>
                 <td>{member._id.toString()}</td>
                 <td>{member.name}</td>
@@ -583,7 +624,7 @@ const AdminAboutUs = () => {
                   <img
                     src={member.avatarUrl}
                     alt={member.name}
-                    className="w-36"
+                    className="w-48"
                   />
                 </td>
                 <td>

@@ -1,6 +1,134 @@
 import { ObjectId } from "mongodb";
+import { CSSProperties, HTMLInputTypeAttribute } from "react";
 
 export type Position = [number, number, number];
+
+// ========== VALIDATIONS ==========
+export interface Validation {
+  object: "length" | "regex" | "text" | "number";
+  constraint: string;
+  errorText: string;
+}
+
+export interface LongAnswerValidation extends Validation {
+  object: "text" | "number";
+}
+
+// ========== FORMFIELDS ==========
+export interface FormShortAnswer {
+  type: "short_answer";
+  inputType?: HTMLInputTypeAttribute;
+  validation?: Validation;
+}
+
+export interface FromLongAnswer {
+  type: "long_answer";
+  validation?: LongAnswerValidation;
+}
+
+export interface FormMultipleChoice {
+  type: "multiple_choice";
+  options?: MultipleChoiceOption[];
+  other?: boolean;
+}
+
+export interface FormCheckbox {
+  type: "checkbox";
+  options?: CheckboxOption[];
+}
+
+export interface FormDropdown {
+  type: "dropdown";
+  options?: string[];
+}
+
+export interface FormLinearScale {
+  type: "linear_scale";
+  high?: string;
+  low?: string;
+  start?: number;
+  count?: number;
+}
+
+export interface FormRating {
+  type: "rating";
+  icon?: "star" | "heart" | "like";
+  stroke?: CSSProperties["color"];
+  fill?: CSSProperties["color"];
+  count?: number;
+}
+
+export interface FormMultipleChoiceGrid {
+  type: "multiple_choice_grid";
+  table?: GridBaseObject;
+}
+
+export interface FormCheckboxGrid {
+  type: "checkbox_grid";
+  table?: GridBaseObject;
+}
+
+export interface FormDate {
+  type: "date";
+  includeTime?: boolean;
+}
+
+export interface FormTime {
+  type: "time";
+}
+
+export interface FormFileUpload {
+  type: "file_upload";
+  acceptedFileTypes?: string[];
+  maxFileSize?: number; // in bytes
+}
+
+// ========= FORM TYPES ==========
+export interface MultipleChoiceOption {
+  option: string;
+  other: boolean;
+}
+
+export interface CheckboxOption extends MultipleChoiceOption {}
+
+export interface GridBaseObject {
+  rows: string[];
+  columns: string[];
+}
+
+// ========== FORM ==========
+export interface FormHeader {
+  title: string;
+  description?: string;
+}
+
+export interface FormField {
+  title?: string;
+  description?: string;
+  required?: boolean;
+  imageUrl?: string;
+  config:
+    | FormShortAnswer
+    | FromLongAnswer
+    | FormMultipleChoice
+    | FormCheckbox
+    | FormDropdown
+    | FormLinearScale
+    | FormRating
+    | FormMultipleChoiceGrid
+    | FormCheckboxGrid
+    | FormDate
+    | FormTime
+    | FormFileUpload;
+}
+
+export interface FormObj {
+  id: string;
+  header: FormHeader;
+  fields: FormField[];
+}
+
+// Types for various components and utilities used in the application
 
 export interface Point {
   idx: number;

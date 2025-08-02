@@ -19,7 +19,7 @@ export const GET = withAuth(async (req: NextRequest) => {
     }
 
     const records = await base(tableName)
-      .select({ pageSize: 10, sort: [{ field: "createdTime", direction: "desc" }] })
+      .select({ pageSize: 10, sort: [{ field: "createdAt", direction: "desc" }] })
       .all();
 
     const formatted = records.map((record) => ({
@@ -69,6 +69,8 @@ export const POST = withAuth(
             Reason: reason as string,
             Details: details as string,
             Status: status,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
           },
         },
       ]);

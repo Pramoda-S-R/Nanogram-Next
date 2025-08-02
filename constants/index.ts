@@ -40,3 +40,18 @@ export const reportOptions = [
   "This media violates community guidelines",
   "Other (please specify)",
 ];
+
+export const formTypes = [
+  "short_answer",
+  "long_answer",
+  "multiple_choice",
+  "checkbox",
+  "dropdown",
+  "linear_scale",
+  "rating",
+  "multiple_choice_grid",
+  "checkbox_grid",
+  "date",
+  "time",
+  "file_upload",
+];
