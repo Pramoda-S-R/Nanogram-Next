@@ -4,8 +4,10 @@ import React, { useEffect, useState } from "react";
 
 const ThemeSwitch = () => {
   const [theme, setTheme] = useState("light");
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     const stored = localStorage.getItem("theme") || "light";
     setTheme(stored);
   }, []);
@@ -14,8 +16,10 @@ const ThemeSwitch = () => {
     const nextTheme = theme === "light" ? "dark" : "light";
     setTheme(nextTheme);
     localStorage.setItem("theme", nextTheme);
-    document.documentElement.setAttribute("data-theme", nextTheme); // manually apply it
+    document.documentElement.setAttribute("data-theme", nextTheme);
   };
+
+  if (!mounted) return null; // Prevent mismatch
 
   return (
     <button

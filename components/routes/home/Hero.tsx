@@ -1,14 +1,17 @@
 import ParticleRing from "@/components/client/ParticleRing";
-import Button from "@/components/client/shared/ui/Button";
 import { ArrowRight, Plus } from "lucide-react";
 import { getHeroNanograms } from "@/app/actions/api";
+import { Suspense } from "react";
+import Link from "next/link";
 
 const Hero = async () => {
   const teamMembers = await getHeroNanograms();
   return (
     <section className="mx-auto w-full h-dvh flex flex-col">
       <div className="w-full h-5/6 relative">
-        <ParticleRing />
+        <Suspense fallback={<div className="w-full h-full bg-primary" />}>
+          <ParticleRing />
+        </Suspense>
         <div className="absolute top-0 left-0 max-w-full w-full h-full flex flex-col justify-end pointer-events-none md:p-20 p-4">
           <div className="pointer-events-auto">
             <h1 className="font-extrabold md:text-7xl text-4xl text-primary-content mb-4">
@@ -20,17 +23,17 @@ const Hero = async () => {
               designed for tech enthusiasts.
             </p>
             <div className="w-full flex md:flex-row flex-col gap-5 pointer-events-auto">
-              <Button
+              <Link
                 className={"btn btn-info text-base-content w-fit"}
-                navigateTo="/community"
+                href="/community"
               >
                 Join the Community for Free!
-              </Button>
-              <Button
+              </Link>
+              <Link
                 className={
                   "w-fit btn btn-link no-underline backdrop-blur-lg group flex items-center gap-1 font-semibold leading-6"
                 }
-                navigateTo="/about-us#team"
+                href="/about-us#team"
               >
                 <p className="text-primary-content group-hover:text-secondary">
                   Meet the Team
@@ -38,7 +41,7 @@ const Hero = async () => {
                 <span className="ml-2 pt-1 flex items-center h-4 w-4 transition-transform duration-200 transform group-hover:translate-x-1">
                   <ArrowRight className="text-primary-content group-hover:text-secondary" />
                 </span>
-              </Button>
+              </Link>
             </div>
           </div>
         </div>

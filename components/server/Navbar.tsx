@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import React from "react";
+import React, { Suspense } from "react";
 import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import SignInButton from "../client/SignInButton";
 import NavSheet from "../client/NavSheet";
@@ -38,22 +38,26 @@ const Navbar = () => {
         {/* Logo & Menu */}
         <div className="flex items-center gap-4">
           {/* Dropdown */}
-          <NavSheet navItems={navItems} />
+          <Suspense>
+            <NavSheet navItems={navItems} />
+          </Suspense>
           {/* Logo */}
           <Logo />
         </div>
 
         {/* User Avatar */}
-        <div className="flex gap-2 items-center justify-center">
-          <ThemeSwitch />
-          <SignedOut>
-            <SignInButton />
-          </SignedOut>
-          <SignedIn>
-            <ProfileDrawer />
-            <UserButton />
-          </SignedIn>
-        </div>
+        <Suspense>
+          <div className="flex gap-2 items-center justify-center">
+            <ThemeSwitch />
+            <SignedOut>
+              <SignInButton />
+            </SignedOut>
+            <SignedIn>
+              <ProfileDrawer />
+              <UserButton />
+            </SignedIn>
+          </div>
+        </Suspense>
       </div>
     </header>
   );

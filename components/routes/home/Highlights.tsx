@@ -1,4 +1,5 @@
 import Button from "@/components/client/shared/ui/Button";
+import Link from "next/link";
 import React from "react";
 
 const Highlights = () => {
@@ -9,6 +10,7 @@ const Highlights = () => {
           <img
             src="/assets/images/home_1.jpg"
             alt="event-img"
+            loading="lazy"
             className="rounded-xl aspect-square object-cover"
           />
         </div>
@@ -16,6 +18,7 @@ const Highlights = () => {
           <img
             src="/assets/images/home_2.jpg"
             alt="event-img"
+            loading="lazy"
             className="rounded-xl aspect-square object-cover"
           />
         </div>
@@ -23,6 +26,7 @@ const Highlights = () => {
           <img
             src="/assets/images/home_3.jpg"
             alt="event-img"
+            loading="lazy"
             className="rounded-xl aspect-square object-cover"
           />
         </div>
@@ -30,6 +34,7 @@ const Highlights = () => {
           <img
             src="/assets/images/home_4.jpg"
             alt="event-img"
+            loading="lazy"
             className="rounded-xl aspect-square object-cover"
           />
         </div>
@@ -40,12 +45,12 @@ const Highlights = () => {
           At Nanogram we actively engage in various activities to keep our
           members updated with the latest trends in technology.
         </p>
-        <Button
+        <Link
           className="btn btn-link text-info w-fit no-underline"
-          navigateTo="/events"
+          href="/events"
         >
           Events at Nanogram
-        </Button>
+        </Link>
       </div>
     </section>
   );
