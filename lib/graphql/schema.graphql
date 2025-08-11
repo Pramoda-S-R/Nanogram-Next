@@ -18,6 +18,30 @@ type PageInfo {
   hasNextPage: Boolean!
 }
 
+# Nanogram
+
+type PaginatedNanogram {
+  items: [Nanogram!]!
+  pageInfo: PageInfo!
+}
+
+type Nanogram {
+  _id: ObjectId!
+  name: String!
+  role: String!
+  content: String
+  avatarId: String
+  avatarUrl: String
+  linkedin: String
+  github: String
+  instagram: String
+  alumini: Boolean!
+  core: Boolean!
+  priority: Int!
+}
+
+# User
+
 type PaginatedUsers {
   items: [User!]!
   pageInfo: PageInfo!
@@ -46,6 +70,8 @@ type User {
   updatedAt: Date!
 }
 
+# Queries and Mutations
+
 type Query {
   users(
     _idArray: [ObjectId]
@@ -59,10 +85,21 @@ type Query {
     after: String
   ): PaginatedUsers!
   user(userId: String, username: String, name: String, _id: ObjectId): User
+  nanograms(
+    _idArray: [ObjectId]
+    name: String
+    alumini: Boolean
+    core: Boolean
+    sort: String
+    order: SortOrder
+    first: Int
+    after: String
+  ): PaginatedNanogram!
+  nanogram(_id: ObjectId, name: String): Nanogram
 }
 
 type Mutation {
-  createUser(
+  createNewUser(
     userId: String!
     username: String!
     firstName: String!

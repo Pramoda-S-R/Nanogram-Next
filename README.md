@@ -14,6 +14,7 @@
 - Mailjet (Newsletters)
 - Google Gemini (embeddings and ai)
 - Qdrant (Vector search?)
+- GraphQL (Better Querying)
 - Cleaner UI/UX with daisy UI
 - Shadcn for amazing UI
 - Form builder and Blog builder
@@ -62,6 +63,7 @@
 - [x] add ai mascot
 - [ ] give context to ai
 - [x] gallery route
+- [ ] add all models to graphql
 - [ ] admin dashboard
 - [ ] add UI to upload images to gallery
 - [ ] check if admin by comparing a admin database
@@ -123,6 +125,7 @@
 - Vector search blogs
 - Vector and tag search for posts
 - report post, comment and blog feature added
+- graphql implemented lesgooo
 
 ## Challenges
 

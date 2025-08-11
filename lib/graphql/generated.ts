@@ -21,11 +21,11 @@ export type Scalars = {
 
 export type Mutation = {
   __typename?: 'Mutation';
-  createUser: User;
+  createNewUser: User;
 };
 
 
-export type MutationCreateUserArgs = {
+export type MutationCreateNewUserArgs = {
   avatarUrl: InputMaybe<Scalars['String']['input']>;
   bio: InputMaybe<Scalars['String']['input']>;
   email: Scalars['String']['input'];
@@ -36,10 +36,32 @@ export type MutationCreateUserArgs = {
   username: Scalars['String']['input'];
 };
 
+export type Nanogram = {
+  __typename?: 'Nanogram';
+  _id: Scalars['ObjectId']['output'];
+  alumini: Scalars['Boolean']['output'];
+  avatarId: Maybe<Scalars['String']['output']>;
+  avatarUrl: Maybe<Scalars['String']['output']>;
+  content: Maybe<Scalars['String']['output']>;
+  core: Scalars['Boolean']['output'];
+  github: Maybe<Scalars['String']['output']>;
+  instagram: Maybe<Scalars['String']['output']>;
+  linkedin: Maybe<Scalars['String']['output']>;
+  name: Scalars['String']['output'];
+  priority: Scalars['Int']['output'];
+  role: Scalars['String']['output'];
+};
+
 export type PageInfo = {
   __typename?: 'PageInfo';
   endCursor: Maybe<Scalars['String']['output']>;
   hasNextPage: Scalars['Boolean']['output'];
+};
+
+export type PaginatedNanogram = {
+  __typename?: 'PaginatedNanogram';
+  items: Array<Nanogram>;
+  pageInfo: PageInfo;
 };
 
 export type PaginatedUsers = {
@@ -50,8 +72,28 @@ export type PaginatedUsers = {
 
 export type Query = {
   __typename?: 'Query';
+  nanogram: Maybe<Nanogram>;
+  nanograms: PaginatedNanogram;
   user: Maybe<User>;
   users: PaginatedUsers;
+};
+
+
+export type QueryNanogramArgs = {
+  _id: InputMaybe<Scalars['ObjectId']['input']>;
+  name: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryNanogramsArgs = {
+  _idArray: InputMaybe<Array<InputMaybe<Scalars['ObjectId']['input']>>>;
+  after: InputMaybe<Scalars['String']['input']>;
+  alumini: InputMaybe<Scalars['Boolean']['input']>;
+  core: InputMaybe<Scalars['Boolean']['input']>;
+  first: InputMaybe<Scalars['Int']['input']>;
+  name: InputMaybe<Scalars['String']['input']>;
+  order: InputMaybe<SortOrder>;
+  sort: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -184,8 +226,10 @@ export type ResolversTypes = {
   Date: ResolverTypeWrapper<Scalars['Date']['output']>;
   Int: ResolverTypeWrapper<Scalars['Int']['output']>;
   Mutation: ResolverTypeWrapper<{}>;
+  Nanogram: ResolverTypeWrapper<Nanogram>;
   ObjectId: ResolverTypeWrapper<Scalars['ObjectId']['output']>;
   PageInfo: ResolverTypeWrapper<PageInfo>;
+  PaginatedNanogram: ResolverTypeWrapper<PaginatedNanogram>;
   PaginatedUsers: ResolverTypeWrapper<PaginatedUsers>;
   Query: ResolverTypeWrapper<{}>;
   SortOrder: SortOrder;
@@ -200,8 +244,10 @@ export type ResolversParentTypes = {
   Date: Scalars['Date']['output'];
   Int: Scalars['Int']['output'];
   Mutation: {};
+  Nanogram: Nanogram;
   ObjectId: Scalars['ObjectId']['output'];
   PageInfo: PageInfo;
+  PaginatedNanogram: PaginatedNanogram;
   PaginatedUsers: PaginatedUsers;
   Query: {};
   String: Scalars['String']['output'];
@@ -213,7 +259,23 @@ export interface DateScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes
 }
 
 export type MutationResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
-  createUser: Resolver<ResolversTypes['User'], ParentType, ContextType, RequireFields<MutationCreateUserArgs, 'email' | 'firstName' | 'fullName' | 'lastName' | 'userId' | 'username'>>;
+  createNewUser: Resolver<ResolversTypes['User'], ParentType, ContextType, RequireFields<MutationCreateNewUserArgs, 'email' | 'firstName' | 'fullName' | 'lastName' | 'userId' | 'username'>>;
+};
+
+export type NanogramResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Nanogram'] = ResolversParentTypes['Nanogram']> = {
+  _id: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType>;
+  alumini: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  avatarId: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  avatarUrl: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  content: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  core: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  github: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  instagram: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  linkedin: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  name: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  priority: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  role: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export interface ObjectIdScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['ObjectId'], any> {
@@ -226,6 +288,12 @@ export type PageInfoResolvers<ContextType = GraphQLContext, ParentType extends R
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type PaginatedNanogramResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['PaginatedNanogram'] = ResolversParentTypes['PaginatedNanogram']> = {
+  items: Resolver<Array<ResolversTypes['Nanogram']>, ParentType, ContextType>;
+  pageInfo: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type PaginatedUsersResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['PaginatedUsers'] = ResolversParentTypes['PaginatedUsers']> = {
   items: Resolver<Array<ResolversTypes['User']>, ParentType, ContextType>;
   pageInfo: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>;
@@ -233,6 +301,8 @@ export type PaginatedUsersResolvers<ContextType = GraphQLContext, ParentType ext
 };
 
 export type QueryResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
+  nanogram: Resolver<Maybe<ResolversTypes['Nanogram']>, ParentType, ContextType, QueryNanogramArgs>;
+  nanograms: Resolver<ResolversTypes['PaginatedNanogram'], ParentType, ContextType, QueryNanogramsArgs>;
   user: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType, QueryUserArgs>;
   users: Resolver<ResolversTypes['PaginatedUsers'], ParentType, ContextType, QueryUsersArgs>;
 };
@@ -264,8 +334,10 @@ export type UserResolvers<ContextType = GraphQLContext, ParentType extends Resol
 export type Resolvers<ContextType = GraphQLContext> = {
   Date: GraphQLScalarType;
   Mutation: MutationResolvers<ContextType>;
+  Nanogram: NanogramResolvers<ContextType>;
   ObjectId: GraphQLScalarType;
   PageInfo: PageInfoResolvers<ContextType>;
+  PaginatedNanogram: PaginatedNanogramResolvers<ContextType>;
   PaginatedUsers: PaginatedUsersResolvers<ContextType>;
   Query: QueryResolvers<ContextType>;
   User: UserResolvers<ContextType>;

@@ -22,3 +22,18 @@ export interface User {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export interface Nanogram {
+  _id: ObjectId;
+  name: string;
+  role: string;
+  content: string | null;
+  avatarId: string | null;
+  avatarUrl: string | null;
+  linkedin: string | null;
+  github: string | null;
+  instagram: string | null;
+  alumini: boolean;
+  core: boolean;
+  priority: number;
+}
