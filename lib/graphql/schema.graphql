@@ -8,6 +8,21 @@ enum UserRole {
   dev
 }
 
+enum SortOrder {
+  ASC
+  DESC
+}
+
+type PageInfo {
+  endCursor: String
+  hasNextPage: Boolean!
+}
+
+type PaginatedUsers {
+  items: [User!]!
+  pageInfo: PageInfo!
+}
+
 type User {
   _id: ObjectId!
   userId: String!
@@ -32,8 +47,18 @@ type User {
 }
 
 type Query {
-  users: [User!]!
-  user(userId: String!): User
+  users(
+    _idArray: [ObjectId]
+    userId: String
+    username: String
+    name: String
+    role: UserRole
+    sort: String
+    order: SortOrder
+    first: Int
+    after: String
+  ): PaginatedUsers!
+  user(userId: String, username: String, name: String, _id: ObjectId): User
 }
 
 type Mutation {

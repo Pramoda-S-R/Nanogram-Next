@@ -2,6 +2,7 @@ import { ObjectId } from "mongodb";
 import { Resolvers } from "./generated";
 import { User as UserModel } from "@/types/graphql";
 import { GraphQLScalarType, Kind } from "graphql";
+import { requireRole } from "./authContext";
 
 const dateScalar = new GraphQLScalarType({
   name: "Date",
@@ -35,6 +36,16 @@ export const resolvers: Resolvers = {
   Date: dateScalar,
   ObjectId: objectIdScalar,
 
+  PageInfo: {
+    endCursor: (parent) => parent.endCursor,
+    hasNextPage: (parent) => parent.hasNextPage,
+  },
+
+  PaginatedUsers: {
+    items: (parent) => parent.items,
+    pageInfo: (parent) => parent.pageInfo,
+  },
+
   User: {
     _id: (parent) => parent._id,
     avatarUrl: (parent) => parent.avatarUrl,
@@ -59,9 +70,46 @@ export const resolvers: Resolvers = {
   },
 
   Query: {
-    users: async (_, __, ctx) => {
-      const users = await ctx.db.collection<UserModel>("user").find().toArray();
-      return users.map((u) => ({
+    users: async (_, args, ctx) => {
+      const filter: any = {};
+
+      if (args.userId) filter.userId = args.userId;
+      if (args.username) filter.username = args.username;
+      if (args.role) filter.role = args.role;
+      if (args._idArray && args._idArray.length > 0) {
+        filter._id = {
+          $in: args._idArray,
+        };
+      }
+      if (args.name) {
+        const nameRegex = new RegExp(args.name, "i"); // case-insensitive
+        filter.$or = [
+          { firstName: nameRegex },
+          { lastName: nameRegex },
+          { username: nameRegex },
+        ];
+      }
+      if (args.after) {
+        filter._id = { ...(filter._id || {}), $gt: new ObjectId(args.after) };
+      }
+
+      let cursor = ctx.db.collection<UserModel>("user").find(filter);
+      if (args.sort) {
+        const sortOrder = args.order === "ASC" ? 1 : -1;
+        cursor = cursor.sort({ [args.sort]: sortOrder });
+      }
+      if (args.first) {
+        cursor.limit(args.first + 1);
+      }
+
+      const users = await cursor.toArray();
+
+      let hasNextPage: boolean = false;
+      if (args.first) {
+        hasNextPage = users.length > args.first;
+      }
+
+      const items = users.map((u) => ({
         ...u,
         avatarUrl: u.avatarUrl ?? null,
         bio: u.bio ?? null,
@@ -75,12 +123,40 @@ export const resolvers: Resolvers = {
         comments: u.comments ?? [],
         likedComments: u.likedComments ?? [],
       }));
+      return {
+        items: args.first ? items.slice(0, args.first) : items,
+        pageInfo: {
+          endCursor:
+            items.length > 0
+              ? hasNextPage
+                ? items[items.length - 2]._id.toString()
+                : items[items.length - 1]._id.toString()
+              : null,
+          hasNextPage,
+        },
+      };
     },
 
-    user: async (_, { userId }, ctx) => {
-      const user = await ctx.db
-        .collection<UserModel>("user")
-        .findOne({ userId });
+    user: async (_, args, ctx) => {
+      const filter: any = {};
+
+      if (args.userId) filter.userId = args.userId;
+      if (args.username) filter.username = args.username;
+      if (args._id) filter._id = args._id; // args._id would already be ObjectId type
+      if (args.name) {
+        const nameRegex = new RegExp(args.name, "i"); // case-insensitive
+        filter.$or = [
+          { firstName: nameRegex },
+          { lastName: nameRegex },
+          { username: nameRegex },
+        ];
+      }
+
+      if (Object.keys(filter).length === 0) {
+        throw new Error("At least one filter parameter must be provided");
+      }
+
+      const user = await ctx.db.collection<UserModel>("user").findOne(filter);
       if (!user) return null;
       return {
         ...user,

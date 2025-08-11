@@ -36,16 +36,48 @@ export type MutationCreateUserArgs = {
   username: Scalars['String']['input'];
 };
 
+export type PageInfo = {
+  __typename?: 'PageInfo';
+  endCursor: Maybe<Scalars['String']['output']>;
+  hasNextPage: Scalars['Boolean']['output'];
+};
+
+export type PaginatedUsers = {
+  __typename?: 'PaginatedUsers';
+  items: Array<User>;
+  pageInfo: PageInfo;
+};
+
 export type Query = {
   __typename?: 'Query';
   user: Maybe<User>;
-  users: Array<User>;
+  users: PaginatedUsers;
 };
 
 
 export type QueryUserArgs = {
-  userId: Scalars['String']['input'];
+  _id: InputMaybe<Scalars['ObjectId']['input']>;
+  name: InputMaybe<Scalars['String']['input']>;
+  userId: InputMaybe<Scalars['String']['input']>;
+  username: InputMaybe<Scalars['String']['input']>;
 };
+
+
+export type QueryUsersArgs = {
+  _idArray: InputMaybe<Array<InputMaybe<Scalars['ObjectId']['input']>>>;
+  after: InputMaybe<Scalars['String']['input']>;
+  first: InputMaybe<Scalars['Int']['input']>;
+  name: InputMaybe<Scalars['String']['input']>;
+  order: InputMaybe<SortOrder>;
+  role: InputMaybe<UserRole>;
+  sort: InputMaybe<Scalars['String']['input']>;
+  userId: InputMaybe<Scalars['String']['input']>;
+  username: InputMaybe<Scalars['String']['input']>;
+};
+
+export type SortOrder =
+  | 'ASC'
+  | 'DESC';
 
 export type User = {
   __typename?: 'User';
@@ -153,7 +185,10 @@ export type ResolversTypes = {
   Int: ResolverTypeWrapper<Scalars['Int']['output']>;
   Mutation: ResolverTypeWrapper<{}>;
   ObjectId: ResolverTypeWrapper<Scalars['ObjectId']['output']>;
+  PageInfo: ResolverTypeWrapper<PageInfo>;
+  PaginatedUsers: ResolverTypeWrapper<PaginatedUsers>;
   Query: ResolverTypeWrapper<{}>;
+  SortOrder: SortOrder;
   String: ResolverTypeWrapper<Scalars['String']['output']>;
   User: ResolverTypeWrapper<User>;
   UserRole: UserRole;
@@ -166,6 +201,8 @@ export type ResolversParentTypes = {
   Int: Scalars['Int']['output'];
   Mutation: {};
   ObjectId: Scalars['ObjectId']['output'];
+  PageInfo: PageInfo;
+  PaginatedUsers: PaginatedUsers;
   Query: {};
   String: Scalars['String']['output'];
   User: User;
@@ -183,9 +220,21 @@ export interface ObjectIdScalarConfig extends GraphQLScalarTypeConfig<ResolversT
   name: 'ObjectId';
 }
 
+export type PageInfoResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['PageInfo'] = ResolversParentTypes['PageInfo']> = {
+  endCursor: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  hasNextPage: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type PaginatedUsersResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['PaginatedUsers'] = ResolversParentTypes['PaginatedUsers']> = {
+  items: Resolver<Array<ResolversTypes['User']>, ParentType, ContextType>;
+  pageInfo: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type QueryResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
-  user: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType, RequireFields<QueryUserArgs, 'userId'>>;
-  users: Resolver<Array<ResolversTypes['User']>, ParentType, ContextType>;
+  user: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType, QueryUserArgs>;
+  users: Resolver<ResolversTypes['PaginatedUsers'], ParentType, ContextType, QueryUsersArgs>;
 };
 
 export type UserResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['User'] = ResolversParentTypes['User']> = {
@@ -216,6 +265,8 @@ export type Resolvers<ContextType = GraphQLContext> = {
   Date: GraphQLScalarType;
   Mutation: MutationResolvers<ContextType>;
   ObjectId: GraphQLScalarType;
+  PageInfo: PageInfoResolvers<ContextType>;
+  PaginatedUsers: PaginatedUsersResolvers<ContextType>;
   Query: QueryResolvers<ContextType>;
   User: UserResolvers<ContextType>;
 };

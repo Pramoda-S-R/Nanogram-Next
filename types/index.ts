@@ -1,10 +1,13 @@
 import { Db, MongoClient, ObjectId } from "mongodb";
 import { CSSProperties, HTMLInputTypeAttribute } from "react";
-import { User } from "@/types/mongodb";
+import { Developers, User } from "@/types/mongodb";
 
 export interface GraphQLContext {
   db: Db;
   mongoClient: MongoClient;
+  dev: Developers;
+  role: string;
+  rateLimit: { limit: number; remaining: number; reset: number };
 }
 
 export type Position = [number, number, number];

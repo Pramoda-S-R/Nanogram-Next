@@ -37,6 +37,18 @@ export interface Event {
   completed?: boolean;
 }
 
+export interface Developers {
+  _id: ObjectId;
+  userId: string;
+  name: string;
+  email: string;
+  tier: string;
+  apiKey: string;
+  appName: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export interface User {
   _id: ObjectId;
   userId: string;
