@@ -1,5 +1,5 @@
 "use client";
-import { User } from "@/types";
+import { User } from "@/types/mongodb";
 import { Search } from "lucide-react";
 import Link from "next/link";
 import React, { useEffect, useRef, useState } from "react";

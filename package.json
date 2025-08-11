@@ -9,6 +9,8 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@apollo/server": "^5.0.0",
+    "@as-integrations/next": "^4.0.0",
     "@clerk/nextjs": "^6.20.0",
     "@google/genai": "^1.10.0",
     "@hookform/resolvers": "^5.0.1",
@@ -33,6 +35,8 @@
     "emoji-picker-react": "^4.13.2",
     "framer-motion": "^12.15.0",
     "fs": "^0.0.1-security",
+    "graphql": "^16.11.0",
+    "graphql-tag": "^2.12.6",
     "gray-matter": "^4.0.3",
     "lucide-react": "^0.510.0",
     "mongodb": "^6.16.0",
@@ -64,6 +68,9 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@graphql-codegen/cli": "^5.0.7",
+    "@graphql-codegen/typescript": "^4.1.6",
+    "@graphql-codegen/typescript-resolvers": "^4.5.1",
     "@tailwindcss/postcss": "^4",
     "@types/jsonwebtoken": "^9.0.9",
     "@types/node": "^20",

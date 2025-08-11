@@ -1,7 +1,8 @@
 import PostActions from "@/components/client/shared/PostActions";
 import PostCreator from "@/components/client/shared/PostCreator";
 import PostStats from "@/components/client/shared/PostStats";
-import { AggregatePost, User } from "@/types";
+import { AggregatePost } from "@/types";
+import { User } from "@/types/mongodb";
 import { timeAgo } from "@/utils";
 import Link from "next/link";
 import React from "react";
@@ -44,7 +45,7 @@ const PostCard = async ({
           </figure>
         </Link>
       )}
-      <PostStats post={post} user={user} align='between' />
+      <PostStats post={post} user={user} align="between" />
     </div>
   );
 };

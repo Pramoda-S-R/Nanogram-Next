@@ -7,7 +7,7 @@ import matter from "gray-matter";
 import { createBlogPost, getCurrentUser } from "@/app/actions/api";
 import { toast } from "sonner";
 import { useUser } from "@clerk/nextjs";
-import { User } from "@/types";
+import { User } from "@/types/mongodb";
 
 const example = `---
 title: "How to Blog"

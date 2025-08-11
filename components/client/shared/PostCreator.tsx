@@ -1,5 +1,5 @@
 "use client";
-import { User } from "@/types";
+import { User } from "@/types/mongodb";
 import React from "react";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "./ui/HoverCard";
 import { useRouter } from "next/navigation";

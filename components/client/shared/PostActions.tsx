@@ -9,7 +9,8 @@ import {
   Trash2,
   TriangleAlert,
 } from "lucide-react";
-import { AggregatePost, User } from "@/types";
+import { AggregatePost } from "@/types";
+import { User } from "@/types/mongodb";
 import { deletePostById } from "@/app/actions/api";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";

@@ -38,7 +38,8 @@ import {
 } from "./ui/AlertDialog";
 import PostCreator from "./PostCreator";
 import { Like, Liked } from "@/components/server/shared/ui/icons";
-import { AggregateComment, AggregatePost, User } from "@/types";
+import { AggregateComment, AggregatePost } from "@/types";
+import { User } from "@/types/mongodb";
 import { useUser } from "@clerk/nextjs";
 import {
   createComment,

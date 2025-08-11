@@ -11,7 +11,7 @@ import {
 } from "./ui/Dialog";
 import { TriangleAlert } from "lucide-react";
 import { ObjectId } from "mongodb";
-import { User } from "@/types";
+import { User } from "@/types/mongodb";
 import { set, z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";

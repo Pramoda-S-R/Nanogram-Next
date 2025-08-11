@@ -1,0 +1,50 @@
+scalar Date
+scalar ObjectId
+
+enum UserRole {
+  user
+  admin
+  moderator
+  dev
+}
+
+type User {
+  _id: ObjectId!
+  userId: String!
+  username: String!
+  firstName: String!
+  lastName: String!
+  fullName: String!
+  email: String!
+  bio: String
+  avatarUrl: String
+  karma: Int
+  role: UserRole
+  posts: [ObjectId!]
+  likedPosts: [ObjectId!]
+  savedPosts: [ObjectId!]
+  following: [ObjectId!]
+  followers: [ObjectId!]
+  comments: [ObjectId!]
+  likedComments: [ObjectId!]
+  createdAt: Date!
+  updatedAt: Date!
+}
+
+type Query {
+  users: [User!]!
+  user(userId: String!): User
+}
+
+type Mutation {
+  createUser(
+    userId: String!
+    username: String!
+    firstName: String!
+    lastName: String!
+    fullName: String!
+    email: String!
+    bio: String
+    avatarUrl: String
+  ): User!
+}

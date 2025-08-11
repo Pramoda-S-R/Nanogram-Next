@@ -15,7 +15,7 @@ import { useIsMobile } from "@/hooks/useIsMobile";
 import { usePathname } from "next/navigation";
 import path from "path";
 import { getNewUsers } from "@/app/actions/api";
-import { User } from "@/types";
+import { User } from "@/types/mongodb";
 import Link from "next/link";
 
 const CONTACTS = [

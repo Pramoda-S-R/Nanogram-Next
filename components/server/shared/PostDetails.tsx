@@ -1,7 +1,8 @@
 import PostActions from "@/components/client/shared/PostActions";
 import PostCreator from "@/components/client/shared/PostCreator";
 import PostStats from "@/components/client/shared/PostStats";
-import { AggregatePost, User } from "@/types";
+import { AggregatePost } from "@/types";
+import { User } from "@/types/mongodb";
 import { timeAgo } from "@/utils";
 import React from "react";
 

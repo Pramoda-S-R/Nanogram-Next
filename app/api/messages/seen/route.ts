@@ -1,7 +1,7 @@
 import { ably } from "@/lib/ably";
 import { withAuth } from "@/lib/apiauth";
 import clientPromise from "@/lib/mongodb";
-import { Message } from "@/types";
+import { Message } from "@/types/mongodb";
 import { ObjectId } from "mongodb";
 import { NextRequest, NextResponse } from "next/server";
 

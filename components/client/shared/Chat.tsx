@@ -2,7 +2,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Ellipsis, SendHorizonal, Trash2 } from "lucide-react";
 import TextareaAutosize from "react-textarea-autosize";
-import { AggregatePost, Message, User } from "@/types";
+import { AggregatePost } from "@/types";
+import { Message, User } from "@/types/mongodb";
 import { formatDate } from "@/utils";
 import { InboundMessage, Realtime } from "ably";
 import {

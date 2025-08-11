@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { ably } from "@/lib/ably";
 import clientPromise from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
-import { Message, Messager, SharedPost } from "@/types";
+import { Messager, SharedPost } from "@/types";
+import { Message } from "@/types/mongodb";
 import { withAuth } from "@/lib/apiauth";
 
 const database: string | undefined = process.env.DATABASE;

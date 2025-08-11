@@ -1,6 +1,6 @@
 "use client";
 import { followUser } from "@/app/actions/api";
-import { User } from "@/types";
+import { User } from "@/types/mongodb";
 import React, { useState } from "react";
 
 const FollowButton = ({

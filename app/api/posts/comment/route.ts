@@ -2,7 +2,7 @@ import clientPromise from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
 import { NextRequest, NextResponse } from "next/server";
 import { withAuth } from "@/lib/apiauth";
-import { Comment, Post, User } from "@/types";
+import { Comment, Post, User } from "@/types/mongodb";
 
 const database: string | undefined = process.env.DATABASE;
 

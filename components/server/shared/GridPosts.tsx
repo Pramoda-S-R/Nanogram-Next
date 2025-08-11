@@ -1,5 +1,6 @@
 import PostStats from "@/components/client/shared/PostStats";
-import { AggregatePost, User } from "@/types";
+import { AggregatePost } from "@/types";
+import { User } from "@/types/mongodb";
 import { SquareActivity } from "lucide-react";
 import Link from "next/link";
 import React from "react";
@@ -16,7 +17,11 @@ const GridPosts = ({
   showStats?: boolean;
 }) => {
   if (!posts || posts.length === 0) {
-    return <div className="h-36 flex items-center justify-center text-base-content/50">No posts found.</div>;
+    return (
+      <div className="h-36 flex items-center justify-center text-base-content/50">
+        No posts found.
+      </div>
+    );
   }
   return (
     <ul className="flex flex-wrap md:justify-start justify-center gap-2">

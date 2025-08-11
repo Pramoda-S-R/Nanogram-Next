@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence, useAnimation } from "framer-motion";
-import { Testimonial } from "@/types";
+import { Testimonial } from "@/types/mongodb";
 
 export default function AnimatedTestimonial({
   testimonials,

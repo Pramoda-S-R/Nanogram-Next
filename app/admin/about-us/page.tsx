@@ -20,7 +20,7 @@ import TextareaAutosize from "react-textarea-autosize";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { Nanogram } from "@/types";
+import { Nanogram } from "@/types/mongodb";
 import {
   createNanogram,
   deleteNanogramById,

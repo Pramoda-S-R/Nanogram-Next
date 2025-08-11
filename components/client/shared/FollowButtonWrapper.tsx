@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { User } from "@/types";
+import { User } from "@/types/mongodb";
 
 // Dynamic import client-side only
 const FollowButton = dynamic(() => import("./FollowButton"));

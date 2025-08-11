@@ -1,4 +1,4 @@
-import { Nanogram } from "@/types";
+import { Nanogram } from "@/types/mongodb";
 import React from "react";
 import { Github, Instagram, Linkedin } from "./ui/icons/brands";
 

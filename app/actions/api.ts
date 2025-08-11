@@ -2,20 +2,20 @@
 "use server";
 import { searchBlogs, searchPosts, similarPosts } from "@/bot/vectorSearch";
 import {
-  AggregateComment,
-  AggregatePost,
   BlogPost,
-  BlogSchema,
-  Comment,
   Event,
   Message,
-  Messager,
   Nanogram,
   Newsletters,
-  Post,
-  SharedPost,
   Testimonial,
   User,
+} from "@/types/mongodb";
+import {
+  AggregateComment,
+  AggregatePost,
+  BlogSchema,
+  Messager,
+  SharedPost,
 } from "@/types";
 import { ResourceApiResponse } from "cloudinary";
 import { ObjectId } from "mongodb";

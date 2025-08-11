@@ -11,7 +11,8 @@ import {
   DialogTrigger,
 } from "./ui/Dialog";
 import { Check, Link, ShareIcon } from "lucide-react";
-import { AggregatePost, Messager, SharedPost, User } from "@/types";
+import { AggregatePost, Messager, SharedPost } from "@/types";
+import { User } from "@/types/mongodb";
 import { getUserByUsername, sendMessage } from "@/app/actions/api";
 import { toast } from "sonner";
 import {

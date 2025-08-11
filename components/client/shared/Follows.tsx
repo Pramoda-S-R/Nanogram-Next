@@ -7,7 +7,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "./ui/Dialog";
-import { User } from "@/types";
+import { User } from "@/types/mongodb";
 import { getUsersByIds } from "@/app/actions/api";
 import { objectIdsToStrings } from "@/utils";
 import Link from "next/link";

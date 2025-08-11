@@ -3,7 +3,7 @@ import { ObjectId } from "mongodb";
 import { NextRequest, NextResponse } from "next/server";
 import cloudinary from "@/lib/cloudinary";
 import { withAuth } from "@/lib/apiauth";
-import { Post, User } from "@/types";
+import { Post, User } from "@/types/mongodb";
 import { deletePostVectors, onPost } from "@/bot/vectorSearch";
 
 const database: string | undefined = process.env.DATABASE;

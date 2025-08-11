@@ -1,7 +1,8 @@
 "use client";
 import { likePost, savePost } from "@/app/actions/api";
 import { Like, Liked, Saved, Save } from "@/components/server/shared/ui/icons";
-import { AggregatePost, User } from "@/types";
+import { AggregatePost } from "@/types";
+import { User } from "@/types/mongodb";
 import { hasLiked, hasSaved } from "@/utils";
 import React, { useState } from "react";
 import Comments from "./Comments";
