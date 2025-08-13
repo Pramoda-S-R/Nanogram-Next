@@ -70,9 +70,42 @@ type User {
   updatedAt: Date!
 }
 
+# Posts
+
+type PaginatedPosts {
+  items: [Post!]!
+  pageInfo: PageInfo!
+}
+
+type Post {
+  _id: ObjectId!
+  creator: User!
+  caption: String!
+  tags: [String]
+  imageId: String
+  imageUrl: String
+  source: String
+  savedBy: [ObjectId]
+  likes: [ObjectId]
+  comments: [ObjectId]
+  createdAt: Date!
+  updatedAt: Date!
+}
+
 # Queries and Mutations
 
 type Query {
+  nanograms(
+    _idArray: [ObjectId]
+    name: String
+    alumini: Boolean
+    core: Boolean
+    sort: String
+    order: SortOrder
+    first: Int
+    after: String
+  ): PaginatedNanogram!
+  nanogram(_id: ObjectId, name: String): Nanogram
   users(
     _idArray: [ObjectId]
     userId: String
@@ -85,17 +118,15 @@ type Query {
     after: String
   ): PaginatedUsers!
   user(userId: String, username: String, name: String, _id: ObjectId): User
-  nanograms(
+  posts(
     _idArray: [ObjectId]
-    name: String
-    alumini: Boolean
-    core: Boolean
+    creator: ObjectId
     sort: String
     order: SortOrder
     first: Int
     after: String
-  ): PaginatedNanogram!
-  nanogram(_id: ObjectId, name: String): Nanogram
+  ): PaginatedPosts!
+  post(_id: ObjectId!): Post
 }
 
 type Mutation {

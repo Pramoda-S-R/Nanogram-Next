@@ -64,16 +64,40 @@ export type PaginatedNanogram = {
   pageInfo: PageInfo;
 };
 
+export type PaginatedPosts = {
+  __typename?: 'PaginatedPosts';
+  items: Array<Post>;
+  pageInfo: PageInfo;
+};
+
 export type PaginatedUsers = {
   __typename?: 'PaginatedUsers';
   items: Array<User>;
   pageInfo: PageInfo;
 };
 
+export type Post = {
+  __typename?: 'Post';
+  _id: Scalars['ObjectId']['output'];
+  caption: Scalars['String']['output'];
+  comments: Maybe<Array<Maybe<Scalars['ObjectId']['output']>>>;
+  createdAt: Scalars['Date']['output'];
+  creator: User;
+  imageId: Maybe<Scalars['String']['output']>;
+  imageUrl: Maybe<Scalars['String']['output']>;
+  likes: Maybe<Array<Maybe<Scalars['ObjectId']['output']>>>;
+  savedBy: Maybe<Array<Maybe<Scalars['ObjectId']['output']>>>;
+  source: Maybe<Scalars['String']['output']>;
+  tags: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  updatedAt: Scalars['Date']['output'];
+};
+
 export type Query = {
   __typename?: 'Query';
   nanogram: Maybe<Nanogram>;
   nanograms: PaginatedNanogram;
+  post: Maybe<Post>;
+  posts: PaginatedPosts;
   user: Maybe<User>;
   users: PaginatedUsers;
 };
@@ -92,6 +116,21 @@ export type QueryNanogramsArgs = {
   core: InputMaybe<Scalars['Boolean']['input']>;
   first: InputMaybe<Scalars['Int']['input']>;
   name: InputMaybe<Scalars['String']['input']>;
+  order: InputMaybe<SortOrder>;
+  sort: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryPostArgs = {
+  _id: Scalars['ObjectId']['input'];
+};
+
+
+export type QueryPostsArgs = {
+  _idArray: InputMaybe<Array<InputMaybe<Scalars['ObjectId']['input']>>>;
+  after: InputMaybe<Scalars['String']['input']>;
+  creator: InputMaybe<Scalars['ObjectId']['input']>;
+  first: InputMaybe<Scalars['Int']['input']>;
   order: InputMaybe<SortOrder>;
   sort: InputMaybe<Scalars['String']['input']>;
 };
@@ -230,7 +269,9 @@ export type ResolversTypes = {
   ObjectId: ResolverTypeWrapper<Scalars['ObjectId']['output']>;
   PageInfo: ResolverTypeWrapper<PageInfo>;
   PaginatedNanogram: ResolverTypeWrapper<PaginatedNanogram>;
+  PaginatedPosts: ResolverTypeWrapper<PaginatedPosts>;
   PaginatedUsers: ResolverTypeWrapper<PaginatedUsers>;
+  Post: ResolverTypeWrapper<Post>;
   Query: ResolverTypeWrapper<{}>;
   SortOrder: SortOrder;
   String: ResolverTypeWrapper<Scalars['String']['output']>;
@@ -248,7 +289,9 @@ export type ResolversParentTypes = {
   ObjectId: Scalars['ObjectId']['output'];
   PageInfo: PageInfo;
   PaginatedNanogram: PaginatedNanogram;
+  PaginatedPosts: PaginatedPosts;
   PaginatedUsers: PaginatedUsers;
+  Post: Post;
   Query: {};
   String: Scalars['String']['output'];
   User: User;
@@ -294,15 +337,39 @@ export type PaginatedNanogramResolvers<ContextType = GraphQLContext, ParentType 
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type PaginatedPostsResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['PaginatedPosts'] = ResolversParentTypes['PaginatedPosts']> = {
+  items: Resolver<Array<ResolversTypes['Post']>, ParentType, ContextType>;
+  pageInfo: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type PaginatedUsersResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['PaginatedUsers'] = ResolversParentTypes['PaginatedUsers']> = {
   items: Resolver<Array<ResolversTypes['User']>, ParentType, ContextType>;
   pageInfo: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type PostResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Post'] = ResolversParentTypes['Post']> = {
+  _id: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType>;
+  caption: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  comments: Resolver<Maybe<Array<Maybe<ResolversTypes['ObjectId']>>>, ParentType, ContextType>;
+  createdAt: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
+  creator: Resolver<ResolversTypes['User'], ParentType, ContextType>;
+  imageId: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  imageUrl: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  likes: Resolver<Maybe<Array<Maybe<ResolversTypes['ObjectId']>>>, ParentType, ContextType>;
+  savedBy: Resolver<Maybe<Array<Maybe<ResolversTypes['ObjectId']>>>, ParentType, ContextType>;
+  source: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  tags: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>;
+  updatedAt: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type QueryResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
   nanogram: Resolver<Maybe<ResolversTypes['Nanogram']>, ParentType, ContextType, QueryNanogramArgs>;
   nanograms: Resolver<ResolversTypes['PaginatedNanogram'], ParentType, ContextType, QueryNanogramsArgs>;
+  post: Resolver<Maybe<ResolversTypes['Post']>, ParentType, ContextType, RequireFields<QueryPostArgs, '_id'>>;
+  posts: Resolver<ResolversTypes['PaginatedPosts'], ParentType, ContextType, QueryPostsArgs>;
   user: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType, QueryUserArgs>;
   users: Resolver<ResolversTypes['PaginatedUsers'], ParentType, ContextType, QueryUsersArgs>;
 };
@@ -338,7 +405,9 @@ export type Resolvers<ContextType = GraphQLContext> = {
   ObjectId: GraphQLScalarType;
   PageInfo: PageInfoResolvers<ContextType>;
   PaginatedNanogram: PaginatedNanogramResolvers<ContextType>;
+  PaginatedPosts: PaginatedPostsResolvers<ContextType>;
   PaginatedUsers: PaginatedUsersResolvers<ContextType>;
+  Post: PostResolvers<ContextType>;
   Query: QueryResolvers<ContextType>;
   User: UserResolvers<ContextType>;
 };

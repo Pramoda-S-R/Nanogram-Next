@@ -1,6 +1,6 @@
 import { ObjectId } from "mongodb";
 import { Resolvers } from "./generated";
-import { Nanogram, User as UserModel } from "@/types/graphql";
+import { Nanogram, Posts, User as UserModel } from "@/types/graphql";
 import { GraphQLScalarType, Kind } from "graphql";
 import { requireRole } from "./authContext";
 
@@ -51,6 +51,11 @@ export const resolvers: Resolvers = {
     pageInfo: (parent) => parent.pageInfo,
   },
 
+  PaginatedPosts: {
+    items: (parent) => parent.items,
+    pageInfo: (parent) => parent.pageInfo,
+  },
+
   Nanogram: {
     _id: (parent) => parent._id,
     name: (parent) => parent.name,
@@ -92,6 +97,21 @@ export const resolvers: Resolvers = {
     updatedAt: (parent) => parent.updatedAt,
     userId: (parent) => parent.userId,
     username: (parent) => parent.username,
+  },
+
+  Post: {
+    _id: (parent) => parent._id,
+    creator: (parent) => parent.creator,
+    caption: (parent) => parent.caption,
+    tags: (parent) => parent.tags,
+    imageId: (parent) => parent.imageId,
+    imageUrl: (parent) => parent.imageUrl,
+    source: (parent) => parent.source,
+    savedBy: (parent) => parent.savedBy,
+    likes: (parent) => parent.likes,
+    comments: (parent) => parent.comments,
+    createdAt: (parent) => parent.createdAt,
+    updatedAt: (parent) => parent.updatedAt,
   },
 
   Query: {
@@ -287,6 +307,87 @@ export const resolvers: Resolvers = {
         alumini: nanogram.alumini ?? null,
         core: nanogram.core ?? null,
         priority: nanogram.priority ?? null,
+      };
+    },
+    posts: async (_, args, ctx) => {
+      const filter: any = {};
+
+      if (args._idArray && args._idArray.length > 0) {
+        filter._id = {
+          $in: args._idArray,
+        };
+      }
+      if (args.creator) filter.creator = args.creator;
+      if (args.after) {
+        filter._id = { ...(filter._id || {}), $gt: new ObjectId(args.after) };
+      }
+
+      let cursor = ctx.db.collection<Posts>("posts").find(filter);
+      if (args.sort) {
+        const sortOrder = args.order === "ASC" ? 1 : -1;
+        cursor = cursor.sort({ [args.sort]: sortOrder });
+      }
+      if (args.first) {
+        cursor.limit(args.first + 1);
+      }
+
+      const posts = await cursor.toArray();
+
+      let hasNextPage: boolean = false;
+      if (args.first) {
+        hasNextPage = posts.length > args.first;
+      }
+
+      const postItems = posts.slice(0, args.first ? args.first : undefined);
+
+      const userIds = [
+        ...new Set(postItems.map((p) => p.creator.toHexString())),
+      ].map((idStr) => new ObjectId(idStr));
+
+      const users = await ctx.db
+        .collection<UserModel>("user")
+        .find({ _id: { $in: userIds } })
+        .toArray();
+
+      const userMap = new Map(users.map((u) => [u._id.toHexString(), u]));
+
+      const items = postItems.map((p) => {
+        const user = userMap.get(p.creator.toHexString());
+        if (!user)
+          throw new Error(`User not found for id ${p.creator.toString()}`);
+        return {
+          ...p,
+          creator: user,
+        };
+      });
+
+      return {
+        items: items,
+        pageInfo: {
+          endCursor:
+            items.length > 0 ? items[items.length - 1]._id.toString() : null,
+          hasNextPage,
+        },
+      };
+    },
+    post: async (_, args, ctx) => {
+      const filter: any = {};
+
+      if (args._id) filter._id = args._id; // args._id would already be ObjectId type
+
+      if (Object.keys(filter).length === 0) {
+        throw new Error("At least one filter parameter must be provided");
+      }
+
+      const post = await ctx.db.collection<Posts>("posts").findOne(filter);
+      if (!post) return null;
+      const user = await ctx.db
+        .collection<UserModel>("user")
+        .findOne({ _id: post.creator });
+      if (!user) return null;
+      return {
+        ...post,
+        creator: user,
       };
     },
   },

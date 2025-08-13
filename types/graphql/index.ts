@@ -37,3 +37,18 @@ export interface Nanogram {
   core: boolean;
   priority: number;
 }
+
+export interface Posts {
+  _id: ObjectId;
+  creator: ObjectId;
+  caption: string;
+  tags: string[];
+  imageId: string | null;
+  imageUrl: string | null;
+  source: string;
+  savedBy: ObjectId[];
+  likes: ObjectId[];
+  comments: ObjectId[];
+  createdAt: Date;
+  updatedAt: Date;
+}

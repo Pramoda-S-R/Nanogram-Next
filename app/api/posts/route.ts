@@ -110,8 +110,8 @@ export const POST = withAuth(async (req: NextRequest) => {
     const source = req.headers.get("x-dev-appname") as string;
 
     const formData = await req.formData();
-    const creator = formData.get("creator") as string;
-    if (tier === "free" && creator !== dev) {
+    const creatorStr = formData.get("creator") as string;
+    if (tier === "free" && creatorStr !== dev) {
       return NextResponse.json(
         { error: "Creator ID does not match developer user ID." },
         { status: 400 }
@@ -121,12 +121,14 @@ export const POST = withAuth(async (req: NextRequest) => {
     const image = formData.get("image") as File;
     const tags = formData.getAll("tags") as string[];
 
-    if (!caption || !creator) {
+    if (!caption || !creatorStr) {
       return NextResponse.json(
         { error: "Caption and Creator Id is required" },
         { status: 400 }
       );
     }
+
+    const creator = new ObjectId(creatorStr);
 
     let imageUrl = null;
     let imageId = null;
@@ -180,7 +182,7 @@ export const POST = withAuth(async (req: NextRequest) => {
     // Update the creator's posts array
     const userCollection = client.db(database).collection("user");
     await userCollection.updateOne(
-      { _id: new ObjectId(creator) },
+      { _id: new ObjectId(creatorStr) },
       { $addToSet: { posts: response.insertedId } }
     );
 
