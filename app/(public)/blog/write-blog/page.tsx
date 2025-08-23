@@ -8,6 +8,7 @@ import { createBlogPost, getCurrentUser } from "@/app/actions/api";
 import { toast } from "sonner";
 import { useUser } from "@clerk/nextjs";
 import { User } from "@/types/mongodb";
+import Image from "next/image";
 
 const example = `---
 title: "How to Blog"
@@ -71,12 +72,21 @@ Checkboxes ?
 
 `;
 
+type Metadata = {
+  title?: string;
+  desc?: string;
+  date?: string;
+  tags?: string[];
+  authors?: string[];
+  cover?: string;
+};
+
 export default function BlogPage() {
   const { isLoaded, user } = useUser();
   const [currentUser, setCurrentUser] = useState<User | undefined>(undefined);
   const [md, setMd] = useState(example);
   const [loading, setLoading] = useState(false);
-  const [metadata, setMetadata] = useState<{ [key: string]: any }>({});
+  const [metadata, setMetadata] = useState<Metadata>({});
   const [reactContent, setReactContent] = useState("");
   const [parseError, setParseError] = useState<string | null>(null); // State to store parsing errors
 
@@ -91,6 +101,7 @@ export default function BlogPage() {
         }
       }
     }
+    fetchCUser();
   }, [isLoaded, user]);
 
   useEffect(() => {
@@ -103,22 +114,22 @@ export default function BlogPage() {
       const { data, content } = matter(md);
       parsedMetadata = data;
       parsedMarkdown = content;
-    } catch (e: any) {
-      // Catch any error during parsing
-      // Check if it's specifically a YAMLException or similar parsing error
-      if (e.name === "YAMLException" || e.message.includes("YAML")) {
+    } catch (e: unknown) {
+      const err = e as { name?: string; message?: string; reason?: string };
+
+      if (err.name === "YAMLException" || err.message?.includes("YAML")) {
         setParseError(
           `YAML Front Matter Error: ${
-            e.reason || e.message
+            err.reason || err.message
           }. Please check your syntax, especially quotes.`
         );
       } else {
-        setParseError(`An unexpected error occurred: ${e.message}`);
+        setParseError(`An unexpected error occurred: ${err.message}`);
       }
-      // Set content to empty or previous valid content to avoid rendering bad data
-      setMetadata({}); // Clear metadata on error
-      setReactContent(""); // Clear rendered content on error
-      return; // Stop execution if parsing failed
+
+      setMetadata({});
+      setReactContent("");
+      return;
     }
 
     // If parsing was successful, proceed to render markdown
@@ -132,7 +143,7 @@ export default function BlogPage() {
       const response = await createBlogPost({
         title: metadata.title || "Untitled",
         desc: metadata.desc || "No description provided",
-        publishedAt: new Date(metadata.date) || new Date(),
+        publishedAt: new Date(metadata.date ?? Date.now()),
         authors: metadata.authors || ["Anonymous"],
         authorId: currentUser?._id.toString() || "",
         tags: metadata.tags || [],
@@ -146,7 +157,8 @@ export default function BlogPage() {
       } else {
         throw new Error("Failed to upload blog");
       }
-    } catch (error: any) {
+    } catch (err: unknown) {
+      const error = err as { message?: string };
       console.error("Error uploading blog:", error);
       toast.error(`Failed to upload blog: ${error.message}`);
     } finally {
@@ -203,11 +215,14 @@ export default function BlogPage() {
       </div>
       <div className="blog w-full px-4 md:px-2 md:pr-6 pb-20 overflow-y-hidden">
         {metadata.cover && (
-          <div className="aspect-[3/1] overflow-hidden">
-            <img
+          <div className="aspect-[3/1] overflow-hidden relative">
+            <Image
               src={metadata.cover}
               alt="cover image"
-              className="w-full h-full object-cover"
+              fill
+              className="object-cover"
+              sizes="100vw"
+              priority={false} // or true if it's above the fold
             />
           </div>
         )}

@@ -15,7 +15,7 @@ import {
   FormBuilderTime,
   FormBuilderTitle,
 } from "@/components/client/shared/FormBuilderComponents";
-import { FormObj, FormHeader, FormField } from "@/types";
+import { FormHeader, FormField } from "@/types";
 
 const AdminForm = () => {
   const [header, setHeader] = useState<FormHeader>({ title: "Untitled Form" });

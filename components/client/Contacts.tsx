@@ -13,7 +13,6 @@ import { avatars } from "@/constants";
 import useDebounce from "@/hooks/useDebounce";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { usePathname } from "next/navigation";
-import path from "path";
 import { getNewUsers } from "@/app/actions/api";
 import { User } from "@/types/mongodb";
 import Link from "next/link";
@@ -46,7 +45,6 @@ function SearchContacts({
   className?: string;
   callback?: (searchedContacts: string) => void;
 }) {
-  const contactList = [...CONTACTS];
   const inputRef = useRef<HTMLInputElement>(null);
   const [searchValue, setSearchValue] = useState("");
   const debouncedValue = useDebounce(searchValue, 500);
@@ -74,7 +72,7 @@ function SearchContacts({
 
   useEffect(() => {
     callback?.(debouncedValue);
-  }, [debouncedValue]);
+  }, [debouncedValue, callback]);
 
   return (
     <label
@@ -101,7 +99,6 @@ const Contacts = () => {
   const { isLoaded, user } = useUser();
   const [mounted, setMounted] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
-  const [allContacts] = useState([...CONTACTS]);
   const [contacts, setContacts] = useState<User[]>([]);
 
   const pathname = usePathname();

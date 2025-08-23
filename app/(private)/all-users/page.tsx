@@ -5,6 +5,7 @@ import Link from "next/link";
 import { getNewUsers, getCurrentUser } from "@/app/actions/api";
 import { currentUser } from "@clerk/nextjs/server";
 import SearchUsers from "@/components/client/shared/SearchUsers";
+import Image from "next/image";
 
 const AllUsers = async () => {
   const clerkCurrentUser = await currentUser();
@@ -46,10 +47,12 @@ const AllUsers = async () => {
             >
               <Link href={`/community/@${creator.username}`}>
                 <figure>
-                  <img
+                  <Image
                     src={creator.avatarUrl || "/assets/icons/user.svg"}
                     alt="creator"
-                    className="rounded-full w-14 h-14"
+                    width={56}
+                    height={56}
+                    className="rounded-full"
                     loading="lazy"
                   />
                 </figure>

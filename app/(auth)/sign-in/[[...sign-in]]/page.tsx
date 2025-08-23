@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff, Lock, User } from "lucide-react";
+import Image from "next/image";
 
 const schema = z.object({
   identifier: z
@@ -59,9 +60,9 @@ export default function CustomSignIn() {
         setLoading(false);
         router.push(redirectUrl);
       }
-    } catch (err: any) {
-      console.error("Sign-in error", err);
-      setError(err.errors?.[0]?.longMessage || "An unknown error occurred.");
+    } catch (err: unknown) {
+      const error = err as { errors?: { longMessage?: string }[] };
+      setError(error.errors?.[0]?.longMessage || "An unknown error occurred.");
       setLoading(false);
     }
   };
@@ -96,7 +97,7 @@ export default function CustomSignIn() {
         )}`,
         redirectUrlComplete: redirectUrl,
       });
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(`OAuth sign-in error for ${strategy}`, err);
       setError("Failed to authenticate with social provider.");
       setLoading(false);
@@ -108,10 +109,12 @@ export default function CustomSignIn() {
   return (
     <div className="min-w-80 max-w-120 mx-auto text-center bg-base-200 p-10 rounded-lg">
       <div className="flex justify-center mb-4">
-        <img
+        <Image
           src="/assets/images/nanogram_logo-bg-primary.svg"
           alt="logo"
-          className="w-12 h-12 rounded-full"
+          width={48}
+          height={48}
+          className="rounded-full"
         />
       </div>
       <h2 className="text-2xl font-bold mb-4">Sign in to Nanogram</h2>
@@ -251,7 +254,7 @@ export default function CustomSignIn() {
           className="btn btn-link text-info p-0 text-xs mx-1"
           onClick={switchToSignUp}
         >
-          Don't have an account? Sign Up
+          Don&apos;t have an account? Sign Up
         </button>
         <button
           type="button"

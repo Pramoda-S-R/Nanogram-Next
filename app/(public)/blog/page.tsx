@@ -1,8 +1,8 @@
 import React from "react";
 import { getAllBlogPosts } from "@/app/actions/api";
-import { Plus } from "lucide-react";
 import Link from "next/link";
 import SearchBlogs from "@/components/client/SearchBlogs";
+import Image from "next/image";
 
 const Blog = async () => {
   const blogs = await getAllBlogPosts();
@@ -17,14 +17,17 @@ const Blog = async () => {
         {blogs.length !== 0 ? (
           blogs.map((blog, idx) => (
             <div key={idx} className="card bg-base-200 w-96 shadow-sm">
-              <figure>
-                <img
+              <figure className="w-full h-32 relative">
+                <Image
                   src={
                     blog.cover ||
                     "/assets/images/nanogram_logo-twitter-card.png"
                   }
                   alt="cover"
-                  className="w-full h-32 object-cover"
+                  fill
+                  className="object-cover"
+                  sizes="384px"
+                  priority={true} // or true if it's above the fold
                 />
               </figure>
               <div className="card-body">

@@ -41,6 +41,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/client/shared/ui/AlertDialog";
+import Image from "next/image";
+import Link from "next/link";
 
 const NanogramFormSchema = z.object({
   name: z.string().min(2).max(30),
@@ -397,16 +399,18 @@ function PreviewNanogram({ member }: { member: Nanogram }) {
         <DialogHeader>
           <DialogTitle>Preview of {member.name}</DialogTitle>
           <DialogDescription>
-            Here's how {member.name} will look in the website.
+            Here&apos;s how {member.name} will look in the website.
           </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col gap-6 xl:flex-row">
           <div className="w-40 h-50 aspect-[4/5] flex-none rounded-2xl object-cover">
-            <img
+            <Image
               alt={member.name}
               loading="lazy"
-              className="w-40 h-50 aspect-[4/5] flex-none rounded-2xl object-cover"
-              src={member.avatarUrl}
+              width={160}
+              height={200}
+              className="aspect-[4/5] flex-none rounded-2xl object-cover"
+              src={member.avatarUrl || "/assets/images/placeholder.png"}
             />
           </div>
           <div className="flex-auto">
@@ -456,15 +460,17 @@ function PreviewNanogram({ member }: { member: Nanogram }) {
           <>
             <div className="divider"></div>
             <div className="flex flex-col items-center text-center">
-              <img
+              <Image
                 src={member.avatarUrl || "/assets/images/placeholder.png"}
                 alt={member.name || "Avatar"}
+                width={96}
+                height={96}
                 className="w-24 h-24 rounded-full border border-base-content/10 object-cover mx-auto"
               />
               <h3 className="text-xl font-semibold mb-1">{member.name}</h3>
               <p className="text-base-content/70 mb-4">{member.role}</p>
               <blockquote className="text-lg italic text-base-content">
-                "{member.content}"
+                &ldquo;{member.content}&rdquo;
               </blockquote>
             </div>
           </>
@@ -565,10 +571,10 @@ const AdminAboutUs = () => {
         <div className="breadcrumbs text-sm">
           <ul>
             <li>
-              <a href="/">Home</a>
+              <Link href="/">Home</Link>
             </li>
             <li>
-              <a href="/admin">Admin</a>
+              <Link href="/admin">Admin</Link>
             </li>
             <li>Manage About Us</li>
           </ul>
@@ -621,10 +627,11 @@ const AdminAboutUs = () => {
                 <td>{member.content}</td>
                 <td>{member.avatarId}</td>
                 <td>
-                  <img
-                    src={member.avatarUrl}
+                  <Image
+                    src={member.avatarUrl || "/assets/images/placeholder.png"}
                     alt={member.name}
-                    className="w-48"
+                    width={64}
+                    height={80}
                   />
                 </td>
                 <td>

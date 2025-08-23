@@ -9,6 +9,7 @@ import FileUploader from "@/components/client/shared/ui/FileUploader";
 import { addUserToDb, userExistsById } from "@/app/actions/api";
 import { User } from "lucide-react";
 import { avatars } from "@/constants";
+import Image from "next/image";
 
 const schema = z.object({
   firstName: z.string().min(1, "First name is required"),
@@ -187,9 +188,11 @@ export default function Onboarding() {
                       key={idx}
                       onClick={() => handleImageSelection(ourAvatars)}
                     >
-                      <img
+                      <Image
                         src={ourAvatars}
                         alt="pfp"
+                        width={80}
+                        height={80}
                         className="size-20 rounded-full"
                       />
                     </button>

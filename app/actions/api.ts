@@ -19,10 +19,9 @@ import {
 } from "@/types";
 import { ResourceApiResponse } from "cloudinary";
 import { ObjectId } from "mongodb";
+import { Blog } from "@/types/qdrant";
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
-const ANONYMOUS_USER_ID =
-  process.env.ANONYMOUS_USER_ID || "686658c02a2faecbc084642b";
 const apiKey: string | undefined = process.env.ADMIN_KEY;
 
 // ===================
@@ -1494,10 +1493,13 @@ export async function getBlogPostsByQdrant({
 }: {
   query: string;
   limit?: number;
-}): Promise<any[]> {
+}): Promise<BlogPost[]> {
   try {
     const response = await searchBlogs(query, limit);
-    return response;
+    // Filter and map to ensure payload is not null and is BlogPost
+    return response
+      .filter((item: any) => item.payload && item.payload !== null)
+      .map((item: any) => item.payload as BlogPost);
   } catch (error) {
     console.error("Error fetching blog posts by Qdrant:", error);
     return [];

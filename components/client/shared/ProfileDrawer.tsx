@@ -967,7 +967,7 @@ function UpdateEmailDialog({ user }: { user: UserResource }) {
         <DialogHeader>
           <DialogTitle>Add Email Address</DialogTitle>
           <DialogDescription>
-            You'll need to verify this email address before it can be added to
+            You&apos;ll need to verify this email address before it can be added to
             your account.
           </DialogDescription>
         </DialogHeader>

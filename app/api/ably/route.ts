@@ -3,7 +3,7 @@ import { withAuth } from "@/lib/apiauth";
 import { NextRequest, NextResponse } from "next/server";
 
 export const GET = withAuth(
-  async (req: NextRequest, dev: any) => {
+  async (req: NextRequest) => {
     try {
       const searchParams = req.nextUrl.searchParams;
       const clientId = searchParams.get("client");

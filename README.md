@@ -63,6 +63,7 @@
 - [x] add ai mascot
 - [ ] give context to ai
 - [x] gallery route
+- [ ] fix the Contacts.tsx component (insert racial slur)
 - [ ] add all models to graphql
 - [ ] admin dashboard
 - [ ] add UI to upload images to gallery

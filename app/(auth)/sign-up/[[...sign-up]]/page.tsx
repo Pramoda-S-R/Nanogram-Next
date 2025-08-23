@@ -8,6 +8,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff, Lock, Mail, User } from "lucide-react";
 import OtpInput from "@/components/client/shared/OtpInput";
+import Image from "next/image";
 
 const schema = z.object({
   username: z
@@ -26,11 +27,7 @@ type FormData = z.infer<typeof schema>;
 
 export default function SignUp() {
   const { signUp, setActive, isLoaded } = useSignUp();
-  const {
-    signIn,
-    setActive: setSignInActive,
-    isLoaded: isSignInLoaded,
-  } = useSignIn();
+  const { signIn } = useSignIn();
   const [pendingVerification, setPendingVerification] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -68,10 +65,11 @@ export default function SignUp() {
       setPendingVerification(true);
       setLoading(false);
       setError(null);
-    } catch (err: any) {
-      console.error("Sign-up error", err);
-      console.log("err: ", err.errors);
-      setError(err.errors?.[0]?.longMessage || "An unknown error occurred.");
+    } catch (err: unknown) {
+      const error = err as { errors?: { longMessage?: string }[] };
+      console.error("Sign-up error", error);
+      console.log("err: ", error.errors);
+      setError(error.errors?.[0]?.longMessage || "An unknown error occurred.");
       setLoading(false);
     }
   };
@@ -88,7 +86,7 @@ export default function SignUp() {
         )}`,
         redirectUrlComplete: redirectUrl,
       });
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(`OAuth sign-in error for ${strategy}`, err);
       setError("Failed to authenticate with social provider.");
     }
@@ -106,9 +104,10 @@ export default function SignUp() {
         await setActive({ session: result.createdSessionId });
         router.push("/onboarding"); // ✅ Final redirect after verification
       }
-    } catch (err: any) {
-      console.error("Verification failed", err);
-      setError(err.errors?.[0]?.longMessage || "Verification failed.");
+    } catch (err: unknown) {
+      const error = err as { errors?: { longMessage?: string }[] };
+      console.error("Verification failed", error);
+      setError(error.errors?.[0]?.longMessage || "Verification failed.");
       setLoading(false);
     }
   };
@@ -126,10 +125,12 @@ export default function SignUp() {
   return (
     <div className="min-w-80 max-w-120 mx-auto text-center bg-base-200 p-10 rounded-lg">
       <div className="flex justify-center mb-4">
-        <img
+        <Image
           src="/assets/images/nanogram_logo-bg-primary.svg"
           alt="logo"
-          className="w-12 h-12 rounded-full"
+          width={48}
+          height={48}
+          className="rounded-full"
         />
       </div>
       <h2 className="text-2xl font-bold mb-4">Create your account</h2>

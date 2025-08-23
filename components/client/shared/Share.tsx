@@ -157,7 +157,7 @@ const Share = ({
         <DialogHeader>
           <DialogTitle>Share</DialogTitle>
           <DialogDescription>
-            Share {post.creator.firstName}'s post with your friends and on other
+            Share {post.creator.firstName}&apos;s post with your friends and on other
             platforms!
           </DialogDescription>
         </DialogHeader>

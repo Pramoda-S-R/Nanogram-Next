@@ -1,7 +1,9 @@
 "use client";
 import { getBlogPostsByQdrant } from "@/app/actions/api";
 import useDebounce from "@/hooks/useDebounce";
+import { BlogPost } from "@/types/mongodb";
 import { Search } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
@@ -11,7 +13,7 @@ const SearchBlogs = () => {
   const debouncedValue = useDebounce(searchValue, 500);
   const [loading, setLoading] = useState(false);
   const [shouldShowSearchResults, setShouldShowSearchResults] = useState(false);
-  const [searchedBlogs, setSearchedBlogs] = useState<any[]>([]);
+  const [searchedBlogs, setSearchedBlogs] = useState<BlogPost[]>([]);
   const router = useRouter();
 
   const inputRef = useRef<HTMLInputElement>(null);
@@ -37,7 +39,7 @@ const SearchBlogs = () => {
   }, []);
 
   useEffect(() => {
-    const getSearchedBlogs = async () => {
+    const fetchBlogs = async () => {
       if (debouncedValue.length === 0) {
         setSearchedBlogs([]);
         setShouldShowSearchResults(false);
@@ -53,15 +55,13 @@ const SearchBlogs = () => {
         setSearchedBlogs(blogs);
         setShouldShowSearchResults(true);
       } catch (error) {
-        console.error("Error fetching searched users:", error);
+        console.error("Error fetching searched blogs:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    if (!loading) {
-      getSearchedBlogs();
-    }
+    fetchBlogs();
   }, [debouncedValue]);
 
   return (
@@ -99,33 +99,35 @@ const SearchBlogs = () => {
               searchedBlogs.map((blog, idx) => (
                 <div key={idx} className="card bg-base-200 w-96 shadow-sm">
                   <figure>
-                    <img
+                    <Image
                       src={
-                        blog.payload.cover ||
+                        blog.cover ||
                         "/assets/images/nanogram_logo-twitter-card.png"
                       }
                       alt="cover"
+                      width={384}
+                      height={128}
                       className="w-full h-32 object-cover"
                     />
                   </figure>
                   <div className="card-body">
-                    <h2 className="card-title">{blog.payload.title}</h2>
+                    <h2 className="card-title">{blog.title}</h2>
                     <div
                       className="tooltip tooltip-top"
-                      data-tip={blog.payload.desc}
+                      data-tip={blog.desc}
                     >
                       <p>
-                        {blog.payload.desc
-                          ? blog.payload.desc.slice(0, 120)
+                        {blog.desc
+                          ? blog.desc.slice(0, 120)
                           : "No description available."}
-                        {blog.payload.desc && blog.payload.desc.length > 120
+                        {blog.desc && blog.desc.length > 120
                           ? "..."
                           : ""}
                       </p>
                     </div>
                     <div className="card-actions justify-end">
                       <Link
-                        href={`/blog/${blog.payload.route}`}
+                        href={`/blog/${blog.route}`}
                         className="btn btn-primary"
                       >
                         Read

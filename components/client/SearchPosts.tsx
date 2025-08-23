@@ -5,6 +5,22 @@ import { Search } from "lucide-react";
 import Link from "next/link";
 import React, { useEffect, useRef, useState } from "react";
 
+const Post = ({ post }: { post: any }) => {
+  return (
+    <Link
+      href={`/posts/${post._id}`}
+      className="md:w-64 md:h-64 w-2/3 bg-base-200 rounded-lg overflow-clip shadow-xl"
+    >
+      <div className="relative">
+        <p className="absolute w-full h-full p-4 bg-linear-to-b from-black to-black/10">
+          {post.caption}
+        </p>
+        {post.imageUrl && <img src={post.imageUrl} alt="Post Image" />}
+      </div>
+    </Link>
+  );
+};
+
 const SearchPosts = () => {
   const [searchValue, setSearchValue] = useState("");
   const debouncedValue = useDebounce(searchValue, 500);
@@ -73,9 +89,7 @@ const SearchPosts = () => {
       }
     };
 
-    if (!loading) {
-      getSearchedPosts();
-    }
+    getSearchedPosts();
   }, [debouncedValue]);
 
   return (
@@ -104,37 +118,11 @@ const SearchPosts = () => {
             {searchedPosts.length > 0 ? (
               tagSearch ? (
                 searchedPosts.map((post, idx) => (
-                  <Link
-                    href={`/posts/${post._id}`}
-                    key={idx}
-                    className="md:w-64 md:h-64 w-2/3 bg-base-200 rounded-lg overflow-clip shadow-xl"
-                  >
-                    <div className="relative">
-                      <p className="absolute w-full h-full p-4 bg-linear-to-b from-black to-black/10">
-                        {post.caption}
-                      </p>
-                      {post.imageUrl && (
-                        <img src={post.imageUrl} alt="Post Image" />
-                      )}
-                    </div>
-                  </Link>
+                  <Post key={idx} post={post} />
                 ))
               ) : (
                 searchedPosts.map((post, idx) => (
-                  <Link
-                    href={`/posts/${post.payload._id}`}
-                    key={idx}
-                    className="md:w-64 md:h-64 w-2/3 bg-base-200 rounded-lg overflow-clip shadow-xl"
-                  >
-                    <div className="relative">
-                      <p className="absolute w-full h-full p-4 bg-linear-to-b from-black to-black/10">
-                        {post.payload.caption}
-                      </p>
-                      {post.payload.imageUrl && (
-                        <img src={post.payload.imageUrl} alt="Post Image" />
-                      )}
-                    </div>
-                  </Link>
+                  <Post key={idx} post={post.payload} />
                 ))
               )
             ) : (

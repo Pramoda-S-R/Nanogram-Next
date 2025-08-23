@@ -14,10 +14,7 @@ import {
   FromRating,
 } from "@/components/client/shared/FormComponents";
 import {
-  CheckboxOption,
   FormObj,
-  GridBaseObject,
-  MultipleChoiceOption,
 } from "@/types";
 import React from "react";
 

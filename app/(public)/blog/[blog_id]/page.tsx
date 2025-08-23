@@ -5,6 +5,7 @@ import remarkGfm from "remark-gfm";
 import { getBlogPostById } from "@/app/actions/api";
 import matter from "gray-matter";
 import ReportMedia from "@/components/client/shared/ReportMedia";
+import Image from "next/image";
 
 export async function getMD(url: URL) {
   const res = await fetch(url.toString());
@@ -31,11 +32,14 @@ export default async function BlogPage({
   return (
     <div className="blog w-full px-4 md:px-2 md:pr-6 pb-20">
       {metadata.cover && (
-        <div className="aspect-[3/1] overflow-hidden">
-          <img
+        <div className="aspect-[3/1] overflow-hidden relative">
+          <Image
             src={metadata.cover}
             alt="cover image"
-            className="w-full h-full object-cover"
+            fill
+            className="object-cover"
+            sizes="100vw"
+            priority={false} // or true if it's above the fold
           />
         </div>
       )}
@@ -47,7 +51,11 @@ export default async function BlogPage({
             {metadata.date} — by {metadata.authors?.join(", ")}
           </p>
         </div>
-        <ReportMedia media="Blog" mediaId={blogPost._id} userId={blogPost.authorId} />
+        <ReportMedia
+          media="Blog"
+          mediaId={blogPost._id}
+          userId={blogPost.authorId}
+        />
       </div>
       <hr />
       <ReactMarkdown remarkPlugins={[remarkGfm]}>{markdown}</ReactMarkdown>

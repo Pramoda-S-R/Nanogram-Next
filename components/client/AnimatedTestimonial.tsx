@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence, useAnimation } from "framer-motion";
+import { motion, AnimatePresence, useAnimation, PanInfo } from "framer-motion";
 import { Testimonial } from "@/types/mongodb";
 
 export default function AnimatedTestimonial({
@@ -28,9 +28,9 @@ export default function AnimatedTestimonial({
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [testimonials]);
+  }, [testimonials, startTimer]);
 
-  const handleDragEnd = (_: any, info: any) => {
+  const handleDragEnd = (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     if (info.offset.x > 100) {
       setDirection("right");
       setCurrentIndex(
@@ -125,7 +125,7 @@ function TestimonialDiv({ testimonial }: { testimonial: Testimonial }) {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4, type: "spring", stiffness: 100 }}
       >
-        "{testimonial?.content}"
+        &ldquo;{testimonial?.content}&rdquo;
       </motion.blockquote>
     </div>
   );

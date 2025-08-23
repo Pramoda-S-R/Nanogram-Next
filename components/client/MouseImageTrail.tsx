@@ -1,4 +1,5 @@
 import { useAnimate } from "framer-motion";
+import Image from "next/image";
 import React, { useRef } from "react";
 
 const MouseImageTrail = ({
@@ -17,43 +18,30 @@ const MouseImageTrail = ({
   const lastRenderPosition = useRef({ x: 0, y: 0 });
   const imageRenderCount = useRef(0);
 
-interface MousePosition {
-    x: number;
-    y: number;
-}
-
-interface MouseImageTrailProps {
-    children: React.ReactNode;
-    images: string[];
-    renderImageBuffer: number;
-    rotationRange: number;
-}
-
-const handleMouseMove = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     const { clientX, clientY } = e;
 
     const distance = calculateDistance(
-        clientX,
-        clientY,
-        lastRenderPosition.current.x,
-        lastRenderPosition.current.y
+      clientX,
+      clientY,
+      lastRenderPosition.current.x,
+      lastRenderPosition.current.y
     );
 
     if (distance >= renderImageBuffer) {
-        lastRenderPosition.current.x = clientX;
-        lastRenderPosition.current.y = clientY;
+      lastRenderPosition.current.x = clientX;
+      lastRenderPosition.current.y = clientY;
 
-        renderNextImage();
+      renderNextImage();
     }
-};
+  };
 
-
-const calculateDistance = (
+  const calculateDistance = (
     x1: number,
     y1: number,
     x2: number,
     y2: number
-): number => {
+  ): number => {
     const deltaX = x2 - x1;
     const deltaY = y2 - y1;
 
@@ -61,7 +49,7 @@ const calculateDistance = (
     const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 
     return distance;
-};
+  };
 
   const renderNextImage = () => {
     const imageIndex = imageRenderCount.current % images.length;
@@ -117,9 +105,12 @@ const calculateDistance = (
       {children}
 
       {images.map((img, index) => (
-        <img
+        <Image
           className="pointer-events-none absolute left-0 top-0 h-48 w-auto rounded-xl border-2 border-black bg-neutral-900 object-cover opacity-0"
+          loading="eager"
           src={img}
+          width={192}
+          height={192}
           alt={`Mouse move image ${index}`}
           key={index}
           data-mouse-move-index={index}

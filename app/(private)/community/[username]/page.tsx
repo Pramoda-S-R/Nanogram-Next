@@ -1,5 +1,5 @@
 import React from "react";
-import { CakeSlice, Coins, FilePenLine } from "lucide-react";
+import { CakeSlice, Coins } from "lucide-react";
 import { formatDate, objectIdsToStrings } from "@/utils";
 import { currentUser } from "@clerk/nextjs/server";
 import {
@@ -13,6 +13,7 @@ import {
   FollowingDialog,
 } from "@/components/client/shared/Follows";
 import FollowButtonWrapper from "@/components/client/shared/FollowButtonWrapper";
+import Image from "next/image";
 
 const Profile = async ({
   params,
@@ -42,12 +43,17 @@ const Profile = async ({
         <div className="flex flex-wrap gap-3">
           <div className="flex flex-col mr-auto gap-2">
             <div className="flex gap-6 md:items-start items-center">
-              <img
-                src={user?.avatarUrl || "/assets/icons/user.svg"}
-                alt="user"
-                className="rounded-full md:size-24 size-16 md:mt-0 mt-1"
-                loading="lazy"
-              />
+              <div className="relative md:w-24 md:h-24 w-16 h-16 mt-1 md:mt-0">
+                <Image
+                  src={user?.avatarUrl || "/assets/icons/user.svg"}
+                  alt="user"
+                  className="rounded-full object-cover"
+                  fill
+                  sizes="(max-width: 768px) 64px, 96px"
+                  priority={false}
+                />
+              </div>
+
               <div className="flex justify-start flex-col">
                 <div>
                   <div className="text-xl font-semibold">

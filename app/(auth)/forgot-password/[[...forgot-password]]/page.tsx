@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useAuth, useSignIn } from "@clerk/nextjs";
 import type { NextPage } from "next";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff, Lock, Mail, MessageSquareMore } from "lucide-react";
+import { Eye, EyeOff, Lock, Mail } from "lucide-react";
 import OtpInput from "@/components/client/shared/OtpInput";
 
 const ForgotPasswordPage: NextPage = () => {
@@ -38,7 +38,7 @@ const ForgotPasswordPage: NextPage = () => {
         strategy: "reset_password_email_code",
         identifier: email,
       })
-      .then((_) => {
+      .then(() => {
         setSuccessfulCreation(true);
         setError("");
       })

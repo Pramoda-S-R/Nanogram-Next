@@ -1,8 +1,9 @@
 import { deleteBlogVectors, onBlog } from "@/bot/vectorSearch";
 import { withAuth } from "@/lib/apiauth";
 import clientPromise from "@/lib/mongodb";
+import { BlogPost } from "@/types/mongodb";
 import { slugify } from "@/utils";
-import { ObjectId } from "mongodb";
+import { Filter, ObjectId } from "mongodb";
 import { NextRequest, NextResponse } from "next/server";
 import { UTApi } from "uploadthing/server";
 
@@ -15,7 +16,7 @@ export const GET = withAuth(async (req: NextRequest) => {
   const sort = searchParams.get("sort") || "publishedAt";
   const order = parseInt(searchParams.get("order") || "1"); // 1 for ascending, -1 for descending
   const limit = parseInt(searchParams.get("limit") || "0");
-  const query: any = {};
+  const query: Filter<BlogPost> = {};
   if (blogId) {
     query._id = new ObjectId(blogId);
   }
@@ -24,7 +25,7 @@ export const GET = withAuth(async (req: NextRequest) => {
   }
   try {
     const client = await clientPromise;
-    const collection = client.db(database).collection("blogs");
+    const collection = client.db(database).collection<BlogPost>("blogs");
 
     let cursor = collection.find(query);
     if (sort) {
@@ -36,9 +37,10 @@ export const GET = withAuth(async (req: NextRequest) => {
 
     const documents = await cursor.toArray();
     return NextResponse.json({ documents }, { status: 200 });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const err = error as { message?: string };
     return NextResponse.json(
-      { error: error.message || "An error occurred." },
+      { error: err.message || "An error occurred." },
       { status: 500 }
     );
   }
@@ -93,10 +95,11 @@ export const POST = withAuth(async (req: NextRequest) => {
       { message: "Blog created successfully", id: result.insertedId },
       { status: 201 }
     );
-  } catch (error: any) {
-    console.error("Error creating blog:", error);
+  } catch (error: unknown) {
+    const err = error as { message?: string };
+    console.error("Error creating blog:", err);
     return NextResponse.json(
-      { error: error.message || "An error occurred." },
+      { error: err.message || "An error occurred." },
       { status: 500 }
     );
   }
@@ -115,17 +118,17 @@ export const PUT = withAuth(async (req: NextRequest) => {
     const formData = await req.formData();
     const title = formData.get("title") as string;
     const desc = formData.get("desc") as string;
-    const cover = formData.get("cover") || undefined;
+    const cover = formData.get("cover") as string || undefined;
     const publishedAt = formData.get("publishedAt") as string;
     const tags = formData.get("tags") as string;
     const authors = formData.get("authors") as string;
     const file = formData.get("file") as File;
     const key = formData.get("key") as string;
 
-    const update: any = {
+    const update: Partial<BlogPost> = {
       title,
       desc,
-      cover,
+      cover: cover ?? undefined,
       publishedAt: new Date(publishedAt),
       tags: JSON.parse(tags),
       authors: JSON.parse(authors),
@@ -157,10 +160,11 @@ export const PUT = withAuth(async (req: NextRequest) => {
       { message: "Blog updated successfully" },
       { status: 200 }
     );
-  } catch (error: any) {
-    console.error("Error updating blog:", error);
+  } catch (error: unknown) {
+    const err = error as { message?: string };
+    console.error("Error updating blog:", err);
     return NextResponse.json(
-      { error: error.message || "An error occurred." },
+      { error: err.message || "An error occurred." },
       { status: 500 }
     );
   }
@@ -203,10 +207,11 @@ export const DELETE = withAuth(async (req: NextRequest) => {
       { message: "Blog deleted successfully" },
       { status: 200 }
     );
-  } catch (error: any) {
-    console.error("Error deleting blog:", error);
+  } catch (error: unknown) {
+    const err = error as { message?: string };
+    console.error("Error deleting blog:", err);
     return NextResponse.json(
-      { error: error.message || "An error occurred." },
+      { error: err.message || "An error occurred." },
       { status: 500 }
     );
   }

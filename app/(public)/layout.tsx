@@ -9,7 +9,7 @@ const PublicLayout = ({ children }: { children: React.ReactNode }) => {
       <Navbar />
       <main className="flex justify-center">
         <div className="w-full bg-base-100 text-base-content">{children}</div>
-        <Suspense fallback={<div className="fixed right-10 bottom-10 btn btn-info btn-circle skeleton" />}>
+        <Suspense fallback={<div className="fixed h-10 w-10 right-10 bottom-10 btn btn-info btn-circle skeleton" />}>
           <AIMascot />
         </Suspense>
       </main>

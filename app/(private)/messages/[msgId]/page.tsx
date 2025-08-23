@@ -1,6 +1,5 @@
 import { getCurrentUser, getUserByUsername } from "@/app/actions/api";
 import Chat from "@/components/client/shared/Chat";
-import { useUser } from "@clerk/nextjs";
 import { currentUser } from "@clerk/nextjs/server";
 import React from "react";
 

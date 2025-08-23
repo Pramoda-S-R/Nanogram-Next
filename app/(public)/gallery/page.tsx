@@ -7,9 +7,13 @@ import MouseImageTrail from "@/components/client/MouseImageTrail";
 import Masonry from "react-masonry-css";
 import { images as galleryImages } from "@/constants";
 import "@/styles/waterfall.css";
+import Image from "next/image";
+import { ResourceApiResponse } from "cloudinary";
+
+type CloudinaryResource = ResourceApiResponse["resources"][number];
 
 const GalleryPage = () => {
-  const [images, setImages] = useState<any[]>([]);
+  const [images, setImages] = useState<CloudinaryResource[]>([]);
   const [loading, setLoading] = useState(false);
   const [cursor, setCursor] = useState<string | undefined>(undefined);
   const { ref, inView } = useInView();
@@ -37,11 +41,11 @@ const GalleryPage = () => {
   useEffect(() => {
     if (inView && !loading && cursor !== null) {
       setLoading(true);
-      fetchNextPage({ cursor, maxResults: 10 }).finally(() => {
+      fetchNextPage({ cursor, maxResults: 12 }).finally(() => {
         setLoading(false);
       });
     }
-  }, [inView]);
+  }, [inView, cursor, loading]);
 
   return (
     <div className="min-h-dvh sm:p-0 pl-2">
@@ -67,10 +71,16 @@ const GalleryPage = () => {
           >
             {images.map((image, index) => (
               <div className="waterfall-item" key={index}>
-                <img
+                <Image
                   src={image.url}
                   alt={`Image ${index + 1}`}
-                  className="px-2 md:px-0"
+                  width={image.width} // ideally from your API
+                  height={image.height} // preserves aspect ratio
+                  className="px-2 md:px-0 object-cover"
+                  sizes="(max-width: 640px) 100vw, 
+                   (max-width: 1024px) 50vw, 
+                   (max-width: 1280px) 33vw, 
+                   25vw"
                 />
               </div>
             ))}
