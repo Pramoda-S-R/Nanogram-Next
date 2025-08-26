@@ -12,7 +12,7 @@ import {
 import { TriangleAlert } from "lucide-react";
 import { ObjectId } from "mongodb";
 import { User } from "@/types/mongodb";
-import { set, z } from "zod";
+import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { reportOptions } from "@/constants";
@@ -50,7 +50,6 @@ const ReportMedia = ({
     register,
     handleSubmit,
     setValue,
-    watch,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(ReportMediaSchema),

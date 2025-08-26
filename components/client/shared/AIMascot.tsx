@@ -58,9 +58,8 @@ export const useToolStore = create<ToolState>((set) => ({
 }));
 
 const AIMascot = () => {
-  const { messages, addMessage, updateMessage, replaceMessages } =
-    useChatStore();
-  const { tools, addTool, updateTool, replaceTools } = useToolStore();
+  const { messages, addMessage, updateMessage } = useChatStore();
+  const { addTool } = useToolStore();
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [searching, setSearching] = useState(false);
@@ -231,7 +230,9 @@ const AIMascot = () => {
                           {msg.parts?.map((part) => part.text).join("") ?? ""}
                         </ReactMarkdown>
                         {searching && messages.length - 1 === idx && (
-                          <span className="loading loading-infinity loading-xs text-base-content/50"></span>
+                          <span className="text-sx text-base-content/50">
+                            Searching {"  "}
+                          </span>
                         )}
                         {loading && messages.length - 1 === idx && (
                           <span className="loading loading-dots loading-xs text-base-content/50"></span>

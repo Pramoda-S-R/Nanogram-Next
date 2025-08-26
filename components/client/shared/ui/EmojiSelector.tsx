@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import EmojiPicker, {
   EmojiClickData,
   EmojiStyle,
@@ -20,12 +20,7 @@ export function EmojiPickerPopover({
   onSelectEmoji: (emojiData: EmojiClickData) => void;
   className?: string;
 }) {
-  const [selectedEmoji, setSelectedEmoji] = useState<
-    EmojiClickData | undefined
-  >(undefined);
-
   const handleEmojiClick = (emojiData: EmojiClickData) => {
-    setSelectedEmoji(emojiData);
     if (onSelectEmoji) {
       onSelectEmoji(emojiData);
     }
@@ -64,13 +59,9 @@ export function ReactionSelector({
   className?: string;
 }) {
   const [open, setOpen] = useState(false);
-  const [emojis, setEmojis] = useState(["1f600", "1f601", "1f602"]);
-  const [selectedEmoji, setSelectedEmoji] = useState<
-    EmojiClickData | undefined
-  >(undefined);
+  const emojis = ["1f600", "1f601", "1f602"];
 
   const handleReactionClick = (emojiData: EmojiClickData) => {
-    setSelectedEmoji(emojiData);
     if (onSelectEmoji) {
       onSelectEmoji(emojiData);
     }
@@ -78,7 +69,6 @@ export function ReactionSelector({
   };
 
   const handleEmojiClick = (emojiData: EmojiClickData) => {
-    setSelectedEmoji(emojiData);
     if (onSelectEmoji) {
       onSelectEmoji(emojiData);
     }

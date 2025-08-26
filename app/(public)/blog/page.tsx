@@ -8,7 +8,7 @@ const Blog = async () => {
   const blogs = await getAllBlogPosts();
 
   return (
-    <div className="w-full h-dvh flex flex-col gap-4 relative">
+    <div className="w-full min-h-dvh flex flex-col gap-4 relative">
       <div className="w-full h-30 bg-base-200 half-ellipse flex items-center justify-center overflow-hidden">
         <h1 className="text-5xl font-bold">Nanogram Blogs</h1>
       </div>

@@ -1,7 +1,7 @@
 "use client";
-import { getBlogPostsByQdrant } from "@/app/actions/api";
+import { getBlogPostsFromQdrant } from "@/app/actions/api";
 import useDebounce from "@/hooks/useDebounce";
-import { BlogPost } from "@/types/mongodb";
+import { BlogPost } from "@/types/qdrant";
 import { Search } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -48,7 +48,7 @@ const SearchBlogs = () => {
 
       setLoading(true);
       try {
-        const blogs = await getBlogPostsByQdrant({
+        const blogs = await getBlogPostsFromQdrant({
           query: debouncedValue,
           limit: 3,
         });
@@ -88,7 +88,7 @@ const SearchBlogs = () => {
       </div>
       {shouldShowSearchResults && debouncedValue.length > 0 ? (
         <>
-          <h3 className="mx-4 text-xl">Search Results</h3>
+          <h3 className="mt-4 text-xl w-full text-center">Search Results</h3>
           {loading && (
             <div className="w-full flex justify-center mx-4">
               <span className="loading loading-spinner loading-xl"></span>
@@ -98,31 +98,27 @@ const SearchBlogs = () => {
             {searchedBlogs.length > 0 ? (
               searchedBlogs.map((blog, idx) => (
                 <div key={idx} className="card bg-base-200 w-96 shadow-sm">
-                  <figure>
+                  <figure className="w-full h-32 relative">
                     <Image
                       src={
                         blog.cover ||
                         "/assets/images/nanogram_logo-twitter-card.png"
                       }
                       alt="cover"
-                      width={384}
-                      height={128}
-                      className="w-full h-32 object-cover"
+                      fill
+                      className="object-cover"
+                      sizes="384px"
+                      priority={true} // or true if it's above the fold
                     />
                   </figure>
                   <div className="card-body">
                     <h2 className="card-title">{blog.title}</h2>
-                    <div
-                      className="tooltip tooltip-top"
-                      data-tip={blog.desc}
-                    >
+                    <div className="tooltip tooltip-top" data-tip={blog.desc}>
                       <p>
                         {blog.desc
                           ? blog.desc.slice(0, 120)
                           : "No description available."}
-                        {blog.desc && blog.desc.length > 120
-                          ? "..."
-                          : ""}
+                        {blog.desc && blog.desc.length > 120 ? "..." : ""}
                       </p>
                     </div>
                     <div className="card-actions justify-end">

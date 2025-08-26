@@ -5,7 +5,7 @@ import { ThemeInit } from "@/components/client/ThemeInit";
 import { Toaster } from "@/components/client/shared/ui/Sonner";
 import { Rubik } from "next/font/google";
 
-export const rubik = Rubik({
+const rubik = Rubik({
   subsets: ["latin"],
   variable: "--font-rubik",
 });

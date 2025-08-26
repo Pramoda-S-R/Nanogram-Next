@@ -1,12 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { useMediaQuery } from "react-responsive";
-import {
-  MessageCircle,
-  SendHorizonal,
-  Trash2,
-  TriangleAlert,
-} from "lucide-react";
+import { MessageCircle, SendHorizonal, Trash2 } from "lucide-react";
 import {
   Drawer,
   DrawerContent,
@@ -54,6 +49,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { ObjectId } from "mongodb";
 import { useInView } from "react-intersection-observer";
 import ReportMedia from "./ReportMedia";
+import Image from "next/image";
 
 const commentSchema = z.object({
   content: z
@@ -139,7 +135,14 @@ export function CommentInput({
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <label htmlFor="comment input" className="input w-full">
-        <img src={user.imageUrl} alt="user" className="w-6 h-6 rounded-full" />
+        <Image
+          width={24}
+          height={24}
+          priority={true}
+          src={user.imageUrl}
+          alt="user"
+          className="rounded-full"
+        />
         <input
           type="text"
           className="w-full"
@@ -309,7 +312,7 @@ const Comments = ({
       setLoading(true);
       setLoaded(true); // Set once loaded
     }
-  }, [open]);
+  }, [open, loaded]);
 
   useEffect(() => {
     const loadComments = async () => {
@@ -320,15 +323,18 @@ const Comments = ({
           limit: limit,
           skip: page * limit,
         });
+        setHasNextPage(resComments.length > limit);
 
-        if (resComments) {
-          const newCommentIds = new Set(comments.map((c) => c._id.toString()));
-          const filtered = resComments.filter(
-            (c) => !newCommentIds.has(c._id.toString())
-          );
+        const newComments = resComments.slice(0, limit);
 
-          setComments((prev) => [...prev, ...filtered]);
-          setHasNextPage(resComments.length === limit);
+        if (newComments.length > 0) {
+          setComments((prev) => {
+            const newCommentIds = new Set(prev.map((c) => c._id.toString()));
+            const filtered = newComments.filter(
+              (c) => !newCommentIds.has(c._id.toString())
+            );
+            return [...prev, ...filtered];
+          });
         }
       } catch (error) {
         console.error("Failed to fetch comments:", error);

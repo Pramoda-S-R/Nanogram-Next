@@ -2,20 +2,28 @@
 import { getPostsByTags, getPostsFromQdrant } from "@/app/actions/api";
 import useDebounce from "@/hooks/useDebounce";
 import { Search } from "lucide-react";
+import { type ObjectId } from "mongodb";
+import Image from "next/image";
 import Link from "next/link";
 import React, { useEffect, useRef, useState } from "react";
 
-const Post = ({ post }: { post: any }) => {
+interface MinimalPost {
+  _id: ObjectId | string;
+  caption: string;
+  imageUrl: string | null;
+}
+
+const Post = ({ post }: { post: MinimalPost }) => {
   return (
     <Link
       href={`/posts/${post._id}`}
-      className="md:w-64 md:h-64 w-2/3 bg-base-200 rounded-lg overflow-clip shadow-xl"
+      className="w-72 h-72 bg-base-200 rounded-lg overflow-clip shadow-xl"
     >
-      <div className="relative">
+      <div className="relative h-72 w-72">
+        {post.imageUrl && <Image fill sizes="288px" src={post.imageUrl} alt="Post Image" />}
         <p className="absolute w-full h-full p-4 bg-linear-to-b from-black to-black/10">
           {post.caption}
         </p>
-        {post.imageUrl && <img src={post.imageUrl} alt="Post Image" />}
       </div>
     </Link>
   );
@@ -27,7 +35,7 @@ const SearchPosts = () => {
   const [loading, setLoading] = useState(false);
   const [tagSearch, setTagSearch] = useState(false);
   const [shouldShowSearchResults, setShouldShowSearchResults] = useState(false);
-  const [searchedPosts, setSearchedPosts] = useState<any[]>([]);
+  const [searchedPosts, setSearchedPosts] = useState<MinimalPost[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -108,7 +116,7 @@ const SearchPosts = () => {
       </label>
       {shouldShowSearchResults && debouncedValue.length > 0 ? (
         <>
-          <h3 className="mt-4 text-xl">Search Results</h3>
+          <h3 className="mt-4 w-full text-center text-xl">Search Results</h3>
           {loading && (
             <div className="w-full flex justify-center m-4">
               <span className="loading loading-spinner loading-xl"></span>
@@ -117,12 +125,10 @@ const SearchPosts = () => {
           <div className="w-full flex flex-wrap md:justify-start justify-center gap-2 py-4">
             {searchedPosts.length > 0 ? (
               tagSearch ? (
-                searchedPosts.map((post, idx) => (
-                  <Post key={idx} post={post} />
-                ))
+                searchedPosts.map((post, idx) => <Post key={idx} post={post} />)
               ) : (
                 searchedPosts.map((post, idx) => (
-                  <Post key={idx} post={post.payload} />
+                  <Post key={idx} post={post} />
                 ))
               )
             ) : (

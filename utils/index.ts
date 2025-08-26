@@ -1,6 +1,9 @@
 import { ObjectId } from "mongodb";
 import { v5 as uuidv5 } from "uuid";
-import type { AggregatePost, Comment, Point, Post, User } from "../types";
+import type { AggregatePost, Point } from "@/types";
+import { Comment, Post, User } from "@/types/mongodb";
+import clsx, { ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge"
 
 const MIN_RADIUS = 7.5;
 const MAX_RADIUS = 15;
@@ -77,6 +80,10 @@ export const pointsOuter: Point[] = Array.from(
     color,
   };
 });
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs))
+}
 
 export function formatRelativeTime(isoDate: string): string {
   const date = new Date(isoDate);

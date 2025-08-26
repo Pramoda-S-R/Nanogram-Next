@@ -4,6 +4,7 @@ import type { SVGProps } from "react";
 export interface IconProps extends SVGProps<SVGSVGElement> {
   color?: string;
   size?: number | string;
+  showTitle?: boolean;
 }
 
 // Base icon component with common props
@@ -88,9 +89,15 @@ const brandIcons = {
 const createBrandIcon = (iconKey: keyof typeof brandIcons) => {
   const iconData = brandIcons[iconKey];
 
-  return ({ color, size, className, ...props }: IconProps) => (
+  return ({
+    color,
+    size,
+    className,
+    showTitle = true,
+    ...props
+  }: IconProps) => (
     <BaseIcon
-      title={iconData.title}
+      title={showTitle ? iconData.title : ""}
       color={color}
       size={size}
       className={className}

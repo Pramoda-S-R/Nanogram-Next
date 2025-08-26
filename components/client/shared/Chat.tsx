@@ -2,7 +2,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Ellipsis, SendHorizonal, Trash2 } from "lucide-react";
 import TextareaAutosize from "react-textarea-autosize";
-import { AggregatePost } from "@/types";
 import { Message, User } from "@/types/mongodb";
 import { formatDate } from "@/utils";
 import { InboundMessage, Realtime } from "ably";
@@ -10,7 +9,6 @@ import {
   deleteMessage,
   getAblyToken,
   getMessages,
-  getPostById,
   markAsSeen,
   reactToMessage,
   removeReaction,
@@ -28,6 +26,7 @@ import { EmojiPickerPopover, ReactionSelector } from "./ui/EmojiSelector";
 import { EmojiClickData } from "emoji-picker-react";
 import { toast } from "sonner";
 import { useInView } from "react-intersection-observer";
+import Image from "next/image";
 
 const MessageActions = ({
   currentUser,
@@ -53,7 +52,7 @@ const MessageActions = ({
         throw new Error("Failed to delete message");
       }
     } catch (error) {
-      console.log("Error deleting message:", error);
+      console.error("Error deleting message:", error);
     } finally {
       setLoading(false);
     }
@@ -105,7 +104,6 @@ const Chat = ({
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const { ref, inView } = useInView();
   const [message, setMessage] = useState("");
-  const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(0);
   const [hasNextPage, setHasNextPage] = useState(false);
   const [chatHistory, setChatHistory] = useState<Message[]>([]);
@@ -157,9 +155,9 @@ const Chat = ({
     const channel = ablyClient.channels.get(channelName);
 
     const onMessage = (message: InboundMessage) => {
-      console.log("Received message:", message.name);
       if (message.name === "new-message") {
         setChatHistory((prev) => [...prev, message.data as Message]);
+        scrollToBottom();
 
         if ((message.data as Message).receiver._id === currentUser._id)
           markAsSeen({
@@ -187,7 +185,6 @@ const Chat = ({
       }
       if (message.name === "update-message") {
         const updatedMessage = message.data as Message;
-        console.log("updatedMessage: ", updatedMessage);
         setChatHistory((prev) =>
           prev.map((msg) =>
             msg._id.toString() === updatedMessage._id.toString()
@@ -217,65 +214,81 @@ const Chat = ({
   }, [ablyClient, channelName]);
 
   useEffect(() => {
-    const fecthPosts = async () => {
-      setLoading(true);
+    const fetchPosts = async () => {
       const limit = 6;
-
-      const container = scrollContainerRef.current;
-      const prevScrollHeight = container?.scrollHeight || 0;
 
       const msgs = await getMessages({
         senderId: currentUser._id.toString(),
         receiverId: contact._id.toString(),
-        limit,
+        limit: limit + 1,
         skip: page * limit,
       });
 
-      if (msgs) {
-        msgs.sort(
+      setHasNextPage(msgs.length > limit);
+
+      return msgs.slice(0, limit);
+    };
+
+    const prependPosts = async (newMsgs: Message[]) => {
+      if (newMsgs.length > 0) {
+        newMsgs.sort(
           (a, b) =>
             new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
         );
 
         setChatHistory((prev) => {
           const newMsgIds = new Set(prev.map((p) => p._id));
-          const filtered = msgs.filter((p) => !newMsgIds.has(p._id));
+          const filtered = newMsgs.filter((p) => !newMsgIds.has(p._id));
           return [...filtered, ...prev];
         });
-
-        scrollToBottom();
-
-        // After messages update and DOM re-renders
-        setTimeout(() => {
-          if (container) {
-            const newScrollHeight = container.scrollHeight;
-            const scrollOffset = newScrollHeight - prevScrollHeight;
-            container.scrollTop += scrollOffset;
-          }
-        }, 0); // Let the DOM update first
-
-        handleSeeMessages(msgs);
       }
-
-      setHasNextPage(msgs.length >= limit);
-      setLoading(false);
     };
 
-    fecthPosts();
-  }, [page]);
+    const handleScroll = async () => {
+      const container = scrollContainerRef.current;
+      if (!container) return;
+
+      const messages = await fetchPosts();
+
+      let anchorEl: HTMLElement | null = null;
+      let anchorId: string | null = null;
+
+      if (chatHistory.length > 0) {
+        anchorId = chatHistory[0]._id.toString();
+        anchorEl = document.getElementById(`msg-${anchorId}`);
+      }
+
+      if (!anchorEl) {
+        prependPosts(messages);
+        handleSeeMessages(messages);
+        return;
+      }
+
+      const offsetBefore = anchorEl.getBoundingClientRect().top;
+
+      prependPosts(messages);
+
+      requestAnimationFrame(() => {
+        const anchorAfter = document.getElementById(`msg-${anchorId}`);
+        if (!anchorAfter) return;
+
+        const offsetAfter = anchorAfter.getBoundingClientRect().top;
+        const diff = offsetAfter - offsetBefore;
+
+        container.scrollTop += diff;
+      });
+      handleSeeMessages(messages);
+    };
+    handleScroll();
+  }, [scrollContainerRef.current, page, currentUser._id, contact._id]);
 
   useEffect(() => {
-    if (inView && hasNextPage && !loading) {
+    if (inView && hasNextPage) {
       setPage((prev) => prev + 1);
     }
-  }, [inView, hasNextPage, loading]);
-
-  useEffect(() => {
-    if (!inView) scrollToBottom();
-  }, [chatHistory]);
+  }, [inView, hasNextPage]);
 
   async function handleSendMessage(content: string) {
-    console.log(content);
     if (!content.trim()) return;
     const messageContent = content.trim();
     setMessage("");
@@ -362,8 +375,6 @@ const Chat = ({
   }
 
   async function handleSeeMessages(messages: Message[]) {
-    console.log("calling this seen function", chatHistory[-1]);
-
     const unseenMessages = messages.filter(
       (msg) =>
         !msg.seen && msg.receiver._id.toString() === currentUser._id.toString()
@@ -371,12 +382,6 @@ const Chat = ({
     if (unseenMessages.length === 0) return;
     try {
       unseenMessages.forEach(async (msg, idx) => {
-        console.log(
-          "Marking message as seen:",
-          idx,
-          ": ",
-          idx === unseenMessages.length - 1
-        );
         const res = await markAsSeen({
           senderId: contact._id.toString(),
           recipientId: currentUser._id.toString(),
@@ -400,7 +405,13 @@ const Chat = ({
         <div className="flex gap-2">
           <div className="avatar">
             <div className="w-10 h-10 rounded-full">
-              <img src={contact.avatarUrl} />
+              <Image
+                width={40}
+                height={40}
+                alt={contact.fullName}
+                src={contact.avatarUrl || "/assets/images/placeholder.png"}
+                priority={true}
+              />
             </div>
           </div>
           <div>
@@ -411,7 +422,7 @@ const Chat = ({
       </div>
       <div className="divider my-0"></div>
       <div ref={scrollContainerRef} className="flex-1 overflow-y-auto p-2">
-        {hasNextPage && loading && (
+        {hasNextPage && (
           <div className="flex justify-center items-center h-10">
             <span className="loading loading-spinner"></span>
           </div>
@@ -419,6 +430,7 @@ const Chat = ({
         <div ref={ref} />
         {chatHistory.map((msg, idx) => (
           <div
+            id={`msg-${msg._id.toString()}`}
             className={`chat group ${
               msg.sender._id === currentUser._id ? "chat-end" : "chat-start"
             }`}
@@ -426,7 +438,13 @@ const Chat = ({
           >
             <div className="chat-image avatar">
               <div className="w-10 rounded-full">
-                <img alt="chat" src={msg.sender.avatarUrl} />
+                <Image
+                  width={40}
+                  height={40}
+                  alt="chat"
+                  src={msg.sender.avatarUrl || "/assets/images/placeholder.png"}
+                  priority={true}
+                />
               </div>
             </div>
             <div className="chat-header">
@@ -444,18 +462,21 @@ const Chat = ({
             >
               <div className="relative">
                 {typeof msg.message !== "string" ? (
-                  <div className="card bg-base-200 md:w-72 w-[60vw] shadow-sm">
+                  <div className="card bg-base-200 w-72 shadow-sm">
                     <div className="card-body">
                       <div className="flex justify-between">
                         <div className="flex items-center gap-2 cursor-pointer">
                           <div className="avatar">
-                            <div className="w-5 rounded-full">
-                              <img
+                            <div className="w-7 rounded-full">
+                              <Image
+                                width={28}
+                                height={28}
                                 src={
                                   msg.message.creator.avatarUrl ||
                                   "/assets/images/placeholder.png"
                                 }
                                 alt="User Avatar"
+                                priority={true}
                               />
                             </div>
                           </div>
@@ -474,12 +495,15 @@ const Chat = ({
                     <Link href={`/posts/${msg.message._id.toString()}`}>
                       {msg.message.imageUrl ? (
                         <figure>
-                          <img
+                          <Image
+                            width={288}
+                            height={288}
                             src={
                               msg.message.imageUrl ||
                               "/assets/images/placeholder.png"
                             }
                             alt={msg.message._id.toString()}
+                            priority={true}
                           />
                         </figure>
                       ) : (

@@ -5,6 +5,7 @@ import { HoverCard, HoverCardContent, HoverCardTrigger } from "./ui/HoverCard";
 import { useRouter } from "next/navigation";
 import { Binary, CakeSlice } from "lucide-react";
 import { formatDate } from "@/utils";
+import Image from "next/image";
 
 const PostCreator = ({
   creator,
@@ -22,9 +23,12 @@ const PostCreator = ({
         <div className="flex items-center gap-2 cursor-pointer">
           <div className="avatar">
             <div className="w-10 rounded-full">
-              <img
+              <Image
+                width={40}
+                height={40}
                 src={creator.avatarUrl || "/assets/images/placeholder.png"}
                 alt="User Avatar"
+                priority
               />
             </div>
           </div>
@@ -39,10 +43,13 @@ const PostCreator = ({
       <HoverCardContent className="card max-w-120 bg-base-100 shadow-sm px-0 py-0 border-0">
         <div className="card-body w-full text-wrap">
           <div className="flex items-center gap-2 mb-2">
-            <img
+            <Image
+              width={40}
+              height={40}
               src={creator.avatarUrl || "/assets/images/placeholder.png"}
               alt={creator.username}
-              className="size-10 rounded-full"
+              className="rounded-full"
+              priority
             />
             <div>
               <h2 className="card-title">

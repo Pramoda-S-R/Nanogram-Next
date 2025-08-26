@@ -50,7 +50,7 @@ const Profile = async ({
                   className="rounded-full object-cover"
                   fill
                   sizes="(max-width: 768px) 64px, 96px"
-                  priority={false}
+                  priority={true}
                 />
               </div>
 

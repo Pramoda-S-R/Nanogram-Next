@@ -6,16 +6,19 @@ import React, { useEffect, useRef, useState } from "react";
 import FollowButton from "./FollowButton";
 import useDebounce from "@/hooks/useDebounce";
 import { searchUsers } from "@/app/actions/api";
+import Image from "next/image";
 
 const SearchUsers = ({
   currentuser,
   showTitle = true,
   variant = "default",
+  containerClassName,
   onClickCallback,
 }: {
   currentuser: User;
   showTitle?: boolean;
   variant?: "default" | "small";
+  containerClassName?: string;
   onClickCallback?: (user: User) => void;
 }) => {
   const [searchValue, setSearchValue] = useState("");
@@ -67,7 +70,11 @@ const SearchUsers = ({
 
   return (
     <>
-      <div className="flex flex-col gap-4 mb-8">
+      <div
+        className={`flex flex-col gap-4 mb-4 ${
+          variant === "default" ? "mb-8" : "mb-4"
+        }`}
+      >
         {showTitle && <h2 className="text-2xl w-full">Search Users</h2>}
         <label
           htmlFor="search users"
@@ -88,7 +95,7 @@ const SearchUsers = ({
         <ul
           className={
             variant === "default"
-              ? "bg-base-200 flex flex-col py-8 px-4 mb-8 w-full"
+              ? "bg-base-200 flex flex-col py-4 px-4 mb-8 w-full"
               : "flex flex-col items-start max-h-34 overflow-y-auto gap-2"
           }
         >
@@ -101,18 +108,20 @@ const SearchUsers = ({
                     className="flex item-center gap-4"
                   >
                     <figure className="flex items-center justify-center">
-                      <img
+                      <Image
+                        width={40}
+                        height={40}
                         src={creator.avatarUrl || "/assets/icons/user.svg"}
                         alt={creator.username || "creator"}
-                        className="size-10 rounded-full"
-                        loading="lazy"
+                        className="rounded-full"
+                        priority
                       />
                     </figure>
-                    <div className="flex justify-start flex-col gap-1">
-                      <p className="text-left line-clamp-1">
+                    <div className="flex justify-start flex-col">
+                      <p className="text-left line-clamp-1 text-sm">
                         {creator.firstName} {creator.lastName}
                       </p>
-                      <p className="text-left line-clamp-1">
+                      <p className="text-left line-clamp-1 text-xs">
                         @{creator.username}
                       </p>
                     </div>
@@ -131,17 +140,19 @@ const SearchUsers = ({
                     className="rounded-full overflow-clip"
                     onClick={() => onClickCallback && onClickCallback(creator)}
                   >
-                    <img
-                      src={creator.avatarUrl}
+                    <Image
+                      width={40}
+                      height={40}
+                      src={creator.avatarUrl || "/assets/icons/user.svg"}
                       alt={creator.username}
-                      className="size-10"
+                      className="rounded-full"
                     />
                   </button>
                   <p className="text-xs">@{creator.username}</p>
                 </div>
               )}
               {idx !== searchedUsers.length - 1 && variant === "default" && (
-                <div className="divider"></div>
+                <div className="divider my-1"></div>
               )}
             </div>
           ))}

@@ -2,7 +2,6 @@
 "use server";
 import { searchBlogs, searchPosts, similarPosts } from "@/bot/vectorSearch";
 import {
-  BlogPost,
   Event,
   Message,
   Nanogram,
@@ -19,7 +18,7 @@ import {
 } from "@/types";
 import { ResourceApiResponse } from "cloudinary";
 import { ObjectId } from "mongodb";
-import { Blog } from "@/types/qdrant";
+import { BlogPost, Post } from "@/types/qdrant";
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 const apiKey: string | undefined = process.env.ADMIN_KEY;
@@ -607,13 +606,15 @@ export async function getPostsByTags({
 export async function getPostsFromQdrant(
   query: string,
   limit = 3
-): Promise<any[]> {
+): Promise<Post[]> {
   try {
     const response = await searchPosts(query, limit);
     if (!response || response.length === 0) {
       return [];
     }
-    return response;
+    return response
+      .filter((item) => item.payload && item.payload !== null)
+      .map((item) => item.payload as unknown as Post);
   } catch (error) {
     console.error("Error fetching posts from Qdrant:", error);
     return [];
@@ -789,6 +790,7 @@ export async function getMessages({
   skip?: number;
 }): Promise<Message[]> {
   try {
+    console.log("fetching from api");
     const response = await fetch(
       `${BASE_URL}/api/messages?senderId=${senderId}&receiverId=${receiverId}${
         skip ? `&skip=${skip}` : ""
@@ -1487,7 +1489,7 @@ export async function getBlogPostById(id: string): Promise<BlogPost | null> {
   }
 }
 // Qdrant proxy
-export async function getBlogPostsByQdrant({
+export async function getBlogPostsFromQdrant({
   query,
   limit = 10,
 }: {
@@ -1496,10 +1498,13 @@ export async function getBlogPostsByQdrant({
 }): Promise<BlogPost[]> {
   try {
     const response = await searchBlogs(query, limit);
+    if (!response || response.length === 0) {
+      return [];
+    }
     // Filter and map to ensure payload is not null and is BlogPost
     return response
-      .filter((item: any) => item.payload && item.payload !== null)
-      .map((item: any) => item.payload as BlogPost);
+      .filter((item) => item.payload && item.payload !== null)
+      .map((item) => item.payload as unknown as BlogPost);
   } catch (error) {
     console.error("Error fetching blog posts by Qdrant:", error);
     return [];

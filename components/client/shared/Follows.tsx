@@ -12,6 +12,7 @@ import { getUsersByIds } from "@/app/actions/api";
 import { objectIdsToStrings } from "@/utils";
 import Link from "next/link";
 import FollowButton from "./FollowButton";
+import Image from "next/image";
 
 export const FollowersDialog = ({
   user,
@@ -29,6 +30,7 @@ export const FollowersDialog = ({
       <DialogContent className="max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Followers</DialogTitle>
+          <DialogDescription hidden></DialogDescription>
         </DialogHeader>
         <div className="divider"></div>
         {user.followers?.length === 0 ? (
@@ -95,17 +97,17 @@ export const Followers = async ({
           >
             <div className="flex gap-2">
               <Link href={`/community/@${follower.username}`}>
-                <img
+                <Image
                   src={follower.avatarUrl || "/assets/icons/user.svg"}
+                  width={32}
+                  height={32}
                   alt="user"
-                  className="rounded-full md:size-10 size-8"
+                  className="rounded-full"
                   loading="lazy"
                 />
               </Link>
               <div className="flex flex-col">
-                <p className="text-md font-semibold">
-                  {follower.fullName}
-                </p>
+                <p className="text-md font-semibold">{follower.fullName}</p>
                 <p className="text-xs font-light">@{follower.username}</p>
               </div>
             </div>
@@ -141,17 +143,17 @@ export const Following = async ({
           >
             <div className="flex gap-2">
               <Link href={`/community/@${following.username}`}>
-                <img
+                <Image
                   src={following.avatarUrl || "/assets/icons/user.svg"}
+                  width={32}
+                  height={32}
                   alt="user"
-                  className="rounded-full md:size-10 size-8"
+                  className="rounded-full size-8"
                   loading="lazy"
                 />
               </Link>
               <div className="flex flex-col">
-                <p className="text-md font-semibold">
-                  {following.fullName}
-                </p>
+                <p className="text-md font-semibold">{following.fullName}</p>
                 <p className="text-xs font-light">@{following.username}</p>
               </div>
             </div>

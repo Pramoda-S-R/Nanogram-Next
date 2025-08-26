@@ -24,6 +24,7 @@ import {
   Whatsapp,
 } from "@/components/server/shared/ui/icons/brands";
 import SearchUsers from "./SearchUsers";
+import Image from "next/image";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
 
@@ -43,32 +44,32 @@ const Share = ({
   const socials = [
     {
       name: "WhatsApp",
-      icon: <Whatsapp strokeWidth={1.5} />,
+      icon: <Whatsapp strokeWidth={1.5} showTitle={false} />,
       url: `https://wa.me/?text=Check%20this%20post%20out:%20${BASE_URL}/posts/${post._id.toString()}`,
     },
     {
       name: "Facebook",
-      icon: <Facebook strokeWidth={1.5} />,
+      icon: <Facebook strokeWidth={1.5} showTitle={false} />,
       url: `https://www.facebook.com/sharer/sharer.php?u=${BASE_URL}/posts/${post._id.toString()}`,
     },
     {
       name: "Twitter",
-      icon: <Twitter strokeWidth={1.5} />,
+      icon: <Twitter strokeWidth={1.5} showTitle={false} />,
       url: `https://twitter.com/intent/tweet?text=Check%20this%20post%20out:%20&url=${BASE_URL}/posts/${post._id.toString()}`,
     },
     {
       name: "LinkedIn",
-      icon: <Linkedin strokeWidth={1.5} />,
+      icon: <Linkedin strokeWidth={1.5} showTitle={false} />,
       url: `https://www.linkedin.com/sharing/share-offsite/?url=${BASE_URL}/posts/${post._id.toString()}`,
     },
     {
       name: "Telegram",
-      icon: <Telegram strokeWidth={1.5} />,
+      icon: <Telegram strokeWidth={1.5} showTitle={false} />,
       url: `https://t.me/share/url?url=${BASE_URL}/posts/${post._id.toString()}&text=Check%20this%20post%20out!`,
     },
     {
       name: "Email",
-      icon: <Mail strokeWidth={1.5} />,
+      icon: <Mail strokeWidth={1.5} showTitle={false} />,
       url: `mailto:?subject=Check%20out%20this%20post&body=${BASE_URL}/posts/${post._id.toString()}`,
     },
   ];
@@ -157,47 +158,65 @@ const Share = ({
         <DialogHeader>
           <DialogTitle>Share</DialogTitle>
           <DialogDescription>
-            Share {post.creator.firstName}&apos;s post with your friends and on other
-            platforms!
+            Share {post.creator.firstName}&apos;s post with your friends and on
+            other platforms!
           </DialogDescription>
         </DialogHeader>
         <div className="flex flex-wrap gap-2">
-          <button
-            className="btn btn-circle"
-            onClick={() =>
-              handleCopy(`${BASE_URL}/posts/${post._id.toString()}`)
-            }
-          >
-            {copied ? <Check strokeWidth={1.5} /> : <Link strokeWidth={1.5} />}
-          </button>
-          {socials.map((social) => (
-            <a
-              key={social.name}
-              href={social.url}
-              target="_blank"
-              rel="noopener noreferrer"
+          <div className="tooltip tooltip-bottom" data-tip="Copy link">
+            <button
               className="btn btn-circle"
+              onClick={() =>
+                handleCopy(`${BASE_URL}/posts/${post._id.toString()}`)
+              }
             >
-              {social.icon}
-            </a>
+              {copied ? (
+                <Check strokeWidth={1.5} />
+              ) : (
+                <Link strokeWidth={1.5} />
+              )}
+            </button>
+          </div>
+          {socials.map((social) => (
+            <div
+              key={social.name}
+              className="tooltip tooltip-bottom"
+              data-tip={social.name}
+            >
+              <a
+                href={social.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-circle"
+              >
+                {social.icon}
+              </a>
+            </div>
           ))}
         </div>
         <div className="flex flex-col gap-2">
           <div className="flex flex-wrap gap-2 mb-2">
             {users.map((user) => (
-              <button
+              <div
                 key={user._id.toString()}
-                className="rounded-full overflow-clip tooltip tooltip-bottom"
-                onClick={() => handleShare(user)}
-                disabled={loading}
+                className="tooltip tooltip-bottom"
                 data-tip={`@${user.username}`}
               >
-                <img
-                  src={user.avatarUrl}
-                  alt={user.username}
-                  className="size-10"
-                />
-              </button>
+                <button
+                  className="rounded-full overflow-clip tooltip tooltip-bottom"
+                  onClick={() => handleShare(user)}
+                  disabled={loading}
+                  data-tip={`@${user.username}`}
+                >
+                  <Image
+                    src={user.avatarUrl || "/assets/icons/user.svg"}
+                    alt={user.username}
+                    width={40}
+                    height={40}
+                    priority
+                  />
+                </button>
+              </div>
             ))}
           </div>
           <SearchUsers
