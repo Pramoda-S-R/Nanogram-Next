@@ -1,25 +1,23 @@
 "use client";
 
-import {
-  CSSProperties,
-  HTMLInputTypeAttribute,
-  ReactNode,
-  useEffect,
-  useState,
-} from "react";
-import Datetime from "react-datetime";
+import { ReactNode, useEffect, useState } from "react";
 import TextareaAutoResize from "react-textarea-autosize";
 import "@/styles/calendar.css";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/Popover";
-import { formatDate } from "@/utils";
 import { FormHeader, FormField } from "@/types";
 import {
   CalendarDays,
+  ChevronDown,
+  CircleCheck,
   Clock,
   Copy,
   EllipsisVertical,
+  Grid2x2,
+  Grid2x2Check,
   Heart,
   Image,
+  Minus,
+  SquareCheck,
   Star,
   Text,
   ThumbsUp,
@@ -38,67 +36,67 @@ const fieldOptionsMap = {
   long_answer: (
     <label className="flex gap-2">
       <Text />
-      Long Answer
+      Paragraph
     </label>
   ),
   multiple_choice: (
     <div className="flex gap-2">
-      <Text />
+      <CircleCheck />
       Multiple Choice
     </div>
   ),
   checkbox: (
     <div className="flex gap-2">
-      <Text />
-      Checkbox
+      <SquareCheck />
+      Checkboxes
     </div>
   ),
   dropdown: (
     <div className="flex gap-2">
-      <Text />
+      <ChevronDown />
       Dropdown
-    </div>
-  ),
-  linear_scale: (
-    <div className="flex gap-2">
-      <Text />
-      Linear Scale
-    </div>
-  ),
-  rating: (
-    <div className="flex gap-2">
-      <Text />
-      Rating
-    </div>
-  ),
-  multiple_choice_grid: (
-    <div className="flex gap-2">
-      <Text />
-      Multiple Choice Grid
-    </div>
-  ),
-  checkbox_grid: (
-    <div className="flex gap-2">
-      <Text />
-      Checkbox Grid
-    </div>
-  ),
-  date: (
-    <div className="flex gap-2">
-      <Text />
-      Date
-    </div>
-  ),
-  time: (
-    <div className="flex gap-2">
-      <Text />
-      Time
     </div>
   ),
   file_upload: (
     <div className="flex gap-2">
       <Image />
       File Upload
+    </div>
+  ),
+  linear_scale: (
+    <div className="flex gap-2">
+      <Minus />
+      Linear Scale
+    </div>
+  ),
+  rating: (
+    <div className="flex gap-2">
+      <Star />
+      Rating
+    </div>
+  ),
+  multiple_choice_grid: (
+    <div className="flex gap-2">
+      <Grid2x2 />
+      Multiple Choice Grid
+    </div>
+  ),
+  checkbox_grid: (
+    <div className="flex gap-2">
+      <Grid2x2Check />
+      Checkbox Grid
+    </div>
+  ),
+  date: (
+    <div className="flex gap-2">
+      <CalendarDays />
+      Date
+    </div>
+  ),
+  time: (
+    <div className="flex gap-2">
+      <Clock />
+      Time
     </div>
   ),
 };
@@ -142,9 +140,11 @@ function FormBuilderBaseImage({
   index: number;
 }) {
   return (
-    <button>
-      <Image strokeWidth={1.5} />
-    </button>
+    <div className="tooltip" data-tip="Insert Image">
+      <button className="btn btn-circle">
+        <Image strokeWidth={1.5} />
+      </button>
+    </div>
   );
 }
 
@@ -331,6 +331,55 @@ function MultiChoiceOption({
   );
 }
 
+function ChoiceDeleteButton({
+  type,
+  setField,
+  index,
+  optionIndex,
+}: {
+  type: "multiple_choice" | "checkbox" | "dropdown";
+  setField: React.Dispatch<React.SetStateAction<FormField[]>>;
+  index: number;
+  optionIndex: number;
+}) {
+  return (
+    <button
+      className="btn btn-circle btn-soft btn-error"
+      onClick={(e) => {
+        e.preventDefault();
+        setField((prev) => {
+          const updated = [...prev];
+          if (updated[index].config.type !== type) {
+            return updated;
+          }
+          if (updated[index].config.type === "dropdown") {
+            const options = [...(updated[index].config?.options ?? [])];
+            updated[index] = {
+              ...updated[index],
+              config: {
+                ...updated[index].config,
+                options: options.filter((_, i) => i !== optionIndex),
+              },
+            };
+          } else {
+            const options = [...(updated[index].config?.options ?? [])];
+            updated[index] = {
+              ...updated[index],
+              config: {
+                ...updated[index].config,
+                options: options.filter((_, i) => i !== optionIndex),
+              },
+            };
+          }
+          return updated;
+        });
+      }}
+    >
+      <Trash2 strokeWidth={1.5} />
+    </button>
+  );
+}
+
 function MultiChoiceAddButton({
   field,
   setField,
@@ -359,7 +408,11 @@ function MultiChoiceAddButton({
                 options: [
                   ...(updated[index].config.options ?? []),
                   {
-                    option: "Option x",
+                    option: `Option ${
+                      updated[index].config.options?.length
+                        ? updated[index].config.options?.length + 1
+                        : 1
+                    }`,
                     other: false,
                   },
                 ],
@@ -478,7 +531,11 @@ function CheckboxAddButton({
                 options: [
                   ...(updated[index].config.options ?? []),
                   {
-                    option: "Option x",
+                    option: `Option ${
+                      updated[index].config.options?.length
+                        ? updated[index].config.options?.length + 1
+                        : 1
+                    }`,
                     other: false,
                   },
                 ],
@@ -590,7 +647,14 @@ function DropdownAddButton({
               ...updated[index],
               config: {
                 ...updated[index].config,
-                options: [...(updated[index].config.options ?? []), "Option x"],
+                options: [
+                  ...(updated[index].config.options ?? []),
+                  `Option ${
+                    updated[index].config.options?.length
+                      ? updated[index].config.options?.length + 1
+                      : 1
+                  }`,
+                ],
               },
             };
             return updated;
@@ -861,6 +925,107 @@ function RatingPreview({ field }: { field: FormField }) {
   );
 }
 
+function GridChoiceAddButton({
+  type,
+  action,
+  setField,
+  index,
+}: {
+  type: "multiple_choice_grid" | "checkbox_grid";
+  action: "Add Row" | "Add Column";
+  setField: React.Dispatch<React.SetStateAction<FormField[]>>;
+  index: number;
+}) {
+  return (
+    <button
+      className="btn btn-soft"
+      onClick={() => {
+        setField((prev) => {
+          const updated = [...prev];
+          if (updated[index].config.type !== type) {
+            return updated;
+          }
+          const rows = [...(updated[index].config?.table?.rows ?? []), ""];
+          const columns = [
+            ...(updated[index].config?.table?.columns ?? []),
+            "",
+          ];
+          updated[index] = {
+            ...updated[index],
+            config: {
+              ...updated[index].config,
+              table: {
+                ...updated[index].config.table,
+                rows:
+                  action === "Add Row"
+                    ? rows
+                    : updated[index].config.table?.rows ?? [],
+                columns:
+                  action === "Add Column"
+                    ? columns
+                    : updated[index].config.table?.columns ?? [],
+              },
+            },
+          };
+          return updated;
+        });
+      }}
+    >
+      {action}
+    </button>
+  );
+}
+
+function GridChoiceDeleteButton({
+  type,
+  actOn,
+  setField,
+  index,
+  optionIndex,
+}: {
+  type: "multiple_choice_grid" | "checkbox_grid";
+  actOn: "row" | "column";
+  setField: React.Dispatch<React.SetStateAction<FormField[]>>;
+  index: number;
+  optionIndex: number;
+}) {
+  return (
+    <button
+      className="btn btn-circle btn-soft btn-error"
+      onClick={(e) => {
+        e.preventDefault();
+        setField((prev) => {
+          const updated = [...prev];
+          if (updated[index].config.type !== type) {
+            return updated;
+          }
+          const rows = [...(updated[index].config?.table?.rows ?? [])];
+          const columns = [...(updated[index].config?.table?.columns ?? [])];
+          if (actOn === "row") {
+            rows.splice(optionIndex, 1);
+          } else {
+            columns.splice(optionIndex, 1);
+          }
+          updated[index] = {
+            ...updated[index],
+            config: {
+              ...updated[index].config,
+              table: {
+                ...updated[index].config.table,
+                rows,
+                columns,
+              },
+            },
+          };
+          return updated;
+        });
+      }}
+    >
+      <Trash2 strokeWidth={1.5} />
+    </button>
+  );
+}
+
 function GridMultiChoiceRowInput({
   index,
   field,
@@ -874,62 +1039,51 @@ function GridMultiChoiceRowInput({
   return (
     <div className="w-full flex flex-col gap-2">
       {field.config.table?.rows.map((option, optionIndex) => (
-        <input
-          key={optionIndex}
-          type="text"
-          placeholder="Option"
-          className="input"
-          value={option}
-          onChange={(e) =>
-            setField((prev) => {
-              const updated = [...prev];
-              if (updated[index].config.type !== "multiple_choice_grid") {
-                return updated;
-              }
-              const rows = [...(updated[index].config?.table?.rows ?? [])];
-              rows[optionIndex] = e.target.value;
-              updated[index] = {
-                ...updated[index],
-                config: {
-                  ...updated[index].config,
-                  table: {
-                    ...updated[index].config.table,
-                    rows,
-                    columns: updated[index].config.table?.columns ?? [],
+        <div key={optionIndex} className="flex items-center gap-2">
+          <input
+            type="text"
+            placeholder="Option"
+            className="input"
+            value={option}
+            onChange={(e) =>
+              setField((prev) => {
+                const updated = [...prev];
+                if (updated[index].config.type !== "multiple_choice_grid") {
+                  return updated;
+                }
+                const rows = [...(updated[index].config?.table?.rows ?? [])];
+                rows[optionIndex] = e.target.value;
+                updated[index] = {
+                  ...updated[index],
+                  config: {
+                    ...updated[index].config,
+                    table: {
+                      ...updated[index].config.table,
+                      rows,
+                      columns: updated[index].config.table?.columns ?? [],
+                    },
                   },
-                },
-              };
-              return updated;
-            })
-          }
-        />
+                };
+                return updated;
+              })
+            }
+          />
+          <GridChoiceDeleteButton
+            type="multiple_choice_grid"
+            actOn="row"
+            setField={setField}
+            index={index}
+            optionIndex={optionIndex}
+          />
+        </div>
       ))}
 
-      <button
-        onClick={() => {
-          setField((prev) => {
-            const updated = [...prev];
-            if (updated[index].config.type !== "multiple_choice_grid") {
-              return updated;
-            }
-            const rows = [...(updated[index].config?.table?.rows ?? []), ""];
-            updated[index] = {
-              ...updated[index],
-              config: {
-                ...updated[index].config,
-                table: {
-                  ...updated[index].config.table,
-                  rows,
-                  columns: updated[index].config.table?.columns ?? [],
-                },
-              },
-            };
-            return updated;
-          });
-        }}
-      >
-        Add Row
-      </button>
+      <GridChoiceAddButton
+        type="multiple_choice_grid"
+        action="Add Row"
+        setField={setField}
+        index={index}
+      />
     </div>
   );
 }
@@ -979,37 +1133,22 @@ function GridMultiChoiceColumnInput({
               })
             }
           />
+          <GridChoiceDeleteButton
+            type="multiple_choice_grid"
+            actOn="column"
+            setField={setField}
+            index={index}
+            optionIndex={optionIndex}
+          />
         </div>
       ))}
 
-      <button
-        onClick={() => {
-          setField((prev) => {
-            const updated = [...prev];
-            if (updated[index].config.type !== "multiple_choice_grid") {
-              return updated;
-            }
-            const columns = [
-              ...(updated[index].config?.table?.columns ?? []),
-              "",
-            ];
-            updated[index] = {
-              ...updated[index],
-              config: {
-                ...updated[index].config,
-                table: {
-                  ...updated[index].config.table,
-                  rows: updated[index].config.table?.rows ?? [],
-                  columns,
-                },
-              },
-            };
-            return updated;
-          });
-        }}
-      >
-        Add Column
-      </button>
+      <GridChoiceAddButton
+        type="multiple_choice_grid"
+        action="Add Column"
+        setField={setField}
+        index={index}
+      />
     </div>
   );
 }
@@ -1027,62 +1166,51 @@ function GridCheckboxRowInput({
   return (
     <div className="w-full flex flex-col gap-2">
       {field.config.table?.rows.map((option, optionIndex) => (
-        <input
-          key={optionIndex}
-          type="text"
-          placeholder="Option"
-          className="input"
-          value={option}
-          onChange={(e) =>
-            setField((prev) => {
-              const updated = [...prev];
-              if (updated[index].config.type !== "checkbox_grid") {
-                return updated;
-              }
-              const rows = [...(updated[index].config?.table?.rows ?? [])];
-              rows[optionIndex] = e.target.value;
-              updated[index] = {
-                ...updated[index],
-                config: {
-                  ...updated[index].config,
-                  table: {
-                    ...updated[index].config.table,
-                    rows,
-                    columns: updated[index].config.table?.columns ?? [],
+        <div className="flex items-center gap-2" key={optionIndex}>
+          <input
+            type="text"
+            placeholder="Option"
+            className="input"
+            value={option}
+            onChange={(e) =>
+              setField((prev) => {
+                const updated = [...prev];
+                if (updated[index].config.type !== "checkbox_grid") {
+                  return updated;
+                }
+                const rows = [...(updated[index].config?.table?.rows ?? [])];
+                rows[optionIndex] = e.target.value;
+                updated[index] = {
+                  ...updated[index],
+                  config: {
+                    ...updated[index].config,
+                    table: {
+                      ...updated[index].config.table,
+                      rows,
+                      columns: updated[index].config.table?.columns ?? [],
+                    },
                   },
-                },
-              };
-              return updated;
-            })
-          }
-        />
+                };
+                return updated;
+              })
+            }
+          />
+          <GridChoiceDeleteButton
+            type="checkbox_grid"
+            actOn="row"
+            setField={setField}
+            index={index}
+            optionIndex={optionIndex}
+          />
+        </div>
       ))}
 
-      <button
-        onClick={() => {
-          setField((prev) => {
-            const updated = [...prev];
-            if (updated[index].config.type !== "checkbox_grid") {
-              return updated;
-            }
-            const rows = [...(updated[index].config?.table?.rows ?? []), ""];
-            updated[index] = {
-              ...updated[index],
-              config: {
-                ...updated[index].config,
-                table: {
-                  ...updated[index].config.table,
-                  rows,
-                  columns: updated[index].config.table?.columns ?? [],
-                },
-              },
-            };
-            return updated;
-          });
-        }}
-      >
-        Add Row
-      </button>
+      <GridChoiceAddButton
+        type="checkbox_grid"
+        action="Add Row"
+        setField={setField}
+        index={index}
+      />
     </div>
   );
 }
@@ -1132,37 +1260,22 @@ function GridCheckboxColumnInput({
               })
             }
           />
+          <GridChoiceDeleteButton
+            type="checkbox_grid"
+            actOn="column"
+            setField={setField}
+            index={index}
+            optionIndex={optionIndex}
+          />
         </div>
       ))}
 
-      <button
-        onClick={() => {
-          setField((prev) => {
-            const updated = [...prev];
-            if (updated[index].config.type !== "checkbox_grid") {
-              return updated;
-            }
-            const columns = [
-              ...(updated[index].config?.table?.columns ?? []),
-              "",
-            ];
-            updated[index] = {
-              ...updated[index],
-              config: {
-                ...updated[index].config,
-                table: {
-                  ...updated[index].config.table,
-                  rows: updated[index].config.table?.rows ?? [],
-                  columns,
-                },
-              },
-            };
-            return updated;
-          });
-        }}
-      >
-        Add Column
-      </button>
+      <GridChoiceAddButton
+        type="checkbox_grid"
+        action="Add Column"
+        setField={setField}
+        index={index}
+      />
     </div>
   );
 }
@@ -1365,6 +1478,12 @@ export function FormBuilderMultipleChoice({
                   disabled
                   className="input"
                 />
+                <ChoiceDeleteButton
+                  type="multiple_choice"
+                  setField={setField}
+                  index={index}
+                  optionIndex={optionIndex}
+                />
               </div>
             );
           return (
@@ -1373,6 +1492,12 @@ export function FormBuilderMultipleChoice({
               <MultiChoiceOption
                 key={optionIndex}
                 field={field}
+                setField={setField}
+                index={index}
+                optionIndex={optionIndex}
+              />
+              <ChoiceDeleteButton
+                type="multiple_choice"
                 setField={setField}
                 index={index}
                 optionIndex={optionIndex}
@@ -1410,6 +1535,12 @@ export function FormBuilderCheckbox({
                   disabled
                   className="input"
                 />
+                <ChoiceDeleteButton
+                  type="checkbox"
+                  setField={setField}
+                  index={index}
+                  optionIndex={optionIndex}
+                />
               </div>
             );
           return (
@@ -1418,6 +1549,12 @@ export function FormBuilderCheckbox({
               <CheckboxOption
                 key={optionIndex}
                 field={field}
+                setField={setField}
+                index={index}
+                optionIndex={optionIndex}
+              />
+              <ChoiceDeleteButton
+                type="checkbox"
                 setField={setField}
                 index={index}
                 optionIndex={optionIndex}
@@ -1445,13 +1582,20 @@ export function FormBuilderDropdown({
     <FormBuilderBase index={index} field={field} setField={setField}>
       <div className="flex flex-col gap-2">
         {field.config.options?.map((option, optionIndex) => (
-          <DropdownOption
-            key={optionIndex}
-            field={field}
-            setField={setField}
-            index={index}
-            optionIndex={optionIndex}
-          />
+          <div className="flex items-center gap-2" key={optionIndex}>
+            <DropdownOption
+              field={field}
+              setField={setField}
+              index={index}
+              optionIndex={optionIndex}
+            />
+            <ChoiceDeleteButton
+              type="dropdown"
+              setField={setField}
+              index={index}
+              optionIndex={optionIndex}
+            />
+          </div>
         ))}
       </div>
       <DropdownAddButton field={field} setField={setField} index={index} />

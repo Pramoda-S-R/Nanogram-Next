@@ -5,6 +5,7 @@ import { useDropzone } from "react-dropzone";
 import Cropper, { ReactCropperElement } from "react-cropper";
 import "cropperjs/dist/cropper.css";
 import { UploadedFile } from "@/types";
+import Image from "next/image";
 
 const FileUploader = ({
   onFileChange,
@@ -120,12 +121,15 @@ const FileUploader = ({
                 onClick={(e) => e.stopPropagation()}
               >
                 {enableImageCropping ? (
-                  <img
-                    src={fileUrl}
-                    alt="Uploaded file"
-                    className={`${imageStyles} object-cover object-top pointer-events-none`}
-                    loading="lazy"
-                  />
+                  <div className={`relative ${imageStyles}`}>
+                    <Image
+                      fill
+                      src={fileUrl}
+                      alt="Uploaded file"
+                      className="object-cover object-top pointer-events-none"
+                      priority
+                    />
+                  </div>
                 ) : (
                   <p className="w-full text-center p-4 border-t border-t-neutral">
                     File uploaded successfully {fileUrl}

@@ -2,6 +2,7 @@
 "use server";
 import { searchBlogs, searchPosts, similarPosts } from "@/bot/vectorSearch";
 import {
+  BlogPost,
   Event,
   Message,
   Nanogram,
@@ -18,7 +19,7 @@ import {
 } from "@/types";
 import { ResourceApiResponse } from "cloudinary";
 import { ObjectId } from "mongodb";
-import { BlogPost, Post } from "@/types/qdrant";
+import { BlogPost as QdrantBlogPost, Post } from "@/types/qdrant";
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 const apiKey: string | undefined = process.env.ADMIN_KEY;
@@ -1495,7 +1496,7 @@ export async function getBlogPostsFromQdrant({
 }: {
   query: string;
   limit?: number;
-}): Promise<BlogPost[]> {
+}): Promise<QdrantBlogPost[]> {
   try {
     const response = await searchBlogs(query, limit);
     if (!response || response.length === 0) {
@@ -1504,7 +1505,7 @@ export async function getBlogPostsFromQdrant({
     // Filter and map to ensure payload is not null and is BlogPost
     return response
       .filter((item) => item.payload && item.payload !== null)
-      .map((item) => item.payload as unknown as BlogPost);
+      .map((item) => item.payload as unknown as QdrantBlogPost);
   } catch (error) {
     console.error("Error fetching blog posts by Qdrant:", error);
     return [];

@@ -22,7 +22,7 @@ const AdminForm = () => {
   const [formFields, setFormFields] = useState<FormField[]>([]);
   const index = useRef<number>(0);
   return (
-    <div className="w-full h-dvh overflow-y-auto bg-base-300">
+    <div className="w-full min-h-dvh overflow-y-auto bg-base-300">
       <div className="max-w-3xl mx-auto flex flex-col gap-2 py-2">
         <FormBuilderTitle header={header} setHeader={setHeader} />
         {formFields.map((field, index) => {

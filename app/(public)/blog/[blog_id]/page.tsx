@@ -1,6 +1,6 @@
 import React from "react";
 import ReactMarkdown from "react-markdown";
-import "../styles/blog.css";
+import "@/styles/blog.css";
 import remarkGfm from "remark-gfm";
 import { getBlogPostById } from "@/app/actions/api";
 import matter from "gray-matter";

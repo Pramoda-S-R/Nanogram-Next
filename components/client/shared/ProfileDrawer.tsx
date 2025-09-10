@@ -117,7 +117,7 @@ const ProfileDrawer = () => {
 
   return (
     <Drawer>
-      <DrawerTrigger>
+      <DrawerTrigger className="rounded-full focus:outline-neutral/20 focus:outline-4">
         <div
           className="flex h-full items-center"
           title={user?.fullName || "User"}
@@ -128,7 +128,7 @@ const ProfileDrawer = () => {
               alt={user?.username || "pfp"}
               className="w-full h-full object-cover rounded-full cursor-pointer"
             />
-            <div className="pointer-events-none absolute inset-0 before:absolute before:w-[150%] before:h-[150%] before:rotate-45 before:top-[-100%] before:left-[-100%] before:bg-gradient-to-r before:from-transparent before:via-base-100/50 before:to-transparent before:content-[''] before:transition-transform before:duration-500 group-hover:before:translate-x-[200%] group-hover:before:translate-y-[200%]" />
+            <div className="pointer-events-none absolute inset-0 before:absolute before:w-[150%] before:h-[150%] before:rotate-45 before:top-[-100%] before:left-[-100%] before:bg-gradient-to-r before:from-transparent before:via-white/50 before:to-transparent before:content-[''] before:transition-transform before:duration-500 group-hover:before:translate-x-[200%] group-hover:before:translate-y-[200%]" />
           </div>
         </div>
       </DrawerTrigger>

@@ -25,7 +25,9 @@
   margin: 0.9em 0 0.4em;
   color: var(--color-base-content);
 }
-.blog h4, .blog h5, .blog h6 {
+.blog h4,
+.blog h5,
+.blog h6 {
   font-weight: 600;
   margin: 0.8em 0 0.4em;
   color: var(--color-base-content);
@@ -37,7 +39,8 @@
 }
 
 /* Lists */
-.blog ul, .blog ol {
+.blog ul,
+.blog ol {
   padding-left: 1.5em;
   margin: 1em 0;
 }
@@ -108,7 +111,7 @@
 /* Images */
 .blog img {
   max-width: 100%;
-  border-radius: var(--radius-box);
+  border-radius: var(--radius-sm);
   margin: 1em 0;
 }
 
@@ -118,7 +121,8 @@
   border-collapse: collapse;
   margin: 1.5em 0;
 }
-.blog th, .blog td {
+.blog th,
+.blog td {
   border: 1px solid var(--color-base-300);
   padding: 0.5em 1em;
 }
@@ -126,4 +130,36 @@
   background-color: var(--color-base-200);
   color: var(--color-base-content);
   font-weight: 600;
+}
+
+/* Checkbox list */
+.blog ul[role="checkbox"] {
+  list-style: none; /* remove default bullets */
+  padding-left: 0;
+  margin: 1em 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em; /* space between items */
+}
+
+.blog ul[role="checkbox"] li {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  padding: 0.4em 0.6em;
+  border-radius: var(--radius-field);
+  background-color: var(--color-base-200);
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.blog ul[role="checkbox"] li:hover {
+  background-color: var(--color-base-300);
+}
+
+.blog ul[role="checkbox"] input[type="checkbox"] {
+  accent-color: var(--color-primary); /* modern browsers */
+  width: 1em;
+  height: 1em;
+  cursor: pointer;
 }

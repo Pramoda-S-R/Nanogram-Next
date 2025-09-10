@@ -39,16 +39,19 @@ export interface FormMultipleChoice {
   type: "multiple_choice";
   options?: MultipleChoiceOption[];
   other?: boolean;
+  shuffle?: boolean;
 }
 
 export interface FormCheckbox {
   type: "checkbox";
   options?: CheckboxOption[];
+  shuffle?: boolean;
 }
 
 export interface FormDropdown {
   type: "dropdown";
   options?: string[];
+  shuffle?: boolean;
 }
 
 export interface FormLinearScale {
@@ -70,11 +73,15 @@ export interface FormRating {
 export interface FormMultipleChoiceGrid {
   type: "multiple_choice_grid";
   table?: GridBaseObject;
+  shuffle?: boolean;
+  limitToOnePerColumn?: boolean;
 }
 
 export interface FormCheckboxGrid {
   type: "checkbox_grid";
   table?: GridBaseObject;
+  shuffle?: boolean;
+  limitToOnePerColumn?: boolean;
 }
 
 export interface FormDate {

@@ -100,7 +100,9 @@ function NanogramForm({
         typeof member.priority === "object" &&
         member.priority !== null &&
         "$numberInt" in member.priority
-          ? Number((member.priority as any).$numberInt)
+          ? Number(
+              (member.priority as unknown as { $numberInt: string }).$numberInt
+            )
           : member?.priority ?? 50,
     },
   });
@@ -685,7 +687,8 @@ const AdminAboutUs = () => {
                   )}
                 </td>
                 <td>
-                  {(member.priority as any)?.$numberInt || member.priority}
+                  {(member.priority as unknown as { $numberInt: string })
+                    ?.$numberInt || member.priority}
                 </td>
                 <th>{idx + 1}</th>
               </tr>
