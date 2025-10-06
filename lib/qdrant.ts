@@ -1,9 +1,10 @@
 import { QdrantClient } from "@qdrant/js-client-rest";
 
-const API_KEY = process.env.QDRANT_API_KEY || "";
+const QDRANT_API_KEY = process.env.QDRANT_API_KEY || "";
+const QDRANT_ENDPOINT = process.env.QDRANT_CLUSTER_ENDPOINT || "";
 
 // or connect to Qdrant Cloud
 export const qdrantClient = new QdrantClient({
-  url: "https://68866a33-c2b7-47de-b46c-c416f28f6476.eu-central-1-0.aws.cloud.qdrant.io",
-  apiKey: API_KEY,
+  url: QDRANT_ENDPOINT,
+  apiKey: QDRANT_API_KEY,
 });

@@ -1,8 +1,8 @@
-name: Keep Qdrant Alive
+name: Keep Services Alive
 
 on:
   schedule:
-    - cron: '0 0 */6 * *'  # every 6 days
+    - cron: '0 0 */6 * *'  # every 6 days at midnight UTC
   workflow_dispatch:
 
 jobs:
@@ -11,5 +11,12 @@ jobs:
     steps:
       - name: Ping Qdrant
         run: |
-          curl -H "api-key: ${{ secrets.QDRANT_API_KEY }}" \
-               https://68866a33-c2b7-47de-b46c-c416f28f6476.eu-central-1-0.aws.cloud.qdrant.io
+          curl -s -o /dev/null -w "%{http_code}\n" \
+            -H "api-key: ${{ secrets.QDRANT_API_KEY }}" \
+            "${{ secrets.QDRANT_CLUSTER_ENDPOINT }}"
+
+      - name: Ping Upstash Redis
+        run: |
+          curl -s -o /dev/null -w "%{http_code}\n" \
+            -H "Authorization: Bearer ${{ secrets.UPSTASH_TOKEN }}" \
+            "${{ secrets.UPSTASH_REDIS_URL }}"
